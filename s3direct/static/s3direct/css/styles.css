@@ -1,0 +1,36 @@
+.s3direct {
+  display: inline-block;
+  width: 220px;
+}
+
+.s3direct .progress {
+  background: #333;
+}
+
+/* inactive */
+
+.s3direct .progress,
+.s3direct .link,
+.s3direct .remove,
+.s3direct input {
+  display: none;
+}
+
+/* active progress */
+.s3direct.progress-active .progress {
+  display: block;
+}
+
+/* active image */
+.s3direct.link-active .link {
+  display: block;
+}
+
+.s3direct.link-active .remove {
+  display: inline-block;
+}
+
+/* active form */
+.s3direct.form-active input {
+  display: block;
+}
