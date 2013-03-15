@@ -11,6 +11,9 @@ Add direct uploads to S3 functionality with a progress bar to file input fields 
 ```python
 # settings.py
 S3DIRECT_DIR = 's3direct' # (optional, default is 's3direct')
+AWS_SECRET_ACCESS_KEY = ''
+AWS_ACCESS_KEY_ID = ''
+AWS_STORAGE_BUCKET_NAME = ''
 ```
   
 ```python

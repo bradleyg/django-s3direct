@@ -39,7 +39,7 @@ def get_upload_params(request, upload_to=''):
         "signature": signature,
         "key": key,
         "AWSAccessKeyId": settings.AWS_ACCESS_KEY_ID,
-        "form_action": settings.AWS_STORAGE_BUCKET_URL,
+        "form_action": "http://%s.s3.amazonaws.com" % settings.AWS_STORAGE_BUCKET_NAME,
         "success_action_status": "201",
         "acl": "public-read",
         "Content-Type": content_type
