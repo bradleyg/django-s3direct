@@ -23,9 +23,9 @@ class S3DirectEditor(widgets.TextInput):
 
     class Media:
         js = (
-            'ajaximage/js/jquery.iframe-transport.js',
-            'ajaximage/js/jquery.ui.widget.js',
-            'ajaximage/js/jquery.fileupload.js',
+            's3direct/js/jquery.iframe-transport.js',
+            's3direct/js/jquery.ui.widget.js',
+            's3direct/js/jquery.fileupload.js',
             's3direct/js/s3direct.js',
         )
         css = {
