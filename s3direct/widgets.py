@@ -23,14 +23,14 @@ class S3DirectEditor(widgets.TextInput):
 
     class Media:
         js = (
-            's3direct/js/jquery.iframe-transport.js',
-            's3direct/js/jquery.ui.widget.js',
-            's3direct/js/jquery.fileupload.js',
+            'shared-bg/js/jquery.iframe-transport.js',
+            'shared-bg/js/jquery.ui.widget.js',
+            'shared-bg/js/jquery.fileupload.js',
             's3direct/js/s3direct.js',
         )
         css = {
             'all': (
-                's3direct/css/bootstrap-progress.min.css',
+                'shared-bg/css/bootstrap-progress.min.css',
                 's3direct/css/styles.css',
             )
         }
