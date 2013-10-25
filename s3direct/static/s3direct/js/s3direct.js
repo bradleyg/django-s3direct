@@ -9,6 +9,7 @@ $s3Direct(function(){
       autoUpload: true,
       dataType: 'xml',
       add: function(e, data){
+        $s3Direct(".submit-row input[type=submit]").prop('disabled', true)
         $s3Direct(el).attr('class', 's3direct progress-active')
         
         $s3Direct.ajax({
@@ -41,6 +42,7 @@ $s3Direct(function(){
         $s3Direct(el).attr('class', 's3direct link-active')
         $s3Direct(el).find('input[type=hidden]').val(url)
         $s3Direct(el).find('.bar').css({width: '0%'})
+        $s3Direct(".submit-row input[type=submit]").prop('disabled', false)
       }
     })
   }
