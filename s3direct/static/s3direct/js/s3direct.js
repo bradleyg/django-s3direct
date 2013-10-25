@@ -1,6 +1,6 @@
 var $s3Direct = jQuery.noConflict()
 
-$(function(){
+$s3Direct(function(){
 
   var attach = function($fileInput, policy_url, el){
 
