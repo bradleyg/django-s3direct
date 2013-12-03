@@ -15,10 +15,14 @@ S3DIRECT_DIR = getattr(settings, "S3DIRECT_DIR", 's3direct')
 @require_POST
 @user_passes_test(lambda u: u.is_staff)
 def get_upload_params(request, upload_to=''):
-    
     content_type = request.POST['type']
+    data = create_upload_data(content_type, upload_to)
+    return HttpResponse(json.dumps(data), content_type="application/json")
+
+
+def create_upload_data(content_type, upload_to):
     expires = (datetime.now() + timedelta(hours=24)).strftime('%Y-%m-%dT%H:%M:%S.000Z')
-    
+
     policy_object = json.dumps({
         "expiration": expires,
         "conditions": [
@@ -29,12 +33,12 @@ def get_upload_params(request, upload_to=''):
             {"success_action_status": "201"}
         ]
     })
-    
+
     policy = b64encode(policy_object.replace('\n', '').replace('\r', ''))
     signature = b64encode(hmac.new(settings.AWS_SECRET_ACCESS_KEY, policy, sha).digest())
     key = "%s/%s/${filename}" % (upload_to or S3DIRECT_DIR, uuid.uuid4().hex)
-    
-    data = {
+
+    return {
         "policy": policy,
         "signature": signature,
         "key": key,
@@ -44,5 +48,3 @@ def get_upload_params(request, upload_to=''):
         "acl": "public-read",
         "Content-Type": content_type
     }
-
-    return HttpResponse(json.dumps(data), content_type="application/json")
