@@ -17,7 +17,9 @@ Install with Pip:
 ```pip install django-s3direct```
 
 
-Update Django files:
+Update Django files:  
+
+Currently only python 2.7 supported.  
 
 ```python
 # settings.py
