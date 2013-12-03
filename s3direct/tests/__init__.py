@@ -1,2 +1,2 @@
-from widgets import *
-from views import *
+from .widgets import *
+from .views import *
