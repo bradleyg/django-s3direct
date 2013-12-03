@@ -1,7 +1,6 @@
 language: python
 python:
   - 2.7
-  - 3.2
 env:
   - DJANGO=1.4.0
   - DJANGO=1.4.5
@@ -13,9 +12,3 @@ install:
   - pip install mock
 script:
   - python manage.py test s3direct
-matrix:
-  exclude:
-    - python: 3.2
-      env: DJANGO=1.4.0
-    - python: 3.2
-      env: DJANGO=1.4.5
