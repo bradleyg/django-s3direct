@@ -1,4 +1,4 @@
-import sha, uuid, hmac, json
+import hashlib, uuid, hmac, json
 from datetime import datetime, timedelta
 from base64 import b64encode
 from django.conf import settings
@@ -35,7 +35,7 @@ def create_upload_data(content_type, upload_to):
     })
 
     policy = b64encode(policy_object.replace('\n', '').replace('\r', ''))
-    signature = b64encode(hmac.new(settings.AWS_SECRET_ACCESS_KEY, policy, sha).digest())
+    signature = b64encode(hmac.new(settings.AWS_SECRET_ACCESS_KEY, policy, hashlib.sha1).digest())
     key = "%s/%s/${filename}" % (upload_to or S3DIRECT_DIR, uuid.uuid4().hex)
 
     return {
@@ -43,7 +43,7 @@ def create_upload_data(content_type, upload_to):
         "signature": signature,
         "key": key,
         "AWSAccessKeyId": settings.AWS_ACCESS_KEY_ID,
-        "form_action": "https://%s.s3.amazonaws.com" % settings.AWS_STORAGE_BUCKET_NAME,
+        "form_action": "http://%s.s3.amazonaws.com" % settings.AWS_STORAGE_BUCKET_NAME,
         "success_action_status": "201",
         "acl": "public-read",
         "Content-Type": content_type
