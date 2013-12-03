@@ -54,3 +54,5 @@ You may need to run `collectstatic` before `s3direct` will work correctly on you
 ```bash
 python manage.py collectstatic
 ````
+  
+[![Build Status](https://secure.travis-ci.org/bradleyg/django-s3direct.png)](http://travis-ci.org/bradleyg/django-s3direct) 
