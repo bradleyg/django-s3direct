@@ -17,7 +17,7 @@ class S3DirectField(Field):
         defaults = {'widget': self.widget}
         defaults.update(kwargs)
         return super(S3DirectField, self).formfield(**defaults)
-        
+
 
 if 'south' in settings.INSTALLED_APPS:
     from south.modelsinspector import add_introspection_rules

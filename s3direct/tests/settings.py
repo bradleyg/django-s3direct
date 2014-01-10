@@ -7,3 +7,6 @@ INSTALLED_APPS = ('s3direct',)
 AWS_STORAGE_BUCKET_NAME = 'test_bucket'
 AWS_SECRET_ACCESS_KEY = 'test_secret'
 AWS_ACCESS_KEY_ID = 'test_key'
+S3DIRECT_DIR='s3direct'
+S3DIRECT_ENDPOINT='s3-eu-west-1.amazonaws.com'
+S3DIRECT_UNIQUE_RENAME=True
