@@ -30,6 +30,6 @@ class ViewsTestCase(TestCase):
             'acl': 'public-read'
         }
 
-        data = create_upload_data('text/plain', 'test_upload')
+        data = create_upload_data('text/plain', 'filename', 'test_upload')
 
         self.assertItemsEqual(expected, data)
