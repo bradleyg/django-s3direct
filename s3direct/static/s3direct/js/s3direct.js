@@ -4,7 +4,7 @@ $s3Direct(function(){
 
   var attach = function($fileInput, policy_url, el){
 
-    $el = $s3Direct(el)
+    var $el = $s3Direct(el)
 
     $fileInput.fileupload({
       paramName: 'file',
