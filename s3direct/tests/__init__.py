@@ -1,2 +1,2 @@
-from .widgets import *
-from .views import *
+from .test_widgets import *
+from .test_views import *

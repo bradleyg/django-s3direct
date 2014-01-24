@@ -5,6 +5,7 @@ env:
   - DJANGO=1.4.0
   - DJANGO=1.4.5
   - DJANGO=1.5
+  - DJANGO=1.6
 before_install:
   - export DJANGO_SETTINGS_MODULE=s3direct.tests.settings
 install:
