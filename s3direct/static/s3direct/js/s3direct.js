@@ -53,7 +53,7 @@ $s3Direct(function(){
   }
 
   var setup = function(el){
-    $el = $s3Direct(el)
+    var $el = $s3Direct(el)
 
     var policy_url = $el.data('url')
     var file_url = $el.find('input[type=hidden]').val()
