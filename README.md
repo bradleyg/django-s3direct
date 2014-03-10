@@ -49,7 +49,6 @@ INSTALLED_APPS = [
 AWS_SECRET_ACCESS_KEY = ''
 AWS_ACCESS_KEY_ID = ''
 AWS_STORAGE_BUCKET_NAME = ''
-S3DIRECT_ENDPOINT = '' # http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
 S3DIRECT_DIR = 's3direct' # (optional, default is 's3direct', location within the bucket to upload files)
 S3DIRECT_UNIQUE_RENAME = False # (optional, default is 'False', gives the uploaded file a unique filename)
 ```
@@ -70,7 +69,7 @@ from django.db import models
 from s3direct.fields import S3DirectField
 
 class Example(models.Model):
-    thumbnail = S3DirectField(upload_to='s3direct')
+    file = S3DirectField(upload_to='s3direct')
     # 'upload_to' is an optional argument
 ```
 
