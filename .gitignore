@@ -3,4 +3,4 @@
 dist/*
 *.egg-info
 venv
-test
+example/db.sqlite3
