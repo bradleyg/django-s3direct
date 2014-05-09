@@ -20,7 +20,7 @@ class S3DirectConf(AppConf):
 
 @csrf_exempt
 @require_POST
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
 def get_upload_params(request, upload_to=''):
     content_type = request.POST['type']
     source_filename = request.POST['name']
@@ -32,7 +32,7 @@ def create_upload_data(content_type, source_filename, upload_to):
     access_key = settings.AWS_ACCESS_KEY_ID
     secret_access_key = settings.AWS_SECRET_ACCESS_KEY
     bucket = settings.AWS_STORAGE_BUCKET_NAME
-    s3_host = settings.BOTO_S3_HOST or 's3.amazonaws.com'
+    s3_host = 's3.amazonaws.com'
 
     expires_in = datetime.now() + timedelta(hours=24)
     expires = expires_in.strftime('%Y-%m-%dT%H:%M:%S.000Z')

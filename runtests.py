@@ -2,6 +2,7 @@
 import sys
 
 from os.path import dirname, abspath
+from os import environ
 
 
 def module_exists(module_name):
@@ -19,7 +20,10 @@ if not settings.configured:
         INSTALLED_APPS=[
             's3direct',
         ],
-        ROOT_URLCONF='s3direct.urls'
+        ROOT_URLCONF='s3direct.urls',
+        AWS_ACCESS_KEY_ID=environ.get('AWS_ACCESS_KEY_ID', ''),
+        AWS_SECRET_ACCESS_KEY=environ.get('AWS_SECRET_ACCESS_KEY', ''),
+        AWS_STORAGE_BUCKET_NAME=environ.get('AWS_STORAGE_BUCKET_NAME', 'test-storage')
     )
 
 if module_exists("django.test.runner.Discover"):

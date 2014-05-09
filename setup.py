@@ -35,7 +35,7 @@ setup(
     url='https://github.com/bradleyg/django-s3direct',
     packages=['s3direct'],
     include_package_data=True,
-    install_requires=['django>=1.4.1', 'django-boto>=0.3.0', 'django-storages>=1.1.0'],
+    install_requires=['django>=1.4.1', 'django-storages>=1.1.0', 'django-appconf>=0.6'],
     zip_safe=False,
     classifiers=[
         'Development Status :: 4 - Beta',
