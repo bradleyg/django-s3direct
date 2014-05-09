@@ -1,9 +1,9 @@
 from django.db import models
-from s3direct.fields import S3DirectField
 
 
 class Kitten(models.Model):
-    file = S3DirectField(upload_to='files')
+    file = models.FileField(upload_to='path/to/dir')
+    url = models.URLField(upload_to='path/to/dir')
 
     def __unicode__(self):
         return str(self.file)
