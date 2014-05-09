@@ -82,7 +82,7 @@ class S3DirectWidget(forms.FileInput):
         file_url = value or ''
         file_name = os.path.basename(file_url)
 
-        output = self.template.format(policy_url=policy_url,
+        output = HTML_DEPRECATED.format(policy_url=policy_url,
                                         file_url=file_url,
                                         file_name=file_name,
                                         element_id=element_id,
@@ -96,7 +96,7 @@ class S3DirectWidget(forms.FileInput):
             return upload
         else:
             bucket = settings.AWS_STORAGE_BUCKET_NAME
-            s3_host = settings.BOTO_S3_HOST or 's3.amazonaws.com'
+            s3_host = settings.S3DIRECT_ENDPOINT
 
             storage = DefaultStorage()
             url = data[name]

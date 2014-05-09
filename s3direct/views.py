@@ -12,6 +12,7 @@ from appconf import AppConf
 class S3DirectConf(AppConf):
     DIR = "s3direct"
     UNIQUE_RENAME = False
+    ENDPOINT = 's3.amazonaws.com'
 
     class Meta:
         prefix = 'S3DIRECT'
@@ -32,7 +33,7 @@ def create_upload_data(content_type, source_filename, upload_to):
     access_key = settings.AWS_ACCESS_KEY_ID
     secret_access_key = settings.AWS_SECRET_ACCESS_KEY
     bucket = settings.AWS_STORAGE_BUCKET_NAME
-    s3_host = 's3.amazonaws.com'
+    s3_host = settings.S3DIRECT_ENDPOINT
 
     expires_in = datetime.now() + timedelta(hours=24)
     expires = expires_in.strftime('%Y-%m-%dT%H:%M:%S.000Z')
