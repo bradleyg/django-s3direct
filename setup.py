@@ -1,9 +1,29 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import os
-from setuptools import setup
+from setuptools import setup, Command
 
 f = open(os.path.join(os.path.dirname(__file__), 'README.md'))
 readme = f.read()
 f.close()
+
+
+class PyTest(Command):
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        import sys
+        import subprocess
+
+        exit_code = subprocess.call([sys.executable, 'runtests.py'])
+        raise SystemExit(exit_code)
+
 
 setup(
     name='django-s3direct',
@@ -15,7 +35,7 @@ setup(
     url='https://github.com/bradleyg/django-s3direct',
     packages=['s3direct'],
     include_package_data=True,
-    install_requires=['setuptools'],
+    install_requires=['django>=1.4.1', 'django-boto>=0.3.0', 'django-storages>=1.1.0'],
     zip_safe=False,
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -26,4 +46,5 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
     ],
+    cmdclass={'test': PyTest},
 )
