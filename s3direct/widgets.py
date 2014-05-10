@@ -57,8 +57,8 @@ class S3DirectBaseWidget(widgets.Input):
         }
 
 
-class S3DirectURLWidget(S3DirectBaseWidget, widgets.URLInput):
-    pass
+class S3DirectURLWidget(S3DirectBaseWidget):
+    input_type = 'url'
 
 
 class S3DirectEditor(S3DirectURLWidget):
@@ -67,7 +67,8 @@ class S3DirectEditor(S3DirectURLWidget):
         super(S3DirectEditor, self).__init__(*args, **kwargs)
 
 
-class S3DirectFileWidget(S3DirectBaseWidget, widgets.FileInput):
+class S3DirectFileWidget(S3DirectBaseWidget):
+    input_type = 'file'
     needs_multipart_form = False
 
     def value_from_datadict(self, data, files, name):
