@@ -13,17 +13,29 @@ def module_exists(module_name):
     else:
         return True
 
+
 from django.conf import settings
+
 if not settings.configured:
     settings.configure(
         DATABASES={'default': {'ENGINE': 'django.db.backends.sqlite3'}},
         INSTALLED_APPS=[
+            'django.contrib.auth',
+            'django.contrib.contenttypes',
+            'django.contrib.sessions',
+            'django.contrib.admin',
             's3direct',
         ],
         ROOT_URLCONF='s3direct.urls',
         AWS_ACCESS_KEY_ID=environ.get('AWS_ACCESS_KEY_ID', ''),
         AWS_SECRET_ACCESS_KEY=environ.get('AWS_SECRET_ACCESS_KEY', ''),
-        AWS_STORAGE_BUCKET_NAME=environ.get('AWS_STORAGE_BUCKET_NAME', 'test-storage')
+        AWS_STORAGE_BUCKET_NAME=environ.get('AWS_STORAGE_BUCKET_NAME', 'test-storage'),
+
+        S3DIRECT_DESTINATIONS={
+            'foo': ('', lambda u: True),
+            'bar': ('bar', lambda u: u.is_staff),
+            'baz': ('baz/baz', lambda u: u.is_authenticated)
+        },
     )
 
 if module_exists("django.test.runner.Discover"):

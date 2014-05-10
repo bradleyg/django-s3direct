@@ -1,39 +1,30 @@
-import hashlib, uuid, hmac, json
+import hashlib, uuid, hmac, json, os
 from datetime import datetime, timedelta
 from base64 import b64encode
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import user_passes_test
 from django.views.decorators.http import require_POST
-from appconf import AppConf
 
 
-class S3DirectConf(AppConf):
-    DIR = "s3direct"
-    UNIQUE_RENAME = False
-    ENDPOINT = 's3.amazonaws.com'
-
-    class Meta:
-        prefix = 'S3DIRECT'
-
-
-
-@csrf_exempt
 @require_POST
-# @user_passes_test(lambda u: u.is_staff)
-def get_upload_params(request, upload_to=''):
+def get_upload_params(request, upload_to):
     content_type = request.POST['type']
     source_filename = request.POST['name']
-    data = create_upload_data(content_type, source_filename, upload_to)
-    return HttpResponse(json.dumps(data), content_type="application/json")
+    if upload_to in settings.S3DIRECT_DESTINATIONS:
+        path, permission = settings.S3DIRECT_DESTINATIONS[upload_to]
+        if permission(request.user):
+            data = create_upload_data(content_type, source_filename, path)
+            return HttpResponse(json.dumps(data), content_type="application/json")
+    raise PermissionDenied()
 
 
-def create_upload_data(content_type, source_filename, upload_to):
+def create_upload_data(content_type, source_filename, path):
     access_key = settings.AWS_ACCESS_KEY_ID
     secret_access_key = settings.AWS_SECRET_ACCESS_KEY
     bucket = settings.AWS_STORAGE_BUCKET_NAME
     s3_host = settings.S3DIRECT_ENDPOINT
+
 
     expires_in = datetime.now() + timedelta(hours=24)
     expires = expires_in.strftime('%Y-%m-%dT%H:%M:%S.000Z')
@@ -59,7 +50,7 @@ def create_upload_data(content_type, source_filename, upload_to):
     else:
         filename = '${filename}'
 
-    key = "%s/%s" % (upload_to or settings.S3DIRECT_DIR, filename)
+    key = os.path.join(path, filename)
     url = 'https://%s.%s/' % (bucket, s3_host)
 
     return {
