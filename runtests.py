@@ -34,7 +34,7 @@ if not settings.configured:
         S3DIRECT_DESTINATIONS={
             'foo': ('', lambda u: True),
             'bar': ('bar', lambda u: u.is_staff),
-            'baz': ('baz/baz', lambda u: u.is_authenticated)
+            'baz': ('baz/baz', lambda u: u.is_authenticated())
         },
     )
 
