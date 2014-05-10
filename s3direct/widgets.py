@@ -31,11 +31,10 @@ class S3DirectBaseWidget(widgets.Input):
 
         policy_url = reverse('s3direct', kwargs=kwargs)
         file_url = value or ''
-        file_name = os.path.basename(file_url)
 
         output = self.template.format(policy_url=policy_url,
                              file_url=file_url,
-                             file_name=file_name,
+                             file_name=file_url,
                              element_id=element_id,
                              name=name)
 
