@@ -4,10 +4,12 @@ from base64 import b64encode
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 
 @require_POST
+@csrf_exempt
 def get_upload_params(request, upload_to):
     content_type = request.POST['type']
     source_filename = request.POST['name']
