@@ -1,10 +1,11 @@
+django-s3direct
+===============
+
 [![Build Status](https://travis-ci.org/bradleyg/django-s3direct.svg?branch=master)](https://travis-ci.org/bradleyg/django-s3direct)
 [![PyPi Version](https://pypip.in/v/django-s3direct/badge.png)](https://crate.io/packages/django-s3direct)
 [![PyPi Downloads](https://pypip.in/d/django-s3direct/badge.png)](https://crate.io/packages/django-s3direct)
 [![License](https://pypip.in/license/django-s3direct/badge.png)](https://crate.io/packages/django-s3direct)
 
-django-s3direct
-===============
 
 Upload files direct to S3 from Django
 -------------------------------------
@@ -52,7 +53,7 @@ INSTALLED_APPS = [
 AWS_SECRET_ACCESS_KEY = ''  # (required)
 AWS_ACCESS_KEY_ID = ''  # (required)
 AWS_STORAGE_BUCKET_NAME = ''  # (required)
-S3DIRECT_DESTINATIONS = {'profile_picture': ('path/to/dir', lambda u: u.is_authenticated)} # (required, dictionary containing named Tuples('path', user_function).
+S3DIRECT_DESTINATIONS = {'profile': ('path/to/dir', lambda u: u.is_authenticated)} # (required, dictionary containing named Tuples('path', user_function).
 S3DIRECT_ENDPOINT = ''  # (optional, http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region)
 S3DIRECT_UNIQUE_RENAME = False  # (optional, default is 'False', gives the uploaded file a unique filename)
 ```
