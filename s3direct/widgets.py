@@ -72,9 +72,7 @@ class S3DirectFileWidget(S3DirectBaseWidget):
 
     def value_from_datadict(self, data, files, name):
         upload = files.get(name, False)
-        if upload:
-            return upload
-        elif hasattr(data, name):
+        if hasattr(data, name):
             bucket = settings.AWS_STORAGE_BUCKET_NAME
             s3_host = settings.S3DIRECT_ENDPOINT
 
@@ -84,5 +82,7 @@ class S3DirectFileWidget(S3DirectBaseWidget):
             filename = url.lstrip(bucket_url)
             file = storage.open(filename)
             return file
+        elif upload:
+            return upload
         else:
             return None
