@@ -60,24 +60,18 @@ class S3DirectURLWidget(S3DirectBaseWidget):
     input_type = 'url'
 
 
-class S3DirectEditor(S3DirectURLWidget):
-    def __init__(self, *args, **kwargs):
-        warn(DeprecationWarning('(class)s is deprecated. Please use S3DirectURLWidget instead.'))
-        super(S3DirectEditor, self).__init__(*args, **kwargs)
-
-
 class S3DirectFileWidget(S3DirectBaseWidget):
     input_type = 'file'
     needs_multipart_form = False
 
     def value_from_datadict(self, data, files, name):
+        url = data.get(name, False)
         upload = files.get(name, False)
-        if hasattr(data, name):
+        if url:
             bucket = settings.AWS_STORAGE_BUCKET_NAME
             s3_host = settings.S3DIRECT_ENDPOINT
 
             storage = DefaultStorage()
-            url = data[name]
             bucket_url = 'https://%s.%s/' % (bucket, s3_host)
             filename = url.lstrip(bucket_url)
             file = storage.open(filename)
