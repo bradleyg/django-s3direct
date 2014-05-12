@@ -1,20 +1,18 @@
-var $s3Direct = jQuery.noConflict()
-
-$s3Direct(function(){
+$(function(){
 
   var attach = function($fileInput, policy_url, el){
 
-    var $el = $s3Direct(el)
+    var $el = $(el);
 
     $fileInput.fileupload({
       paramName: 'file',
       autoUpload: true,
       dataType: 'xml',
       add: function(e, data){
-        $s3Direct(".submit-row input[type=submit]").prop('disabled', true)
-        $el.attr('class', 's3direct progress-active')
+        $(".submit-row input[type=submit]").prop('disabled', true);
+        $el.attr('class', 's3direct progress-active');
 
-        $s3Direct.ajax({
+        $.ajax({
           url: policy_url,
           type: 'POST',
           data: {
@@ -22,41 +20,41 @@ $s3Direct(function(){
             name: data.files[0].name
           },
           success: function(fields) {
-            data.url = fields.form_action
-            delete fields.form_action
-            data.formData = fields
+            data.url = fields.form_action;
+            delete fields.form_action;
+            data.formData = fields;
             data.submit()
           }
         })
       },
 
       progress: function(e, data){
-        var progress = parseInt(data.loaded / data.total * 100, 10)
+        var progress = parseInt(data.loaded / data.total * 100, 10);
         $el.find('.bar').css({width: progress + '%'})
       },
 
       error: function(e, data){
-        alert('Oops, file upload failed, please try again')
+        alert('Oops, file upload failed, please try again');
         $el.attr('class', 's3direct form-active')
       },
 
       done: function(e, data){
-        var url = $s3Direct(data.result).find('Location').text().replace(/%2F/g, '/')
-        var file_name = url.replace(/^.*[\\\/]/, '')
-        $el.find('.link').attr('href', url).text(file_name)
-        $el.attr('class', 's3direct link-active')
-        $el.find('input[type=hidden]').val(url)
-        $el.find('.bar').css({width: '0%'})
-        $s3Direct(".submit-row input[type=submit]").prop('disabled', false)
+        var url = $(data.result).find('Location').text().replace(/%2F/g, '/');
+        var file_name = url.replace(/^.*[\\\/]/, '');
+        $el.find('.link').attr('href', url).text(file_name);
+        $el.attr('class', 's3direct link-active');
+        $el.find('input[type=hidden]').val(url);
+        $el.find('.bar').css({width: '0%'});
+        $(".submit-row input[type=submit]").prop('disabled', false)
       }
     })
   }
 
   var setup = function(el){
-    var $el = $s3Direct(el)
+    var $el = $(el);
 
-    var policy_url = $el.data('url')
-    var file_url = $el.find('input[type=hidden]').val()
+    var policy_url = $el.data('url');
+    var file_url = $el.find('input[type=hidden]').val();
     var $fileInput = $el.find('input[type=file]')
 
     var class_ = (file_url === '') ? 'form-active' : 'link-active'
@@ -71,13 +69,13 @@ $s3Direct(function(){
     attach($fileInput, policy_url, el)
   }
 
-  $s3Direct('.s3direct').each(function(i, el){
+  $('.s3direct').each(function(i, el){
     setup(el)
   })
 
-  $s3Direct(document).bind('DOMNodeInserted', function(e) {
-    var el = $s3Direct(e.target).find('.s3direct').get(0)
-    var yes = $s3Direct(el).length !== 0
+  $(document).bind('DOMNodeInserted', function(e) {
+    var el = $(e.target).find('.s3direct').get(0)
+    var yes = $(el).length !== 0
     if(yes) setup(el)
   })
 
