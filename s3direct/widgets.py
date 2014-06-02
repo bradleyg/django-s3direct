@@ -30,7 +30,7 @@ class S3DirectBaseWidget(widgets.Input):
         kwargs = {'upload_to': self.upload_to}
 
         policy_url = reverse('s3direct', kwargs=kwargs)
-        file_url = value or ''
+        file_url = '%s%s' % (settings.MEDIA_URL, value) or ''
 
         output = self.template.format(policy_url=policy_url,
                              file_url=file_url,
@@ -68,12 +68,9 @@ class S3DirectFileWidget(S3DirectBaseWidget):
         url = data.get(name, False)
         upload = files.get(name, False)
         if url:
-            bucket = settings.AWS_STORAGE_BUCKET_NAME
-            s3_host = settings.S3DIRECT_ENDPOINT
 
             storage = DefaultStorage()
-            bucket_url = 'https://%s.%s/' % (bucket, s3_host)
-            filename = url.lstrip(bucket_url)
+            filename = url.lstrip(settings.MEDIA_URL)
             file = storage.open(filename)
             return file
         elif upload:
