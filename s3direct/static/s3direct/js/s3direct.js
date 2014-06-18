@@ -30,7 +30,7 @@ $(function(){
 
       progress: function(e, data){
         var progress = parseInt(data.loaded / data.total * 100, 10);
-        $el.find('.bar').css({width: progress + '%'})
+        $el.find('.progress-bar').css({width: progress + '%'}).html(process+'%')
       },
 
       error: function(e, data){
@@ -44,7 +44,7 @@ $(function(){
         $el.find('.link').attr('href', url).text(file_name);
         $el.attr('class', 's3direct link-active');
         $el.find('input[type=hidden]').val(url);
-        $el.find('.bar').css({width: '0%'});
+        $el.find('.progress-bar').css({width: '0%'});
         $(".submit-row input[type=submit]").prop('disabled', false)
       }
     })

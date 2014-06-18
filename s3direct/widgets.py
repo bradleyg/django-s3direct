@@ -16,7 +16,7 @@ class S3DirectBaseWidget(widgets.Input):
         '    <input type="hidden" value="{file_url}" id="{element_id}" name="{name}" />\n'
         '    <input type="file" class="fileinput" />\n'
         '    <div class="progress progress-striped active">\n'
-        '        <div class="bar"></div>\n'
+        '        <div class="progress-bar"></div>\n'
         '    </div>\n'
         '</div>'
     )
