@@ -31,7 +31,10 @@ class S3DirectBaseWidget(widgets.Input):
         kwargs = {'upload_to': self.upload_to}
 
         policy_url = reverse('s3direct', kwargs=kwargs)
-        file_url = '%s%s' % (settings.MEDIA_URL, value) or ''
+        if value:
+            file_url = '%s%s' % (settings.MEDIA_URL, value)
+        else:
+            file_url = ''
 
         output = self.template.format(policy_url=policy_url,
                              file_url=file_url,
