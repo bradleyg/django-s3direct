@@ -1,6 +1,5 @@
-import os
 from urlparse import urlparse
-from warnings import warn
+import urllib2
 from django.forms import widgets
 from django.core.files.storage import DefaultStorage
 from django.utils.safestring import mark_safe
@@ -72,9 +71,8 @@ class S3DirectFileWidget(S3DirectBaseWidget):
         url = data.get(name, False)
         upload = files.get(name, False)
         if url:
-
             storage = DefaultStorage()
-            filename = urlparse(url).path
+            filename = urllib2.unquote(urlparse(url).path)
             file = storage.open(filename)
             return file
         elif upload:
