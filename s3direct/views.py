@@ -37,7 +37,7 @@ def create_upload_data(content_type, source_filename, path):
     access_key = settings.AWS_ACCESS_KEY_ID
     secret_access_key = settings.AWS_SECRET_ACCESS_KEY
     bucket = settings.AWS_STORAGE_BUCKET_NAME
-    expires = (timezone.now() + settings.S3DIRECT_EXPIRATION).isoformat()
+    expires = "%sZ" % (timezone.now() + settings.S3DIRECT_EXPIRATION).isoformat()
     policy_object = json.dumps({
         "expiration": expires,
         "conditions": [
@@ -48,6 +48,8 @@ def create_upload_data(content_type, source_filename, path):
             {"success_action_status": "201"}
         ]
     })
+
+    print(policy_object)
 
     policy = b64encode(policy_object.replace('\n', '').replace('\r', ''))
     signature = hmac.new(secret_access_key, policy, hashlib.sha1).digest()
