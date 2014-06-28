@@ -1,11 +1,16 @@
 django-s3direct
 ===============
 
+[![Build Status](https://travis-ci.org/bradleyg/django-s3direct.svg?branch=master)](https://travis-ci.org/bradleyg/django-s3direct)
+[![PyPi Version](https://pypip.in/v/django-s3direct/badge.png)](https://crate.io/packages/django-s3direct)
+[![PyPi Downloads](https://pypip.in/d/django-s3direct/badge.png)](https://crate.io/packages/django-s3direct)
+[![License](https://pypip.in/license/django-s3direct/badge.png)](https://crate.io/packages/django-s3direct)
+
+
 Upload files direct to S3 from Django
 -------------------------------------
 
-
-Add direct uploads to AWS S3 functionality with a progress bar to file input fields within Django admin.
+S3Direct is a collection of django widgets that upload a file directly to AWS S3 and return ether a URL or Django File object.
 
 ![screenshot](https://raw.github.com/bradleyg/django-s3direct/master/screenshot.png)
 
@@ -16,7 +21,6 @@ Install with Pip:
 
 ```pip install django-s3direct```  
 
-Currently only python 2.7 supported.  
 
 ## S3 Setup
 
@@ -46,12 +50,12 @@ INSTALLED_APPS = [
     ...
 ]
 
-AWS_SECRET_ACCESS_KEY = ''
-AWS_ACCESS_KEY_ID = ''
-AWS_STORAGE_BUCKET_NAME = ''
-S3DIRECT_ENDPOINT = '' # http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
-S3DIRECT_DIR = 's3direct' # (optional, default is 's3direct', location within the bucket to upload files)
-S3DIRECT_UNIQUE_RENAME = False # (optional, default is 'False', gives the uploaded file a unique filename)
+AWS_SECRET_ACCESS_KEY = ''  # (required)
+AWS_ACCESS_KEY_ID = ''  # (required)
+AWS_STORAGE_BUCKET_NAME = ''  # (required)
+S3DIRECT_DESTINATIONS = {'profile': ('path/to/dir', lambda u: u.is_authenticated, ['image/jpeg', 'video/*'])}  # (required, dictionary containing named Tuples('path', user_function, [MIME_TYPE_LIST]).
+S3DIRECT_ENDPOINT = ''  # (optional, http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region)
+S3DIRECT_UNIQUE_RENAME = False  # (optional, default is 'False', gives the uploaded file a unique filename)
 ```
 
 ### urls.py
@@ -62,20 +66,15 @@ urlpatterns = patterns('',
 )
 ```
 
-### models.py
+### forms.py
 
 
 ```python
-from django.db import models
-from s3direct.fields import S3DirectField
+from django import forms
+from s3direct.widgets import S3DirectFileWidget
 
-class Example(models.Model):
-    thumbnail = S3DirectField(upload_to='s3direct')
-    # 'upload_to' is an optional argument
+class Example(forms.Form):
+    image = forms.ImageField(widget=S3DirectFileWidget(upload_to='profile'))
+    pdf_url = forms.URLField(widget=S3DirectURLWidget(upload_to='profile'))
+    # 'upload_to' is a required argument
 ```
-
-You may need to run `collectstatic` before `s3direct` will work correctly on your public website:
-
-```bash
-python manage.py collectstatic
-````

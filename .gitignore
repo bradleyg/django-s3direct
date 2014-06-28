@@ -4,3 +4,4 @@ dist/*
 *.egg-info
 venv
 example/db.sqlite3
+.idea/
