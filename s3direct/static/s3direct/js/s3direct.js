@@ -55,28 +55,28 @@ $(function(){
 
     var policy_url = $el.data('url');
     var file_url = $el.find('input[type=hidden]').val();
-    var $fileInput = $el.find('input[type=file]')
+    var $fileInput = $el.find('input[type=file]');
 
-    var class_ = (file_url === '') ? 'form-active' : 'link-active'
-    $el.attr('class', 's3direct ' + class_)
+    var class_ = (file_url === '') ? 'form-active' : 'link-active';
+    $el.attr('class', 's3direct ' + class_);
 
     $el.find('.remove').click(function(e){
-      e.preventDefault()
-      $el.find('input[type=hidden]').val('')
+      e.preventDefault();
+      $el.find('input[type=hidden]').val('');
       $el.attr('class', 's3direct form-active')
-    })
+    });
 
     attach($fileInput, policy_url, el)
-  }
+  };
 
   $('.s3direct').each(function(i, el){
     setup(el)
-  })
+  });
 
   $(document).bind('DOMNodeInserted', function(e) {
-    var el = $(e.target).find('.s3direct').get(0)
-    var yes = $(el).length !== 0
+    var el = $(e.target).find('.s3direct').get(0);
+    var yes = $(el).length !== 0;
     if(yes) setup(el)
   })
 
-})
+});
