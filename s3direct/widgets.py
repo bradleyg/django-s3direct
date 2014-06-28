@@ -5,15 +5,16 @@ from django.core.files.storage import DefaultStorage
 from django.utils.safestring import mark_safe
 from django.core.urlresolvers import reverse
 from django.conf import settings
+from django.utils.translation import ugettext
 
 
 class S3DirectBaseWidget(widgets.Input):
     template = (
         '<div class="s3direct" data-url="{policy_url}">\n'
-        '    <a class="link" target="_blank" href="{file_url}">{file_name}</a>\n'
-        '    <a class="remove" href="#remove">Remove</a>\n'
+        '    <a class="link" target="_blank" href="{file_url}">{file_url}</a>\n'
+        '    <a class="remove" href="javascript: void(0)">{remove}</a>\n'
         '    <input type="hidden" value="{file_url}" id="{element_id}" name="{name}" />\n'
-        '    <input type="file" class="fileinput" />\n'
+        '    <input type="file" class="fileinput" accept="{acceped_types}" />\n'
         '    <div class="progress progress-striped active">\n'
         '        <div class="progress-bar"></div>\n'
         '    </div>\n'
@@ -21,7 +22,12 @@ class S3DirectBaseWidget(widgets.Input):
     )
 
     def __init__(self, upload_to, *args, **kwargs):
-        self.upload_to = upload_to
+        destinations = settings.S3DIRECT_DESTINATIONS
+        if upload_to in destinations:
+            self.destination = dict(map(None, ('path', 'permission', 'accepted-types'), destinations[upload_to]))
+            self.upload_to = upload_to
+        else:
+            raise ValueError("%s in not defined in the S3DIRECT_DESTINATIONS setting." % upload_to)
         super(S3DirectBaseWidget, self).__init__(*args, **kwargs)
 
     def render(self, name, value, attrs=None):
@@ -30,6 +36,8 @@ class S3DirectBaseWidget(widgets.Input):
         kwargs = {'upload_to': self.upload_to}
 
         policy_url = reverse('s3direct', kwargs=kwargs)
+        acceped_types = "|".join(content_type for content_type in self.destination['accepted-types'])
+
         if value:
             file_url = '%s%s' % (settings.MEDIA_URL, value)
         else:
@@ -37,9 +45,10 @@ class S3DirectBaseWidget(widgets.Input):
 
         output = self.template.format(policy_url=policy_url,
                              file_url=file_url,
-                             file_name=file_url,
-                             element_id=element_id,
-                             name=name)
+                             element_id=element_id or '',
+                             name=name,
+                             acceped_types=acceped_types,
+                             remove=ugettext('remove'))
 
         return mark_safe(output)
 
@@ -73,8 +82,11 @@ class S3DirectFileWidget(S3DirectBaseWidget):
         if url:
             storage = DefaultStorage()
             filename = urllib2.unquote(urlparse(url).path)
-            file = storage.open(filename)
-            return file
+            try:
+                file = storage.open(filename)
+                return file
+            except IOError:
+                return None
         elif upload:
             return upload
         else:

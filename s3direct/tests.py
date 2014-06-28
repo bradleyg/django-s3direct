@@ -11,11 +11,11 @@ from s3direct import widgets
 HTML_OUTPUT = (
     '<div class="s3direct" data-url="/get_upload_params/foo">\n'
     '    <a class="link" target="_blank" href=""></a>\n'
-    '    <a class="remove" href="#remove">Remove</a>\n'
-    '    <input type="hidden" value="" id="None" name="some_file" />\n'
-    '    <input type="file" class="fileinput" />\n'
+    '    <a class="remove" href="javascript: void(0)">remove</a>\n'
+    '    <input type="hidden" value="" id="" name="some_file" />\n'
+    '    <input type="file" class="fileinput" accept="image/jpeg|video/*" />\n'
     '    <div class="progress progress-striped active">\n'
-    '        <div class="bar"></div>\n'
+    '        <div class="progress-bar"></div>\n'
     '    </div>\n'
     '</div>'
 )
@@ -90,4 +90,13 @@ class WidgetTest(TestCase):
         self.client.login(username='user', password='user')
         response = self.client.post(reverse('s3direct', kwargs={'upload_to': 'bar'}),
                                     {'type': 'image/jpeg', 'name': 'image.jpg'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_mime_type_not_allowed(self):
+        """
+        Tests signing response for  user that doesn't have permission.
+        """
+        self.client.login(username='user', password='user')
+        response = self.client.post(reverse('s3direct', kwargs={'upload_to': 'foo'}),
+                                    {'type': 'image/png', 'name': 'image.png'})
         self.assertEqual(response.status_code, 403)

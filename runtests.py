@@ -31,8 +31,14 @@ if not settings.configured:
         AWS_SECRET_ACCESS_KEY=environ.get('AWS_SECRET_ACCESS_KEY', ''),
         AWS_STORAGE_BUCKET_NAME=environ.get('AWS_STORAGE_BUCKET_NAME', 'test-storage'),
 
+        MEDIA_URL='https://test-storage.s3.amazonaws.com/',
+
+        USE_I18N=True,
+        USE_L10N=True,
+        USE_TZ=True,
+
         S3DIRECT_DESTINATIONS={
-            'foo': ('', lambda u: True),
+            'foo': ('', lambda u: True, ['image/jpeg', 'video/*']),
             'bar': ('bar', lambda u: u.is_staff),
             'baz': ('baz/baz', lambda u: u.is_authenticated())
         },

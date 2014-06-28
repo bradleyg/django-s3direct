@@ -53,7 +53,7 @@ INSTALLED_APPS = [
 AWS_SECRET_ACCESS_KEY = ''  # (required)
 AWS_ACCESS_KEY_ID = ''  # (required)
 AWS_STORAGE_BUCKET_NAME = ''  # (required)
-S3DIRECT_DESTINATIONS = {'profile': ('path/to/dir', lambda u: u.is_authenticated)} # (required, dictionary containing named Tuples('path', user_function).
+S3DIRECT_DESTINATIONS = {'profile': ('path/to/dir', lambda u: u.is_authenticated, ['image/jpeg', 'video/*'])}  # (required, dictionary containing named Tuples('path', user_function, [MIME_TYPE_LIST]).
 S3DIRECT_ENDPOINT = ''  # (optional, http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region)
 S3DIRECT_UNIQUE_RENAME = False  # (optional, default is 'False', gives the uploaded file a unique filename)
 ```
