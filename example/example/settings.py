@@ -64,8 +64,11 @@ LOGGING = {
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 
+TEMPLATE_DIRS = (os.path.join(BASE_DIR, 'templates'),)
+
 AWS_SECRET_ACCESS_KEY = ''
 AWS_ACCESS_KEY_ID = ''
 AWS_STORAGE_BUCKET_NAME = ''
 S3DIRECT_ENDPOINT = ''
 S3DIRECT_UNIQUE_RENAME = False
+S3DIRECT_AUTH_TEST = lambda u: True
