@@ -38,7 +38,7 @@
     }
 
     var update = function(el, status, xml) {
-        var link = el.querySelector('.link'),
+        var link = el.querySelector('.file-link'),
             url  = el.querySelector('.file-url')
 
         url.value = parseURL(xml)
@@ -49,11 +49,21 @@
         el.querySelector('.bar').style.width = '0%'
     }
 
+    var disableSubmit = function(status) {
+        var submitRow = document.querySelector('.submit-row'),
+            buttons   = submitRow.querySelectorAll('input[type=submit]')
+
+        ;[].forEach.call(buttons, function(el){
+            el.disabled = status
+        })
+    }
+
     var upload = function(file, json, el) {
         var data = JSON.parse(json),
             form = new FormData(),
             url  = data['form_action']
 
+        disableSubmit(true)
         el.className = 's3direct progress-active'
         delete data['form_action']
 
@@ -63,6 +73,7 @@
         form.append('file', file)
 
         request('POST', url, form, el, function(status, xml){
+            disableSubmit(false)
             if(status !== 201) return alert('Sorry, failed to upload to S3.')
             update(el, status, xml)
         })
@@ -94,7 +105,7 @@
     var addHandlers = function(el) {
         var url    = el.querySelector('.file-url'),
             input  = el.querySelector('.file-input'),
-            remove = el.querySelector('.remove'),
+            remove = el.querySelector('.file-remove'),
             status = (url.value === '') ? 'form' : 'link'
 
         el.classList.add(status + '-active')
