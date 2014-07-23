@@ -12,7 +12,6 @@ from .utils import create_upload_data
 S3DIRECT_AUTH_TEST = getattr(settings, 'S3DIRECT_AUTH_TEST', lambda u: True)
 
 
-@csrf_exempt
 @require_POST
 @user_passes_test(S3DIRECT_AUTH_TEST)
 def get_upload_params(request):

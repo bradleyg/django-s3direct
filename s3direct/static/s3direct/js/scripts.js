@@ -1,8 +1,19 @@
 (function(){
 
-    var request = function(method, url, data, el, showProgress, cb) {
+    var getCookie = function(name) {
+        var value = '; ' + document.cookie
+        var parts = value.split('; ' + name + '=')
+        if (parts.length == 2) return parts.pop().split(';').shift()
+    }
+
+    var request = function(method, url, data, headers, el, showProgress, cb) {
         var req = new XMLHttpRequest()
         req.open(method, url, true)
+        
+        Object.keys(headers).forEach(function(key){
+            req.setRequestHeader(key, headers[key])
+        })
+
         req.onload = function() {
             cb(req.status, req.responseText)
         }
@@ -89,7 +100,7 @@
         })
         form.append('file', file)
 
-        request('POST', url, form, el, true, function(status, xml){
+        request('POST', url, form, {}, el, true, function(status, xml){
             disableSubmit(false)
             if(status !== 201) return error(el, 'Sorry, failed to upload to S3.')
             update(el, xml)
@@ -101,13 +112,14 @@
             file     = el.querySelector('.file-input').files[0],
             uploadTo = el.querySelector('.file-upload-to').value,
             url      = el.getAttribute('data-policy-url'),
-            form     = new FormData()
+            form     = new FormData(),
+            headers  = {'X-CSRFToken': getCookie('csrftoken')}
 
         form.append('type', file.type)
         form.append('name', file.name)
         form.append('upload_to', uploadTo)
 
-        request('POST', url, form, el, false, function(status, json){
+        request('POST', url, form, headers, el, false, function(status, json){
             if(status !== 200) {
                 return error(el, 'Sorry, could not get upload URL.')
             }
