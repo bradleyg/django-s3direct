@@ -4,11 +4,9 @@ django-s3direct
 Upload files direct to S3 from Django
 -------------------------------------
 
-
-Add direct uploads to AWS S3 functionality with a progress bar to file input fields within Django admin.
+Add direct uploads to AWS S3 functionality with a progress bar to file input fields.
 
 ![screenshot](https://raw.github.com/bradleyg/django-s3direct/master/screenshot.png)
-
 
 ## Installation
 
@@ -37,7 +35,7 @@ Setup a CORS policy on your S3 bucket.
 
 ## Django Setup
 
-### Settings.py  
+### settings.py  
 
 ```python
 INSTALLED_APPS = [
@@ -46,12 +44,20 @@ INSTALLED_APPS = [
     ...
 ]
 
+# AWS keys
 AWS_SECRET_ACCESS_KEY = ''
 AWS_ACCESS_KEY_ID = ''
 AWS_STORAGE_BUCKET_NAME = ''
-S3DIRECT_ENDPOINT = '' # http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
-S3DIRECT_DIR = 's3direct' # (optional, default is 's3direct', location within the bucket to upload files)
-S3DIRECT_UNIQUE_RENAME = False # (optional, default is 'False', gives the uploaded file a unique filename)
+
+# The region endpoint of your bucket, more info:
+# http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
+S3DIRECT_ENDPOINT = '' 
+
+# Optional, give the uploaded file a uuid filename.
+S3DIRECT_UNIQUE_RENAME = False
+
+# Optional, only allow specific users to upload files.
+S3DIRECT_AUTH_TEST = lambda u: u.is_staff
 ```
 
 ### urls.py
@@ -62,20 +68,28 @@ urlpatterns = patterns('',
 )
 ```
 
-### models.py
+## Use in Django admin only
 
+### models.py
 
 ```python
 from django.db import models
 from s3direct.fields import S3DirectField
 
 class Example(models.Model):
-    thumbnail = S3DirectField(upload_to='s3direct')
-    # 'upload_to' is an optional argument
+    video = S3DirectField(upload_to='videos')
 ```
 
-You may need to run `collectstatic` before `s3direct` will work correctly on your public website:
+## Use the widget in a custom form
 
-```bash
-python manage.py collectstatic
-````
+### forms.py
+
+```python
+from django import forms
+from s3direct.widgets import S3DirectWidget
+
+class S3DirectUploadForm(forms.Form):
+    images = forms.URLField(widget=S3DirectWidget(upload_to='images'))
+```
+
+## Examples

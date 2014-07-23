@@ -15,9 +15,8 @@ class S3DirectField(Field):
         return 'URLField'
 
     def formfield(self, **kwargs):
-        defaults = {'widget': self.widget}
-        defaults.update(kwargs)
-        return super(S3DirectField, self).formfield(**defaults)
+        kwargs['widget'] = self.widget
+        return super(S3DirectField, self).formfield(**kwargs)
 
 
 if 'south' in settings.INSTALLED_APPS:
