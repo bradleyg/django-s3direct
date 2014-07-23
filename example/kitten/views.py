@@ -1,3 +1,9 @@
 from django.shortcuts import render
+from django.views.generic import FormView
 
-# Create your views here.
+from .forms import S3DirectUploadForm
+
+
+class IndexView(FormView):
+    template_name = 'form.html'
+    form_class = S3DirectUploadForm
