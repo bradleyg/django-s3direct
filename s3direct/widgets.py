@@ -40,8 +40,8 @@ class S3DirectWidget(widgets.TextInput):
                 policy_url=reverse('s3direct'),
                 element_id=self.build_attrs(attrs).get('id'),
                 file_name=os.path.basename(value or ''),
+                upload_to=self.upload_to,
                 file_url=value or '',
-                name=name,
-                upload_to=self.upload_to)
+                name=name)
 
         return mark_safe(output)
