@@ -8,7 +8,6 @@ TEMPLATE_DEBUG = DEBUG
 
 ALLOWED_HOSTS = []
 
-
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
@@ -30,7 +29,6 @@ MIDDLEWARE_CLASSES = (
 )
 
 ROOT_URLCONF = 'example.urls'
-
 WSGI_APPLICATION = 'example.wsgi.application'
 
 DATABASES = {
@@ -41,21 +39,36 @@ DATABASES = {
 }
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    }
+}
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
+
+TEMPLATE_DIRS = (os.path.join(BASE_DIR, 'templates'),)
 
 AWS_SECRET_ACCESS_KEY = ''
 AWS_ACCESS_KEY_ID = ''
 AWS_STORAGE_BUCKET_NAME = ''
+S3DIRECT_ENDPOINT = ''
 S3DIRECT_UNIQUE_RENAME = False
+S3DIRECT_AUTH_TEST = lambda u: True
