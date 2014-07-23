@@ -1,31 +1,17 @@
 (function(){
 
-    var progressBar = function(el, data, showProgress) {
-        if(data.lengthComputable === false || showProgress === false) return
-
-        var pcnt = Math.round(data.loaded * 100 / data.total),
-            bar  = el.querySelector('.bar')
-
-        bar.style.width = pcnt + '%'
-    }
-
     var request = function(method, url, data, el, showProgress, cb) {
         var req = new XMLHttpRequest()
-
         req.open(method, url, true)
-
         req.onload = function() {
             cb(req.status, req.responseText)
         }
-
         req.onerror = function() {
-            alert('Network error.')
+            error(el, 'Network error.')
         }
-
         req.onprogress = function(data) {
             progressBar(el, data, showProgress)
         }
-
         req.send(data)
     }
 
@@ -37,7 +23,29 @@
         return url
     }
 
-    var update = function(el, status, xml) {
+    var parseJson = function(json) {
+        var data
+        try {data = JSON.parse(json)}
+        catch(e){ data = null }
+        return data
+    }
+
+    var progressBar = function(el, data, showProgress) {
+        if(data.lengthComputable === false || showProgress === false) return
+
+        var pcnt = Math.round(data.loaded * 100 / data.total),
+            bar  = el.querySelector('.bar')
+
+        bar.style.width = pcnt + '%'
+    }
+
+    var error = function(el, msg) {
+        el.className = 's3direct form-active'
+        el.querySelector('.file-input').value = ''
+        alert(msg)
+    }
+
+    var update = function(el, xml) {
         var link = el.querySelector('.file-link'),
             url  = el.querySelector('.file-url')
 
@@ -49,26 +57,31 @@
         el.querySelector('.bar').style.width = '0%'
     }
 
-    var concurrent = 0
+    var concurrentUploads = 0
     var disableSubmit = function(status) {
-        var submitRow = document.querySelector('.submit-row'),
-            buttons   = submitRow.querySelectorAll('input[type=submit]')
+        var submitRow = document.querySelector('.submit-row')
+        if( ! submitRow) return
 
-        if (status === true) concurrent++
-        else concurrent--
+        var buttons = submitRow.querySelectorAll('input[type=submit]')
+
+        if (status === true) concurrentUploads++
+        else concurrentUploads--
 
         ;[].forEach.call(buttons, function(el){
-            el.disabled = (concurrent !== 0)
+            el.disabled = (concurrentUploads !== 0)
         })
     }
 
     var upload = function(file, json, el) {
-        var data = JSON.parse(json),
-            form = new FormData(),
-            url  = data['form_action']
+        var data = parseJson(json),
+            form = new FormData()
 
         disableSubmit(true)
+
+        if (data === null) return error(el, 'Sorry, could not get upload URL.')
+
         el.className = 's3direct progress-active'
+        var url  = data['form_action']
         delete data['form_action']
 
         Object.keys(data).forEach(function(key){
@@ -78,8 +91,8 @@
 
         request('POST', url, form, el, true, function(status, xml){
             disableSubmit(false)
-            if(status !== 201) return alert('Sorry, failed to upload to S3.')
-            update(el, status, xml)
+            if(status !== 201) return error(el, 'Sorry, failed to upload to S3.')
+            update(el, xml)
         })
     }
 
@@ -95,7 +108,9 @@
         form.append('upload_to', uploadTo)
 
         request('POST', url, form, el, false, function(status, json){
-            if(status !== 200) return alert('Sorry, could not get upload URL.')
+            if(status !== 200) {
+                return error(el, 'Sorry, could not get upload URL.')
+            }
             upload(file, json, el)
         })
     }
