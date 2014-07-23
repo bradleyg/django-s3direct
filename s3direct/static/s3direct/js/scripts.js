@@ -1,7 +1,7 @@
 (function(){
 
-    var progressBar = function(el, data) {
-        if(data.lengthComputable === false || el === null) return
+    var progressBar = function(el, data, showProgress) {
+        if(data.lengthComputable === false || showProgress === false) return
 
         var pcnt = Math.round(data.loaded * 100 / data.total),
             bar  = el.querySelector('.bar')
@@ -9,7 +9,7 @@
         bar.style.width = pcnt + '%'
     }
 
-    var request = function(method, url, data, progressEl, cb) {
+    var request = function(method, url, data, el, showProgress, cb) {
         var req = new XMLHttpRequest()
 
         req.open(method, url, true)
@@ -23,7 +23,7 @@
         }
 
         req.onprogress = function(data) {
-            progressBar(progressEl, data)
+            progressBar(el, data, showProgress)
         }
 
         req.send(data)
@@ -72,7 +72,7 @@
         })
         form.append('file', file)
 
-        request('POST', url, form, el, function(status, xml){
+        request('POST', url, form, el, true, function(status, xml){
             disableSubmit(false)
             if(status !== 201) return alert('Sorry, failed to upload to S3.')
             update(el, status, xml)
@@ -80,15 +80,17 @@
     }
 
     var getUploadURL = function(e) {
-        var el   = e.target.parentElement,
-            file = el.querySelector('.file-input').files[0],
-            url  = el.getAttribute('data-policy-url'),
-            form = new FormData()
+        var el       = e.target.parentElement,
+            file     = el.querySelector('.file-input').files[0],
+            uploadTo = el.querySelector('.file-upload-to').value,
+            url      = el.getAttribute('data-policy-url'),
+            form     = new FormData()
 
         form.append('type', file.type)
         form.append('name', file.name)
+        form.append('upload_to', uploadTo)
 
-        request('POST', url, form, null, function(status, json){
+        request('POST', url, form, el, false, function(status, json){
             if(status !== 200) return alert('Sorry, could not get upload URL.')
             upload(file, json, el)
         })
