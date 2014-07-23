@@ -20,6 +20,7 @@
             cb(req.status, req.responseText)
         }
         req.onerror = function() {
+            disableSubmit(false)
             error(el, 'Network error.')
         }
         req.onprogress = function(data) {

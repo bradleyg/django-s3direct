@@ -14,7 +14,9 @@ Install with Pip:
 
 ```pip install django-s3direct```  
 
-Currently only python 2.7 supported.  
+## Support
+Python 2.7
+Chrome / Safari / Firefox / IE10+
 
 ## S3 Setup
 
