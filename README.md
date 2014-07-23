@@ -60,6 +60,8 @@ S3DIRECT_UNIQUE_RENAME = False
 S3DIRECT_AUTH_TEST = lambda u: u.is_staff
 ```
 
+Run ```python manage.py collectstatic``` if required.  
+
 ### urls.py
 
 ```python
@@ -118,7 +120,6 @@ class IndexView(FormView):
 </html>
 ```
 
-
 ## Examples
 Examples of both approaches can be found in the examples folder. To run them:
 ```shell
@@ -127,7 +128,7 @@ $ cd django-s3direct
 $ python setup install
 $ cd example
 
-# Add your AWS keys
+# Add your AWS keys to settings.py
 
 $ python manage.py syncdb
 $ python manage.py runserver 0.0.0.0:5000
