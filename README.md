@@ -9,7 +9,7 @@ Add direct uploads to AWS S3 functionality with a progress bar to file input fie
 ![screenshot](https://raw.githubusercontent.com/bradleyg/django-s3direct/remove-js-deps/screenshot.png)
 
 ## Support
-Python 2.7  
+Python 2/3
 Chrome / Safari / Firefox / IE10+
 
 ## Installation
