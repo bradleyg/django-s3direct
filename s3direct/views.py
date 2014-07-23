@@ -4,13 +4,17 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import user_passes_test
 from django.views.decorators.http import require_POST
+from django.conf import settings
 
 from .utils import create_upload_data
 
 
+S3DIRECT_AUTH_TEST = getattr(settings, 'S3DIRECT_AUTH_TEST', lambda u: True)
+
+
 @csrf_exempt
 @require_POST
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(S3DIRECT_AUTH_TEST)
 def get_upload_params(request):
     content_type = request.POST['type']
     source_filename = request.POST['name']

@@ -35,13 +35,12 @@ class S3DirectWidget(widgets.TextInput):
         self.upload_to = upload_to
         super(S3DirectWidget, self).__init__()
 
-    def render(self, name, value='', attrs=None):
-
+    def render(self, name, value, attrs=None):
         output = self.html.format(
                 policy_url=reverse('s3direct'),
                 element_id=self.build_attrs(attrs).get('id'),
-                file_name=os.path.basename(value),
-                file_url=value,
+                file_name=os.path.basename(value or ''),
+                file_url=value or '',
                 name=name,
                 upload_to=self.upload_to)
 
