@@ -80,7 +80,7 @@ class Example(models.Model):
     video = S3DirectField(upload_to='videos')
 ```
 
-## Use the widget in a custom form
+## Use the widget in a custom form outside of admin
 
 ### forms.py
 
@@ -92,4 +92,45 @@ class S3DirectUploadForm(forms.Form):
     images = forms.URLField(widget=S3DirectWidget(upload_to='images'))
 ```
 
+### views.py 
+
+```python
+from django.views.generic import FormView
+from .forms import S3DirectUploadForm
+
+class IndexView(FormView):
+    template_name = 'form.html'
+    form_class = S3DirectUploadForm
+```
+
+### templates/form.html
+
+```html
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>s3direct</title>
+    {{ form.media }}
+</head>
+<body>
+    {{ form.as_p }}
+</body>
+</html>
+```
+
+
 ## Examples
+Examples of both approaches can be found in the examples folder. To run them:
+```shell
+$ git clone git@github.com:bradleyg/django-s3direct.git
+$ cd django-s3direct
+$ python setup install
+$ cd example
+
+# Add your AWS keys
+
+$ python manage.py syncdb
+$ python manage.py runserver 0.0.0.0:5000
+```  
+
+Visit ```http://localhost:5000/admin``` to view the admin widget and ```http://localhost:5000/form``` to view the custom form widget.
