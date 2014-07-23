@@ -8,15 +8,15 @@ Add direct uploads to AWS S3 functionality with a progress bar to file input fie
 
 ![screenshot](https://raw.githubusercontent.com/bradleyg/django-s3direct/remove-js-deps/screenshot.png)
 
+## Support
+Python 2.7  
+Chrome / Safari / Firefox / IE10+
+
 ## Installation
 
 Install with Pip:
 
 ```pip install django-s3direct```  
-
-## Support
-Python 2.7  
-Chrome / Safari / Firefox / IE10+
 
 ## S3 Setup
 
@@ -62,8 +62,6 @@ S3DIRECT_UNIQUE_RENAME = False
 S3DIRECT_AUTH_TEST = lambda u: u.is_staff
 ```
 
-Run ```python manage.py collectstatic``` if required.  
-
 ### urls.py
 
 ```python
@@ -71,6 +69,8 @@ urlpatterns = patterns('',
     url(r'^s3direct/', include('s3direct.urls')),
 )
 ```
+
+Run ```python manage.py collectstatic``` if required.  
 
 ## Use in Django admin only
 
@@ -84,7 +84,7 @@ class Example(models.Model):
     video = S3DirectField(upload_to='videos')
 ```
 
-## Use the widget in a custom form outside of admin
+## Use the widget in a custom form
 
 ### forms.py
 
@@ -105,17 +105,6 @@ from .forms import S3DirectUploadForm
 class MyView(FormView):
     template_name = 'form.html'
     form_class = S3DirectUploadForm
-```
-
-### urls.py
-
-```python
-from django.conf.urls import patterns, url
-from .views import MyView
-
-urlpatterns = patterns('',
-    url('', MyView.as_view(), name='form'),
-)
 ```
 
 ### templates/form.html
