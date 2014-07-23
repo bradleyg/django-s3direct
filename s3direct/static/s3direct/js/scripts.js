@@ -49,12 +49,16 @@
         el.querySelector('.bar').style.width = '0%'
     }
 
+    var concurrent = 0
     var disableSubmit = function(status) {
         var submitRow = document.querySelector('.submit-row'),
             buttons   = submitRow.querySelectorAll('input[type=submit]')
 
+        if (status === true) concurrent++
+        else concurrent--
+
         ;[].forEach.call(buttons, function(el){
-            el.disabled = status
+            el.disabled = (concurrent !== 0)
         })
     }
 
@@ -110,7 +114,7 @@
             remove = el.querySelector('.file-remove'),
             status = (url.value === '') ? 'form' : 'link'
 
-        el.classList.add(status + '-active')
+        el.className = 's3direct ' + status + '-active'
 
         remove.addEventListener('click', removeUpload, false)
         input.addEventListener('change', getUploadURL, false)
