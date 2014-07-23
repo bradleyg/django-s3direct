@@ -3,7 +3,7 @@
     var progressBar = function(el, data) {
         if(data.lengthComputable === false || el === null) return
 
-        var pcnt = Math.round(data.loaded * 100 / data.total)
+        var pcnt = Math.round(data.loaded * 100 / data.total),
             bar  = el.querySelector('.bar')
 
         bar.style.width = pcnt + '%'
@@ -11,7 +11,7 @@
 
     var request = function(method, url, data, progressEl, cb) {
         var req = new XMLHttpRequest()
-        
+
         req.open(method, url, true)
 
         req.onload = function() {
