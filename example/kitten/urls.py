@@ -1,8 +1,8 @@
 from django.conf.urls import patterns, url
 
-from .views import IndexView
+from .views import MyView
 
 
 urlpatterns = patterns('',
-    url('', IndexView.as_view(), name='form'),
+    url('', MyView.as_view(), name='form'),
 )

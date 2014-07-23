@@ -15,7 +15,7 @@ Install with Pip:
 ```pip install django-s3direct```  
 
 ## Support
-Python 2.7
+Python 2.7  
 Chrome / Safari / Firefox / IE10+
 
 ## S3 Setup
@@ -102,9 +102,20 @@ class S3DirectUploadForm(forms.Form):
 from django.views.generic import FormView
 from .forms import S3DirectUploadForm
 
-class IndexView(FormView):
+class MyView(FormView):
     template_name = 'form.html'
     form_class = S3DirectUploadForm
+```
+
+### urls.py
+
+```python
+from django.conf.urls import patterns, url
+from .views import MyView
+
+urlpatterns = patterns('',
+    url('', MyView.as_view(), name='form'),
+)
 ```
 
 ### templates/form.html

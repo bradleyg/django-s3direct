@@ -4,6 +4,6 @@ from django.views.generic import FormView
 from .forms import S3DirectUploadForm
 
 
-class IndexView(FormView):
+class MyView(FormView):
     template_name = 'form.html'
     form_class = S3DirectUploadForm
