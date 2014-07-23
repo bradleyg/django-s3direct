@@ -9,5 +9,3 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^s3direct/', include('s3direct.urls')),
 )
-
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
