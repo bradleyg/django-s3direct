@@ -7,15 +7,15 @@ f.close()
 
 setup(
     name='django-s3direct',
-    version='0.1.10',
-    description='Add direct uploads to S3 functionality with a progress bar to file input fields within Django admin.',
+    version='0.1.11',
+    description='Add direct uploads to S3 functionality with a progress bar to file input fields.',
     long_description=readme,
     author="Bradley Griffiths",
     author_email='bradley.griffiths@gmail.com',
     url='https://github.com/bradleyg/django-s3direct',
     packages=['s3direct'],
     include_package_data=True,
-    install_requires=['setuptools'],
+    install_requires=['django>=1.6.2'],
     zip_safe=False,
     classifiers=[
         'Development Status :: 4 - Beta',
