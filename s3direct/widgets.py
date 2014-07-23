@@ -6,11 +6,11 @@ from django.conf import settings
 
 
 HTML = (
-    '<div class="s3direct" data-url="{policy_url}">'
+    '<div class="s3direct" data-policy-url="{policy_url}">'
     '    <a class="link" target="_blank" href="{file_url}">{file_name}</a>'
     '    <a class="remove" href="#remove">Remove</a>'
-    '    <input type="hidden" value="{file_url}" id="{element_id}" name="{name}" />'
-    '    <input type="file" class="fileinput" />'
+    '    <input class="file-url" type="hidden" value="{file_url}" id="{element_id}" name="{name}" />'
+    '    <input class="file-input" type="file" />'
     '    <div class="progress progress-striped active">'
     '        <div class="bar"></div>'
     '    </div>'
@@ -22,11 +22,7 @@ class S3DirectEditor(widgets.TextInput):
 
     class Media:
         js = (
-            's3direct/js/jquery-1.10.2.min.js',
-            's3direct/js/jquery.iframe-transport.js',
-            's3direct/js/jquery.ui.widget.js',
-            's3direct/js/jquery.fileupload.js',
-            's3direct/js/s3direct.js',
+            's3direct/js/scripts.js',
         )
         css = {
             'all': (
