@@ -3,20 +3,18 @@ from django.conf import settings
 from s3direct.widgets import S3DirectWidget
 
 
-S3DIRECT_DIR = getattr(settings, 'S3DIRECT_DIR', 's3direct')
-
-
 class S3DirectField(Field):
-    def __init__(self, upload_to=S3DIRECT_DIR):
+    def __init__(self, *args, **kwargs):
+        upload_to = kwargs.pop('upload_to', None)
         self.widget = S3DirectWidget(upload_to=upload_to)
-        super(S3DirectField, self).__init__()
+        super(S3DirectField, self).__init__(*args, **kwargs)
 
     def get_internal_type(self):
         return 'TextField'
 
-    def formfield(self, **kwargs):
+    def formfield(self, *args, **kwargs):
         kwargs['widget'] = self.widget
-        return super(S3DirectField, self).formfield(**kwargs)
+        return super(S3DirectField, self).formfield(*args, **kwargs)
 
 
 if 'south' in settings.INSTALLED_APPS:

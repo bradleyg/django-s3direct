@@ -3,6 +3,10 @@ import os
 from django.forms import widgets
 from django.utils.safestring import mark_safe
 from django.core.urlresolvers import reverse
+from django.conf import settings
+
+
+S3DIRECT_DIR = getattr(settings, 'S3DIRECT_DIR', 's3direct')
 
 
 class S3DirectWidget(widgets.TextInput):
@@ -31,9 +35,9 @@ class S3DirectWidget(widgets.TextInput):
             )
         }
 
-    def __init__(self, upload_to):
-        self.upload_to = upload_to
-        super(S3DirectWidget, self).__init__()
+    def __init__(self, *args, **kwargs):
+        self.upload_to = kwargs.pop('upload_to', None) or S3DIRECT_DIR
+        super(S3DirectWidget, self).__init__(*args, **kwargs)
 
     def render(self, name, value, attrs=None):
         output = self.html.format(
