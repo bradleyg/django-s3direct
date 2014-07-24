@@ -127,7 +127,7 @@ Examples of both approaches can be found in the examples folder. To run them:
 ```shell
 $ git clone git@github.com:bradleyg/django-s3direct.git
 $ cd django-s3direct
-$ python setup install
+$ python setup.py install
 $ cd example
 
 # Add your AWS keys to settings.py
