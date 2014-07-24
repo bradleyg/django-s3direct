@@ -12,7 +12,7 @@ class S3DirectField(Field):
         super(S3DirectField, self).__init__()
 
     def get_internal_type(self):
-        return 'URLField'
+        return 'TextField'
 
     def formfield(self, **kwargs):
         kwargs['widget'] = self.widget

@@ -10,7 +10,9 @@ Add direct uploads to AWS S3 functionality with a progress bar to file input fie
 
 ## Support
 Python 2/3  
-Chrome / Safari / Firefox / IE10+
+Chrome / Safari / Firefox / IE10+  
+  
+For older browser support use version 0.1.10.  
 
 ## Installation
 
