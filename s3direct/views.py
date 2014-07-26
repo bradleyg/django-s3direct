@@ -1,7 +1,6 @@
 import json
 
 from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import user_passes_test
 from django.views.decorators.http import require_POST
 from django.conf import settings
@@ -20,5 +19,3 @@ def get_upload_params(request):
     upload_to = request.POST['upload_to']
     data = create_upload_data(content_type, source_filename, upload_to)
     return HttpResponse(json.dumps(data), content_type="application/json")
-
-
