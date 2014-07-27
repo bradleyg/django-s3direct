@@ -45,7 +45,7 @@ def create_upload_data(content_type, source_filename, upload_to):
     bucket_url = "https://%s/%s" % (endpoint, bucket)
 
     return {
-        "policy": policy,
+        "policy": encoded,
         "signature": signature_b64,
         "key": key,
         "AWSAccessKeyId": access_key,
