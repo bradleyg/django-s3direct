@@ -30,8 +30,8 @@ def create_upload_data(content_type, source_filename, upload_to):
             {"success_action_status": "201"}
         ]
     })
-
-    policy = b64encode(bytes(policy_object.replace('\n', '').replace('\r', '')))
+    encoded = bytes(policy_object.replace('\n', '').replace('\r', ''), 'utf-8')
+    policy = b64encode(encoded)
     signature = hmac.new(secret_access_key, policy, hashlib.sha1).digest()
     signature_b64 = b64encode(signature)
 
