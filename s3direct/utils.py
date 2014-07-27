@@ -13,7 +13,7 @@ S3DIRECT_UNIQUE_RENAME = getattr(settings, 'S3DIRECT_UNIQUE_RENAME', None)
 
 def create_upload_data(content_type, source_filename, upload_to):
     access_key = settings.AWS_ACCESS_KEY_ID
-    secret_access_key = settings.AWS_SECRET_ACCESS_KEY
+    secret_access_key = settings.AWS_SECRET_ACCESS_KEY.encode('utf-8')
     bucket = settings.AWS_STORAGE_BUCKET_NAME
     endpoint = settings.S3DIRECT_ENDPOINT
 
