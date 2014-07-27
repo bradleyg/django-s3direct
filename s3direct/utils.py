@@ -30,9 +30,13 @@ def create_upload_data(content_type, source_filename, upload_to):
             {"success_action_status": "201"}
         ]
     })
-    encoded = policy_object.replace('\n', '').replace('\r', '').encode('utf-8')
-    policy = b64encode(bytes(encoded))
-    signature = hmac.new(bytes(secret_access_key), policy, hashlib.sha1).digest()
+
+    policy = policy_object.replace('\n', '').replace('\r', '').encode('utf-8')
+    signature = hmac.new(
+        bytes(secret_access_key),
+        b64encode(bytes(policy)),
+        hashlib.sha1).digest()
+
     signature_b64 = b64encode(signature)
 
     if S3DIRECT_UNIQUE_RENAME:
@@ -45,8 +49,8 @@ def create_upload_data(content_type, source_filename, upload_to):
     bucket_url = "https://%s/%s" % (endpoint, bucket)
 
     return {
-        "policy": encoded,
-        "signature": signature_b64,
+        "policy": str(policy),
+        "signature": str(signature_b64),
         "key": key,
         "AWSAccessKeyId": access_key,
         "form_action": bucket_url,
