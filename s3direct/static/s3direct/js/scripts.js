@@ -19,13 +19,16 @@
         req.onload = function() {
             cb(req.status, req.responseText)
         }
-        req.onerror = function() {
+        
+        req.onerror = req.onabort = function() {
             disableSubmit(false)
-            error(el, 'Network error.')
+            error(el, 'Sorry, failed to upload file.')
         }
-        req.onprogress = function(data) {
+
+        req.upload.onprogress = function(data) {
             progressBar(el, data, showProgress)
         }
+
         req.send(data)
     }
 
