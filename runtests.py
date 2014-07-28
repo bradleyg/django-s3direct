@@ -22,7 +22,7 @@ settings.configure(DEBUG=True,
                    AWS_STORAGE_BUCKET_NAME=environ.get(
                                 'AWS_STORAGE_BUCKET_NAME',
                                 'test-bucket'),
-                   S3DIRECT_ENDPOINT='s3.amazonaws.com',
+                   S3DIRECT_REGION='us-east-1',
                    S3DIRECT_AUTH_TEST=lambda u: u.is_staff
                    )
 
