@@ -13,7 +13,7 @@ S3DIRECT_UNIQUE_RENAME = getattr(settings, 'S3DIRECT_UNIQUE_RENAME', None)
 
 def create_upload_data(content_type, source_filename, upload_to):
     access_key = settings.AWS_ACCESS_KEY_ID
-    secret_access_key = settings.AWS_SECRET_ACCESS_KEY.encode('utf-8')
+    secret_access_key = settings.AWS_SECRET_ACCESS_KEY
     bucket = settings.AWS_STORAGE_BUCKET_NAME
     endpoint = settings.S3DIRECT_ENDPOINT
 
@@ -31,11 +31,11 @@ def create_upload_data(content_type, source_filename, upload_to):
         ]
     })
 
-    policy = policy_object.replace('\n', '').replace('\r', '').encode('utf-8')
+    policy = b64encode(
+        policy_object.replace('\n', '').replace('\r', '').encode())
+
     signature = hmac.new(
-        bytes(secret_access_key),
-        b64encode(bytes(policy)),
-        hashlib.sha1).digest()
+        secret_access_key.encode(), policy, hashlib.sha1).digest()
 
     signature_b64 = b64encode(signature)
 
@@ -45,12 +45,12 @@ def create_upload_data(content_type, source_filename, upload_to):
     else:
         filename = '${filename}'
 
-    key = "%s/%s" % (upload_to, filename)
-    bucket_url = "https://%s/%s" % (endpoint, bucket)
+    key = '%s/%s' % (upload_to, filename)
+    bucket_url = 'https://%s/%s' % (endpoint, bucket)
 
     return {
-        "policy": str(policy),
-        "signature": str(signature_b64),
+        "policy": policy.decode(),
+        "signature": signature_b64.decode(),
         "key": key,
         "AWSAccessKeyId": access_key,
         "form_action": bucket_url,

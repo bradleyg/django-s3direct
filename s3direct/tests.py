@@ -66,7 +66,7 @@ class WidgetTest(TestCase):
         self.client.login(username='admin', password='admin')
         data = {'upload_to': 'foo', 'name': 'image.jpg', 'type': 'image/jpg'}
         response = self.client.post(reverse('s3direct'), data)
-        response_dict = json.loads(response.content)
+        response_dict = json.loads(response.content.decode())
         self.assertTrue(u'signature' in response_dict)
         self.assertTrue(u'policy' in response_dict)
         self.assertDictContainsSubset(FOO_RESPONSE, response_dict)
