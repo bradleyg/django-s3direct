@@ -10,12 +10,23 @@ from django.conf import settings
 
 S3DIRECT_UNIQUE_RENAME = getattr(settings, 'S3DIRECT_UNIQUE_RENAME', None)
 
+REGIONS = {
+    'us-east-1': 's3.amazonaws.com',
+    'us-west-2': 's3-us-west-2.amazonaws.com',
+    'us-west-1': 's3-us-west-1.amazonaws.com',
+    'eu-west-1': 's3-eu-west-1.amazonaws.com',
+    'ap-southeast-1': 's3-ap-southeast-1.amazonaws.com',
+    'ap-southeast-2': 's3-ap-southeast-2.amazonaws.com',
+    'ap-northeast-1': 's3-ap-northeast-1.amazonaws.com',
+    'sa-east-1': 's3-sa-east-1.amazonaws.com',
+}
+
 
 def create_upload_data(content_type, source_filename, upload_to):
     access_key = settings.AWS_ACCESS_KEY_ID
     secret_access_key = settings.AWS_SECRET_ACCESS_KEY
     bucket = settings.AWS_STORAGE_BUCKET_NAME
-    endpoint = settings.S3DIRECT_ENDPOINT
+    endpoint = REGIONS.get(settings.S3DIRECT_REGION, 's3.amazonaws.com')
 
     expires_in = datetime.now() + timedelta(hours=5)
     expires = expires_in.strftime('%Y-%m-%dT%H:%M:%S.000Z')

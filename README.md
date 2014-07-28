@@ -57,9 +57,9 @@ AWS_SECRET_ACCESS_KEY = ''
 AWS_ACCESS_KEY_ID = ''
 AWS_STORAGE_BUCKET_NAME = ''
 
-# The region endpoint of your bucket, more info:
+# The region of your bucket, more info:
 # http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
-S3DIRECT_ENDPOINT = '' 
+S3DIRECT_REGION = 'us-east-1' 
 
 # Optional, give the uploaded file a uuid filename.
 S3DIRECT_UNIQUE_RENAME = False
