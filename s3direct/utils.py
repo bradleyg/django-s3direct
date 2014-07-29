@@ -26,7 +26,8 @@ def create_upload_data(content_type, source_filename, upload_to):
     access_key = settings.AWS_ACCESS_KEY_ID
     secret_access_key = settings.AWS_SECRET_ACCESS_KEY
     bucket = settings.AWS_STORAGE_BUCKET_NAME
-    endpoint = REGIONS.get(settings.S3DIRECT_REGION, 's3.amazonaws.com')
+    region = getattr(settings, 'S3DIRECT_REGION', None)
+    endpoint = REGIONS.get(region, 's3.amazonaws.com')
 
     expires_in = datetime.now() + timedelta(hours=5)
     expires = expires_in.strftime('%Y-%m-%dT%H:%M:%S.000Z')

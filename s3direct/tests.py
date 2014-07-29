@@ -2,10 +2,9 @@ import json
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse, resolve
-from django.conf import settings
 from django.test import TestCase
 
-from s3direct import widgets, views
+from s3direct import widgets
 
 
 HTML_OUTPUT = (
