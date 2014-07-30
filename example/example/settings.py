@@ -16,7 +16,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     's3direct',
-    'kitten',
+    'cat',
 )
 
 MIDDLEWARE_CLASSES = (
