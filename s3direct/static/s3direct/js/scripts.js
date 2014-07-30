@@ -157,4 +157,11 @@
         ;[].forEach.call(document.querySelectorAll('.s3direct'), addHandlers)
     })
 
+    document.addEventListener('DOMNodeInserted', function(e){
+        if(e.target.tagName) {
+            var el = e.target.querySelector('.s3direct')
+            if(el) addHandlers(el)
+        }
+    })
+
 })()
