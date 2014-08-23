@@ -9,6 +9,7 @@ from django.conf import settings
 
 
 S3DIRECT_UNIQUE_RENAME = getattr(settings, 'S3DIRECT_UNIQUE_RENAME', None)
+S3DIRECT_FILE_PERMISSION = getattr(settings, 'S3DIRECT_FILE_PERMISSION', "public-read")
 
 REGIONS = {
     'us-east-1': 's3.amazonaws.com',
@@ -67,6 +68,6 @@ def create_upload_data(content_type, source_filename, upload_to):
         "AWSAccessKeyId": access_key,
         "form_action": bucket_url,
         "success_action_status": "201",
-        "acl": "public-read",
+        "acl": S3DIRECT_FILE_PERMISSION,
         "Content-Type": content_type
     }
