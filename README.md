@@ -70,10 +70,10 @@ S3DIRECT_AUTH_TEST = lambda u: u.is_staff
 # Optional, set the  permissions of the uploaded file
 S3DIRECT_FILE_PERMISSION = 'private'
 
-For more information on acl settings, look at this link:
+For more information on acl settings, look at this [link](http://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html
+):
 
-http://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html
-
+```
 
 
 ### urls.py
