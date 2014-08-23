@@ -37,7 +37,7 @@ def create_upload_data(content_type, source_filename, upload_to):
         "expiration": expires,
         "conditions": [
             {"bucket": bucket},
-            {"acl": "public-read"},
+            {"acl": S3DIRECT_FILE_PERMISSION},
             {"Content-Type": content_type},
             ["starts-with", "$key", ""],
             {"success_action_status": "201"}
