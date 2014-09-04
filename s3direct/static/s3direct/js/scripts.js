@@ -11,7 +11,7 @@
     var request = function(method, url, data, headers, el, showProgress, cb) {
         var req = new XMLHttpRequest()
         req.open(method, url, true)
-        
+
         Object.keys(headers).forEach(function(key){
             req.setRequestHeader(key, headers[key])
         })
@@ -19,7 +19,7 @@
         req.onload = function() {
             cb(req.status, req.responseText)
         }
-        
+
         req.onerror = req.onabort = function() {
             disableSubmit(false)
             error(el, 'Sorry, failed to upload file.')
@@ -89,9 +89,8 @@
         })
     }
 
-    var upload = function(file, json, el) {
-        var data = parseJson(json),
-            form = new FormData()
+    var upload = function(file, data, el) {
+        var form = new FormData()
 
         disableSubmit(true)
 
@@ -126,10 +125,18 @@
         form.append('upload_to', uploadTo)
 
         request('POST', url, form, headers, el, false, function(status, json){
-            if(status !== 200) {
-                return error(el, 'Sorry, could not get upload URL.')
+            var data = parseJson(json)
+
+            switch(status) {
+                case 400:
+                    error(el, data.error)
+                    break;
+                case 200:
+                    upload(file, data, el)
+                    break
+                default:
+                    error(el, 'Sorry, could not get upload URL.')
             }
-            upload(file, json, el)
         })
     }
 

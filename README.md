@@ -13,16 +13,16 @@ Add direct uploads to AWS S3 functionality with a progress bar to file input fie
 ![screenshot](https://raw.githubusercontent.com/bradleyg/django-s3direct/master/screenshot.png)
 
 ## Support
-Python 2/3  
-Chrome / Safari / Firefox / IE10+  
-  
-For older browser support use version 0.1.10.  
+Python 2/3
+Chrome / Safari / Firefox / IE10+
+
+For older browser support use version 0.1.10.
 
 ## Installation
 
 Install with Pip:
 
-```pip install django-s3direct```  
+```pip install django-s3direct```
 
 ## S3 Setup
 
@@ -43,7 +43,7 @@ Setup a CORS policy on your S3 bucket.
 
 ## Django Setup
 
-### settings.py  
+### settings.py
 
 ```python
 INSTALLED_APPS = [
@@ -59,13 +59,16 @@ AWS_STORAGE_BUCKET_NAME = ''
 
 # The region of your bucket, more info:
 # http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
-S3DIRECT_REGION = 'us-east-1' 
+S3DIRECT_REGION = 'us-east-1'
 
 # Optional, give the uploaded file a uuid filename.
 S3DIRECT_UNIQUE_RENAME = False
 
 # Optional, only allow specific users to upload files.
 S3DIRECT_AUTH_TEST = lambda u: u.is_staff
+
+# Optional, only allow specific mime types. Remove setting to allow all mime types.
+S3DIRECT_ALLOWED_MIME_TYPES = ['image/png', 'image/jpeg']
 ```
 
 ### urls.py
@@ -76,7 +79,7 @@ urlpatterns = patterns('',
 )
 ```
 
-Run ```python manage.py collectstatic``` if required.  
+Run ```python manage.py collectstatic``` if required.
 
 ## Use in Django admin only
 
@@ -102,7 +105,7 @@ class S3DirectUploadForm(forms.Form):
     images = forms.URLField(widget=S3DirectWidget(upload_to='images'))
 ```
 
-### views.py 
+### views.py
 
 ```python
 from django.views.generic import FormView
@@ -140,6 +143,6 @@ $ cd example
 
 $ python manage.py syncdb
 $ python manage.py runserver 0.0.0.0:5000
-```  
+```
 
 Visit ```http://localhost:5000/admin``` to view the admin widget and ```http://localhost:5000/form``` to view the custom form widget.
