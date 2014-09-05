@@ -1,8 +1,8 @@
 import sys
+import os
 from os import environ
 
 from django.conf import settings
-
 
 settings.configure(DEBUG=True,
                    DATABASES={
@@ -23,8 +23,12 @@ settings.configure(DEBUG=True,
                                 'AWS_STORAGE_BUCKET_NAME',
                                 'test-bucket'),
                    S3DIRECT_REGION='us-east-1',
-                   S3DIRECT_AUTH_TEST=lambda u: u.is_staff
-                   )
+                   S3DIRECT_DESTINATIONS={
+                       'misc': (lambda old_filename: 'images/unique.jpg',),
+                       'files': ('uploads/files', lambda u: u.is_staff,),
+                       'imgs': ('uploads/imgs', lambda u: True, ['image/jpeg', 'image/png'],),
+                       'vids': ('uploads/vids', lambda u: u.is_authenticated(), ['video/mp4'],)
+                   })
 
 from django.test.simple import DjangoTestSuiteRunner
 test_runner = DjangoTestSuiteRunner(verbosity=1)

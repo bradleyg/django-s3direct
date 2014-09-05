@@ -22,7 +22,15 @@ REGIONS = {
 }
 
 
-def create_upload_data(content_type, source_filename, upload_to):
+def get_at(index, t):
+    try:
+        value = t[index]
+    except IndexError:
+        value = None
+    return value
+
+
+def create_upload_data(content_type, key):
     access_key = settings.AWS_ACCESS_KEY_ID
     secret_access_key = settings.AWS_SECRET_ACCESS_KEY
     bucket = settings.AWS_STORAGE_BUCKET_NAME
@@ -51,13 +59,6 @@ def create_upload_data(content_type, source_filename, upload_to):
 
     signature_b64 = b64encode(signature)
 
-    if S3DIRECT_UNIQUE_RENAME:
-        ext = source_filename.split('.')[-1]
-        filename = '%s.%s' % (uuid.uuid4(), ext)
-    else:
-        filename = '${filename}'
-
-    key = '%s/%s' % (upload_to, filename)
     bucket_url = 'https://%s/%s' % (endpoint, bucket)
 
     return {

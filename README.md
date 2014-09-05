@@ -61,14 +61,25 @@ AWS_STORAGE_BUCKET_NAME = ''
 # http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
 S3DIRECT_REGION = 'us-east-1'
 
-# Optional, give the uploaded file a uuid filename.
-S3DIRECT_UNIQUE_RENAME = False
+# Destinations in the following format:
+# {destination_key: (path_to_upload_to or function_to_create_path, auth_test, [allowed_mime_types])}
+# 'destination_key' is the key to use for the 'dest' attribute on your widget or model field
+S3DIRECT_DESTINATIONS={
+    # Allow anybody to upload any MIME type
+    'misc': ('uploads/misc'),
 
-# Optional, only allow specific users to upload files.
-S3DIRECT_AUTH_TEST = lambda u: u.is_staff
+    # Allow staff users to upload any MIME type
+    'files': ('uploads/files', lambda u: u.is_staff),
 
-# Optional, only allow specific mime types. Remove setting to allow all mime types.
-S3DIRECT_ALLOWED_MIME_TYPES = ['image/png', 'image/jpeg']
+    # Allow anybody to upload jpeg's and png's.
+    'imgs': ('uploads/imgs', lambda u: True, ['image/jpeg', 'image/png']),
+
+    # Allow authenticated users to upload mp4's
+    'vids': ('uploads/vids', lambda u: u.is_authenticated(), ['video/mp4'])
+
+    # Allow anybody to upload any MIME type with a custom name function, eg:
+    'custom_filename': (lambda old_filename: 'images/unique.jpg',),
+}
 ```
 
 ### urls.py
@@ -90,7 +101,7 @@ from django.db import models
 from s3direct.fields import S3DirectField
 
 class Example(models.Model):
-    video = S3DirectField(upload_to='videos')
+    video = S3DirectField(dest='destination_key')
 ```
 
 ## Use the widget in a custom form
@@ -102,7 +113,7 @@ from django import forms
 from s3direct.widgets import S3DirectWidget
 
 class S3DirectUploadForm(forms.Form):
-    images = forms.URLField(widget=S3DirectWidget(upload_to='images'))
+    images = forms.URLField(widget=S3DirectWidget(dest='destination_key'))
 ```
 
 ### views.py

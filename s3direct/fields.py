@@ -5,8 +5,8 @@ from s3direct.widgets import S3DirectWidget
 
 class S3DirectField(Field):
     def __init__(self, *args, **kwargs):
-        upload_to = kwargs.pop('upload_to', None)
-        self.widget = S3DirectWidget(upload_to=upload_to)
+        dest = kwargs.pop('dest', None)
+        self.widget = S3DirectWidget(dest=dest)
         super(S3DirectField, self).__init__(*args, **kwargs)
 
     def get_internal_type(self):

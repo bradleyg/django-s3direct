@@ -66,10 +66,33 @@ STATIC_URL = '/static/'
 
 TEMPLATE_DIRS = (os.path.join(BASE_DIR, 'templates'),)
 
-AWS_ACCESS_KEY_ID = ''
-AWS_SECRET_ACCESS_KEY = ''
-AWS_STORAGE_BUCKET_NAME = ''
-S3DIRECT_REGION = ''
+AWS_ACCESS_KEY_ID = 'AKIAJRCPFMRUH7LRJDYQ'
+AWS_SECRET_ACCESS_KEY = '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'
+AWS_STORAGE_BUCKET_NAME = 's3.thesweetshop.tv'
+S3DIRECT_REGION = 'us-east-1'
 S3DIRECT_UNIQUE_RENAME = False
-S3DIRECT_AUTH_TEST = lambda u: True
-S3DIRECT_ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png']
+
+
+def create_filename(filename):
+    import uuid
+    ext = filename.split('.')[-1]
+    filename = '%s.%s' % (uuid.uuid4().hex, ext)
+    return os.path.join('images', filename)
+
+
+S3DIRECT_DESTINATIONS={
+    # Allow anybody to upload any MIME type
+    'misc': ('uploads/misc',),
+
+    # Allow staff users to upload any MIME type
+    'files': ('uploads/files', lambda u: u.is_staff,),
+
+    # Allow anybody to upload jpeg's and png's.
+    'imgs': ('uploads/imgs', lambda u: True, ['image/jpeg', 'image/png'],),
+
+    # Allow authenticated users to upload mp4's
+    'vids': ('uploads/vids', lambda u: u.is_authenticated(), ['video/mp4'],),
+
+    # Allow anybody to upload any MIME type with a custom name function
+    'custom_filename': (create_filename,),
+}

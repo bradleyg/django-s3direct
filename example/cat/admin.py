@@ -3,7 +3,7 @@ from django.contrib import admin
 from .models import Cat, Kitten
 
 
-class KittenAdminInline(admin.TabularInline):
+class KittenAdminInline(admin.StackedInline):
     model = Kitten
     extra = 1
 

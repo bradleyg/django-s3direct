@@ -115,25 +115,26 @@
     var getUploadURL = function(e) {
         var el       = e.target.parentElement,
             file     = el.querySelector('.file-input').files[0],
-            uploadTo = el.querySelector('.file-upload-to').value,
+            dest     = el.querySelector('.file-dest').value,
             url      = el.getAttribute('data-policy-url'),
             form     = new FormData(),
             headers  = {'X-CSRFToken': getCookie('csrftoken')}
 
         form.append('type', file.type)
         form.append('name', file.name)
-        form.append('upload_to', uploadTo)
+        form.append('dest', dest)
 
         request('POST', url, form, headers, el, false, function(status, json){
             var data = parseJson(json)
 
             switch(status) {
-                case 400:
-                    error(el, data.error)
-                    break;
                 case 200:
                     upload(file, data, el)
                     break
+                case 400:
+                case 403:
+                    error(el, data.error)
+                    break;
                 default:
                     error(el, 'Sorry, could not get upload URL.')
             }

@@ -6,9 +6,6 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 
 
-S3DIRECT_DIR = getattr(settings, 'S3DIRECT_DIR', 's3direct')
-
-
 class S3DirectWidget(widgets.TextInput):
 
     html = (
@@ -16,7 +13,7 @@ class S3DirectWidget(widgets.TextInput):
         '  <a class="file-link" target="_blank" href="{file_url}">{file_name}</a>'
         '  <a class="file-remove" href="#remove">Remove</a>'
         '  <input class="file-url" type="hidden" value="{file_url}" id="{element_id}" name="{name}" />'
-        '  <input class="file-upload-to" type="hidden" value="{upload_to}">'
+        '  <input class="file-dest" type="hidden" value="{dest}">'
         '  <input class="file-input" type="file" />'
         '  <div class="progress progress-striped active">'
         '    <div class="bar"></div>'
@@ -36,7 +33,7 @@ class S3DirectWidget(widgets.TextInput):
         }
 
     def __init__(self, *args, **kwargs):
-        self.upload_to = kwargs.pop('upload_to', None) or S3DIRECT_DIR
+        self.dest = kwargs.pop('dest', None)
         super(S3DirectWidget, self).__init__(*args, **kwargs)
 
     def render(self, name, value, attrs=None):
@@ -44,7 +41,7 @@ class S3DirectWidget(widgets.TextInput):
             policy_url=reverse('s3direct'),
             element_id=self.build_attrs(attrs).get('id'),
             file_name=os.path.basename(value or ''),
-            upload_to=self.upload_to,
+            dest=self.dest,
             file_url=value or '',
             name=name)
 
