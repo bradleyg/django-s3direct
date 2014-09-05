@@ -64,7 +64,7 @@ S3DIRECT_REGION = 'us-east-1'
 # Destinations in the following format:
 # {destination_key: (path_or_function, auth_test, [allowed_mime_types])}
 # 'destination_key' is the key to use for the 'dest' attribute on your widget or model field
-S3DIRECT_DESTINATIONS={
+S3DIRECT_DESTINATIONS = {
     # Allow anybody to upload any MIME type
     'misc': ('uploads/misc',),
 
@@ -78,7 +78,7 @@ S3DIRECT_DESTINATIONS={
     'vids': ('uploads/vids', lambda u: u.is_authenticated(), ['video/mp4'],)
 
     # Allow anybody to upload any MIME type with a custom name function, eg:
-    'custom_filename': (lambda old_filename: 'images/unique.jpg',),
+    'custom_filename': (lambda original_filename: 'images/unique.jpg',),
 }
 ```
 
