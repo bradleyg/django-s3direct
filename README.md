@@ -101,7 +101,7 @@ from django.db import models
 from s3direct.fields import S3DirectField
 
 class Example(models.Model):
-    video = S3DirectField(dest='destination_key')
+    video = S3DirectField(dest='destination_key_from_settings')
 ```
 
 ## Use the widget in a custom form
@@ -113,7 +113,7 @@ from django import forms
 from s3direct.widgets import S3DirectWidget
 
 class S3DirectUploadForm(forms.Form):
-    images = forms.URLField(widget=S3DirectWidget(dest='destination_key'))
+    images = forms.URLField(widget=S3DirectWidget(dest='destination_key_from_settings'))
 ```
 
 ### views.py
