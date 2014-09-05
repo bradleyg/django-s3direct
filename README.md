@@ -62,7 +62,7 @@ AWS_STORAGE_BUCKET_NAME = ''
 S3DIRECT_REGION = 'us-east-1'
 
 # Destinations in the following format:
-# {destination_key: (path_to_upload_to or function_to_create_path, auth_test, [allowed_mime_types])}
+# {destination_key: (path_or_function, auth_test, [allowed_mime_types])}
 # 'destination_key' is the key to use for the 'dest' attribute on your widget or model field
 S3DIRECT_DESTINATIONS={
     # Allow anybody to upload any MIME type
