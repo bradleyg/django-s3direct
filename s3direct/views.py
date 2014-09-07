@@ -35,7 +35,7 @@ def get_upload_params(request):
         return HttpResponse(data, content_type="application/json", status=403)
 
     if allowed and content_type not in allowed:
-        data = json.dumps({'error': 'Invalid file type.'})
+        data = json.dumps({'error': 'Invalid file type (%s).' % content_type})
         return HttpResponse(data, content_type="application/json", status=400)
 
     if isfunction(key):
