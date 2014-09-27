@@ -79,6 +79,13 @@ S3DIRECT_DESTINATIONS = {
 
     # Allow anybody to upload any MIME type with a custom name function, eg:
     'custom_filename': (lambda original_filename: 'images/unique.jpg',),
+
+    # Allow logged in users to upload any type of file and give it a private acl:
+    'private': (
+        'uploads/vids',
+        lambda u: u.is_authenticated(),
+        '*',
+        'private')
 }
 ```
 
