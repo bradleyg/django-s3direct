@@ -3,7 +3,6 @@ from inspect import isfunction
 
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
-from django.core.exceptions import PermissionDenied
 from django.conf import settings
 
 from .utils import create_upload_data, get_at
@@ -18,6 +17,7 @@ def get_upload_params(request):
     filename = request.POST['name']
 
     dest = DESTINATIONS.get(request.POST['dest'])
+
     if not dest:
         data = json.dumps({'error': 'File destination does not exist.'})
         return HttpResponse(data, content_type="application/json", status=400)
@@ -25,6 +25,10 @@ def get_upload_params(request):
     key = get_at(0, dest)
     auth = get_at(1, dest)
     allowed = get_at(2, dest)
+    acl = get_at(3, dest)
+
+    if not acl:
+        acl = 'public-read'
 
     if not key:
         data = json.dumps({'error': 'Missing destination path.'})
@@ -34,7 +38,7 @@ def get_upload_params(request):
         data = json.dumps({'error': 'Permission denied.'})
         return HttpResponse(data, content_type="application/json", status=403)
 
-    if allowed and content_type not in allowed:
+    if (allowed and content_type not in allowed) and allowed != '*':
         data = json.dumps({'error': 'Invalid file type (%s).' % content_type})
         return HttpResponse(data, content_type="application/json", status=400)
 
@@ -43,5 +47,6 @@ def get_upload_params(request):
     else:
         key = '%s/${filename}' % key
 
-    data = create_upload_data(content_type, key)
+    data = create_upload_data(content_type, key, acl)
+    print data
     return HttpResponse(json.dumps(data), content_type="application/json")

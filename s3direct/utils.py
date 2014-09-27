@@ -30,7 +30,7 @@ def get_at(index, t):
     return value
 
 
-def create_upload_data(content_type, key):
+def create_upload_data(content_type, key, acl):
     access_key = settings.AWS_ACCESS_KEY_ID
     secret_access_key = settings.AWS_SECRET_ACCESS_KEY
     bucket = settings.AWS_STORAGE_BUCKET_NAME
@@ -44,7 +44,7 @@ def create_upload_data(content_type, key):
         "expiration": expires,
         "conditions": [
             {"bucket": bucket},
-            {"acl": "public-read"},
+            {"acl": acl},
             {"Content-Type": content_type},
             ["starts-with", "$key", ""],
             {"success_action_status": "201"}
@@ -68,6 +68,6 @@ def create_upload_data(content_type, key):
         "AWSAccessKeyId": access_key,
         "form_action": bucket_url,
         "success_action_status": "201",
-        "acl": "public-read",
+        "acl": acl,
         "Content-Type": content_type
     }
