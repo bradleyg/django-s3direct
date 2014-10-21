@@ -8,8 +8,6 @@ from base64 import b64encode
 from django.conf import settings
 
 
-S3DIRECT_UNIQUE_RENAME = getattr(settings, 'S3DIRECT_UNIQUE_RENAME', None)
-
 REGIONS = {
     'us-east-1': 's3.amazonaws.com',
     'us-west-2': 's3-us-west-2.amazonaws.com',
@@ -59,7 +57,8 @@ def create_upload_data(content_type, key, acl):
 
     signature_b64 = b64encode(signature)
 
-    bucket_url = 'https://%s/%s' % (endpoint, bucket)
+    structure = getattr(settings, 'S3DIRECT_URL_STRUCTURE', 'https://%s/%s')
+    bucket_url = structure % (endpoint, bucket)
 
     return {
         "policy": policy.decode(),
