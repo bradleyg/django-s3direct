@@ -57,8 +57,8 @@ def create_upload_data(content_type, key, acl):
 
     signature_b64 = b64encode(signature)
 
-    structure = getattr(settings, 'S3DIRECT_URL_STRUCTURE', 'https://%s/%s')
-    bucket_url = structure % (endpoint, bucket)
+    structure = getattr(settings, 'S3DIRECT_URL_STRUCTURE', 'https://{0}/{1}')
+    bucket_url = structure.format(endpoint, bucket)
 
     return {
         "policy": policy.decode(),
