@@ -1,5 +1,4 @@
 import hashlib
-import uuid
 import hmac
 import json
 from datetime import datetime, timedelta
