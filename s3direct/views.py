@@ -26,6 +26,7 @@ def get_upload_params(request):
     auth = get_at(1, dest)
     allowed = get_at(2, dest)
     acl = get_at(3, dest)
+    bucket = get_at(4, dest)
 
     if not acl:
         acl = 'public-read'
@@ -47,6 +48,6 @@ def get_upload_params(request):
     else:
         key = '%s/${filename}' % key
 
-    data = create_upload_data(content_type, key, acl)
+    data = create_upload_data(content_type, key, acl, bucket)
 
     return HttpResponse(json.dumps(data), content_type="application/json")
