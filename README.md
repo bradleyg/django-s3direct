@@ -80,6 +80,9 @@ S3DIRECT_DESTINATIONS = {
     # Allow anybody to upload any MIME type with a custom name function, eg:
     'custom_filename': (lambda original_filename: 'images/unique.jpg',),
 
+    # Specify a non-default bucket for PDFs
+    'pdfs': ('/', lambda u: True, ['application/pdf'], None, 'pdf-bucket',),
+
     # Allow logged in users to upload any type of file and give it a private acl:
     'private': (
         'uploads/vids',

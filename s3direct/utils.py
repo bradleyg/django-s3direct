@@ -1,5 +1,4 @@
 import hashlib
-import uuid
 import hmac
 import json
 from datetime import datetime, timedelta
@@ -28,10 +27,10 @@ def get_at(index, t):
     return value
 
 
-def create_upload_data(content_type, key, acl):
+def create_upload_data(content_type, key, acl, bucket=None):
     access_key = settings.AWS_ACCESS_KEY_ID
     secret_access_key = settings.AWS_SECRET_ACCESS_KEY
-    bucket = settings.AWS_STORAGE_BUCKET_NAME
+    bucket = bucket or settings.AWS_STORAGE_BUCKET_NAME
     region = getattr(settings, 'S3DIRECT_REGION', None)
     endpoint = REGIONS.get(region, 's3.amazonaws.com')
 
