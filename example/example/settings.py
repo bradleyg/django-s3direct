@@ -70,7 +70,6 @@ AWS_ACCESS_KEY_ID = ''
 AWS_SECRET_ACCESS_KEY = ''
 AWS_STORAGE_BUCKET_NAME = ''
 S3DIRECT_REGION = 'us-east-1'
-S3DIRECT_UNIQUE_RENAME = False
 
 
 def create_filename(filename):
