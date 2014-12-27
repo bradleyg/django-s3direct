@@ -148,7 +148,9 @@ class MyView(FormView):
     {{ form.media }}
 </head>
 <body>
-    {{ form.as_p }}
+    <form action="" method="post">{% csrf_token %}
+        {{ form.as_p }}
+    </form>
 </body>
 </html>
 ```
