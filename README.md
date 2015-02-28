@@ -76,7 +76,7 @@ S3DIRECT_DESTINATIONS = {
     'imgs': ('uploads/imgs', lambda u: True, ['image/jpeg', 'image/png'],),
 
     # Allow authenticated users to upload mp4's
-    'vids': ('uploads/vids', lambda u: u.is_authenticated(), ['video/mp4'],)
+    'vids': ('uploads/vids', lambda u: u.is_authenticated(), ['video/mp4'],),
 
     # Allow anybody to upload any MIME type with a custom name function, eg:
     'custom_filename': (lambda original_filename: 'images/unique.jpg',),
