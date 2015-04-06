@@ -35,7 +35,7 @@ def get_upload_params(request):
         data = json.dumps({'error': 'Missing destination path.'})
         return HttpResponse(data, content_type="application/json", status=403)
 
-    if auth and not auth(request.user):
+    if auth and not auth(request):
         data = json.dumps({'error': 'Permission denied.'})
         return HttpResponse(data, content_type="application/json", status=403)
 
@@ -44,7 +44,7 @@ def get_upload_params(request):
         return HttpResponse(data, content_type="application/json", status=400)
 
     if isfunction(key):
-        key = key(filename)
+        key = key(request, filename)
     else:
         key = '%s/${filename}' % key
 
