@@ -1,5 +1,4 @@
 import json
-from inspect import isfunction
 
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
@@ -43,7 +42,7 @@ def get_upload_params(request):
         data = json.dumps({'error': 'Invalid file type (%s).' % content_type})
         return HttpResponse(data, content_type="application/json", status=400)
 
-    if isfunction(key):
+    if hasattr(key, '__call__'):
         key = key(filename)
     else:
         key = '%s/${filename}' % key
