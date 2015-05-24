@@ -90,6 +90,16 @@ S3DIRECT_DESTINATIONS = {
         lambda u: u.is_authenticated(),
         '*',
         'private')
+
+    # Allow authenticated users to upload with cache-control for a month and content-disposition set to attachment
+    'cached': (
+        'uploads/vids', 
+        lambda u: u.is_authenticated(), 
+        '*', 
+        'public-read', 
+        AWS_STORAGE_BUCKET_NAME, 
+        'max-age=2592000', 
+        'attachment')
 }
 ```
 
