@@ -48,8 +48,9 @@ def get_upload_params(request):
         key = key(filename)
     else:
         key = '%s/${filename}' % key
-        
-    key = key.replace("%user", str(request.user))
+    
+    if auth:    
+        key = key.replace("%user", str(request.user))
 
     data = create_upload_data(content_type, key, acl, bucket, cache_control, content_disposition)
 
