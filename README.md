@@ -199,3 +199,6 @@ S3DIRECT_DESTINATIONS = {
 }
 
 ```
+
+### String replacement
+To enable user based directories, all ocurrences of %user in the filename will be replaced by the current logged in user.
