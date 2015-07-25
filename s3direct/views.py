@@ -47,7 +47,7 @@ def get_upload_params(request):
     if hasattr(key, '__call__'):
         key = key(filename)
     else:
-        key = '%s/${filename}' % key
+        key = '{key}/{filename}'.format(key=key, filename=filename)
 
     data = create_upload_data(content_type, key, acl, bucket, cache_control, content_disposition)
 
