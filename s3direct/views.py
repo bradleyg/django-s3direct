@@ -47,7 +47,9 @@ def get_upload_params(request):
     if hasattr(key, '__call__'):
         key = key(filename)
     else:
-        key = '{key}/{filename}'.format(key=key, filename=filename)
+        # The literal string '${filename}' is an S3 field variable for key.
+        # https://aws.amazon.com/articles/1434#aws-table
+        key = '%s/${filename}' % key
 
     data = create_upload_data(content_type, key, acl, bucket, cache_control, content_disposition)
 
