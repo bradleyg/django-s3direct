@@ -34,7 +34,7 @@ class S3DirectWidget(widgets.TextInput):
 
     def __init__(self, *args, **kwargs):
         self.dest = kwargs.pop('dest', None)
-        self.html = kwargs.pop('dest', self.default_html)
+        self.html = kwargs.pop('html', self.default_html)
         super(S3DirectWidget, self).__init__(*args, **kwargs)
 
     def render(self, name, value, attrs=None):
