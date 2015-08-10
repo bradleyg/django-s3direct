@@ -34,15 +34,19 @@ class S3DirectWidget(widgets.TextInput):
 
     def __init__(self, *args, **kwargs):
         self.dest = kwargs.pop('dest', None)
+        self.transform = kwargs.pop('transform', self.identity_fn)
         super(S3DirectWidget, self).__init__(*args, **kwargs)
 
     def render(self, name, value, attrs=None):
         output = self.html.format(
             policy_url=reverse('s3direct'),
             element_id=self.build_attrs(attrs).get('id'),
-            file_name=os.path.basename(value or ''),
+            file_name=self.transform(os.path.basename(value or '')),
             dest=self.dest,
             file_url=value or '',
             name=name)
 
         return mark_safe(output)
+
+    def identity_fn(self, x):
+        return x
