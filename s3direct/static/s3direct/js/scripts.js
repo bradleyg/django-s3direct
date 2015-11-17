@@ -124,7 +124,7 @@
         form.append('type', file.type)
         form.append('name', file.name)
         form.append('dest', dest)
-        if (cargo_tag !== '') {
+        if (cargo_tag != null) {
             form.append('file-extra', cargo_tag.value)
         }
 
