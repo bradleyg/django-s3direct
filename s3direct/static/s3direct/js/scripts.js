@@ -118,11 +118,15 @@
             dest     = el.querySelector('.file-dest').value,
             url      = el.getAttribute('data-policy-url'),
             form     = new FormData(),
-            headers  = {'X-CSRFToken': getCookie('csrftoken')}
+            headers  = {'X-CSRFToken': getCookie('csrftoken')},
+            cargo_tag = el.parentElement.querySelector('.file-extra')
 
         form.append('type', file.type)
         form.append('name', file.name)
         form.append('dest', dest)
+        if (cargo_tag !== '') {
+            form.append('file-extra', cargo_tag.value)
+        }
 
         request('POST', url, form, headers, el, false, function(status, json){
             var data = parseJson(json)
