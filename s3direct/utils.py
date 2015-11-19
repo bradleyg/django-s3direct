@@ -66,10 +66,10 @@ def create_upload_data(content_type, key, acl, bucket=None, cache_control=None, 
     policy = b64encode(
         policy_object.replace('\n', '').replace('\r', '').encode())
 
-    date_key = hmac.new('AWS4' + secret_access_key, msg=raw_date, digestmod=hashlib.sha256).digest()
-    date_region_key = hmac.new(date_key, msg=region, digestmod=hashlib.sha256).digest()
-    date_region_service_key = hmac.new(date_region_key, msg='s3', digestmod=hashlib.sha256).digest()
-    signing_key = hmac.new(date_region_service_key, msg='aws4_request', digestmod=hashlib.sha256).digest()
+    date_key = hmac.new(b'AWS4' + secret_access_key.encode('utf-8'), msg=raw_date.encode('utf-8'), digestmod=hashlib.sha256).digest()
+    date_region_key = hmac.new(date_key, msg=region.encode('utf-8'), digestmod=hashlib.sha256).digest()
+    date_region_service_key = hmac.new(date_region_key, msg=b's3', digestmod=hashlib.sha256).digest()
+    signing_key = hmac.new(date_region_service_key, msg=b'aws4_request', digestmod=hashlib.sha256).digest()
 
     signature = hmac.new(signing_key, msg=policy, digestmod=hashlib.sha256).hexdigest()
 
@@ -77,7 +77,7 @@ def create_upload_data(content_type, key, acl, bucket=None, cache_control=None, 
     bucket_url = structure.format(endpoint, bucket)
 
     return_dict = {
-        "policy": policy,
+        "policy": policy.decode(),
         "success_action_status": 201,
         "x-amz-credential": "%s/%s/%s/s3/aws4_request" % (access_key, raw_date, region),
         "x-amz-date": now_date,

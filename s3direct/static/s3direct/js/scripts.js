@@ -66,6 +66,8 @@
         var link = el.querySelector('.file-link'),
             url  = el.querySelector('.file-url')
 
+		debugger;
+
         url.value = parseURL(xml)
         link.setAttribute('href', url.value)
         link.innerHTML = url.value.split('/').pop()
