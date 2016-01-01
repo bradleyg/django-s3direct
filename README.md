@@ -106,9 +106,9 @@ S3DIRECT_DESTINATIONS = {
 ### urls.py
 
 ```python
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^s3direct/', include('s3direct.urls')),
-)
+]
 ```
 
 Run ```python manage.py collectstatic``` if required.
@@ -137,7 +137,7 @@ class S3DirectUploadForm(forms.Form):
     images = forms.URLField(widget=S3DirectWidget(dest='destination_key_from_settings'))
 ```
 
-You can create a custom template by passing in a string with your own HTML to the `html` keyword argument. For example:
+__*Optional.__ You can create a custom template by passing in a string with your own HTML to the `html` keyword argument. For example:
 
 ```python
 from django import forms
