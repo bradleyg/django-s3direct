@@ -8,7 +8,7 @@ from django.conf import settings
 
 class S3DirectWidget(widgets.TextInput):
 
-    html = (
+    default_html = (
         '<div class="s3direct" data-policy-url="{policy_url}">'
         '  <a class="file-link" target="_blank" href="{file_url}">{file_name}</a>'
         '  <a class="file-remove" href="#remove">Remove</a>'
@@ -34,6 +34,7 @@ class S3DirectWidget(widgets.TextInput):
 
     def __init__(self, *args, **kwargs):
         self.dest = kwargs.pop('dest', None)
+        self.html = kwargs.pop('html', self.default_html)
         super(S3DirectWidget, self).__init__(*args, **kwargs)
 
     def render(self, name, value, attrs=None):
