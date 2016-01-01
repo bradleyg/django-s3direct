@@ -1,5 +1,0 @@
-image: bradleyg/python
-
-script:
-  - pip install -q Django==1.8
-  - python runtests.py
