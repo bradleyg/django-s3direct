@@ -145,7 +145,7 @@ from s3direct.widgets import S3DirectWidget
 
 class S3DirectUploadForm(forms.Form):
     images = forms.URLField(widget=S3DirectWidget(
-        dest='destination_key_from_settings'
+        dest='destination_key_from_settings',
         html=(
             '<div class="s3direct" data-policy-url="{policy_url}">'
             '  <a class="file-link" target="_blank" href="{file_url}">{file_name}</a>'
