@@ -124,10 +124,10 @@ USE_TZ = True
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 
-AWS_ACCESS_KEY_ID = 'AKIAIAVU4GCABW6FWMCQ'
-AWS_SECRET_ACCESS_KEY = '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'
-AWS_STORAGE_BUCKET_NAME = 'django-s3direct-eu'
-S3DIRECT_REGION = 'eu-west-1'
+AWS_ACCESS_KEY_ID = ''
+AWS_SECRET_ACCESS_KEY = ''
+AWS_STORAGE_BUCKET_NAME = ''
+S3DIRECT_REGION = ''
 
 
 def create_filename(filename):
