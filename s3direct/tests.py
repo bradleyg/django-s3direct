@@ -22,12 +22,12 @@ HTML_OUTPUT = (
 )
 
 FOO_RESPONSE = {
-    u'AWSAccessKeyId': u'',
+    u'x-amz-algorithm': u'AWS4-HMAC-SHA256',
     u'form_action': u'https://s3.amazonaws.com/test-bucket',
-    u'success_action_status': u'201',
+    u'success_action_status': 201,
     u'acl': u'public-read',
     u'key': u'uploads/imgs/${filename}',
-    u'Content-Type': u'image/jpeg'
+    u'content-type': u'image/jpeg'
 }
 
 
@@ -83,7 +83,8 @@ class WidgetTest(TestCase):
         data = {'dest': 'imgs', 'name': 'image.jpg', 'type': 'image/jpeg'}
         response = self.client.post(reverse('s3direct'), data)
         response_dict = json.loads(response.content.decode())
-        self.assertTrue(u'signature' in response_dict)
+        self.assertTrue(u'x-amz-signature' in response_dict)
+        self.assertTrue(u'x-amz-credential' in response_dict)
         self.assertTrue(u'policy' in response_dict)
         self.assertDictContainsSubset(FOO_RESPONSE, response_dict)
 
@@ -91,7 +92,8 @@ class WidgetTest(TestCase):
         data = {'dest': 'misc', 'name': 'image.jpg', 'type': 'image/jpeg'}
         response = self.client.post(reverse('s3direct'), data)
         response_dict = json.loads(response.content.decode())
-        self.assertTrue(u'signature' in response_dict)
+        self.assertTrue(u'x-amz-credential' in response_dict)
+        self.assertTrue(u'x-amz-credential' in response_dict)
         self.assertTrue(u'policy' in response_dict)
         FOO_RESPONSE['key'] = 'images/unique.jpg'
         self.assertDictContainsSubset(FOO_RESPONSE, response_dict)
