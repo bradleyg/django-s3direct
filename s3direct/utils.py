@@ -71,7 +71,7 @@ def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
     policy = b64encode(
         policy_object.replace('\n', '').replace('\r', '').encode())
 
-    date_key = hmac.new('AWS4' + secret_access_key.encode('utf-8'),
+    date_key = hmac.new(b'AWS4' + secret_access_key.encode('utf-8'),
                         msg=raw_date.encode('utf-8'),
                         digestmod=hashlib.sha256).digest()
 
