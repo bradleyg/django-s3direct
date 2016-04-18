@@ -51,6 +51,7 @@ def get_upload_params(request):
         # https://aws.amazon.com/articles/1434#aws-table
         key = '%s/${filename}' % key
 
-    data = create_upload_data(content_type, key, acl, bucket, cache_control, content_disposition)
+    data = create_upload_data(
+        content_type, key, acl, bucket, cache_control, content_disposition)
 
     return HttpResponse(json.dumps(data), content_type="application/json")

@@ -84,26 +84,6 @@ DATABASES = {
     }
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
 
@@ -145,10 +125,15 @@ S3DIRECT_DESTINATIONS = {
     'pdfs': ('uploads/pdfs', lambda u: u.is_staff,),
 
     # Allow anybody to upload jpeg's and png's.
-    'images': ('uploads/images', lambda u: True, ['image/jpeg', 'image/png'],),
+    'images': ('uploads/images', lambda u: True, [
+        'image/jpeg',
+        'image/png']
+    ),
 
     # Allow authenticated users to upload mp4's
-    'videos': ('uploads/videos', lambda u: u.is_authenticated(), ['video/mp4'],),
+    'videos': ('uploads/videos', lambda u: u.is_authenticated(), [
+        'video/mp4'
+    ]),
 
     # Allow anybody to upload any MIME type with a custom name function
     'custom_filename': (create_filename,),
