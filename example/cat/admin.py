@@ -9,7 +9,7 @@ class KittenAdminInline(admin.StackedInline):
 
 
 class CatAdmin(admin.ModelAdmin):
-    inlines = [KittenAdminInline, ]
+    inlines = [KittenAdminInline]
 
 
 admin.site.register(Cat, CatAdmin)
