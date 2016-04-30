@@ -113,7 +113,7 @@ urlpatterns = [
 
 Run ```python manage.py collectstatic``` if required.
 
-## Use in Django admin only
+## Use in Django admin
 
 ### models.py
 
