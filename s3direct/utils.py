@@ -37,10 +37,14 @@ def get_s3direct_destinations():
 
     # TODO: Remove when older "positional" style settings are no longer supported
     converted_destinations = {}
-    key_mapping = {  # FIXME: Code has more but... tests or it didn't happen.
+    key_mapping = {
         0: 'key',
         1: 'auth',
         2: 'allowed',
+        3: 'acl',
+        4: 'bucket',
+        5: 'cache_control',
+        6: 'content_disposition',
     }
     if destinations:
         for dest, dest_value in destinations.items():
@@ -117,6 +121,7 @@ def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
     bucket_url = structure.format(endpoint, bucket)
 
     return_dict = {
+        # FIXME: .decode() does nothing, b64decode works but is decoding really intended?
         "policy": policy.decode(),
         "success_action_status": 201,
         "x-amz-credential": "%s/%s/%s/s3/aws4_request" % (

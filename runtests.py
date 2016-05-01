@@ -45,6 +45,15 @@ settings.configure(DEBUG=True,
                            'auth': lambda u: u.is_authenticated(),
                            'allowed': ['video/mp4'],
                        },
+                       'cached': {
+                           'key': 'uploads/vids',
+                           'auth': lambda u: True,
+                           'allowed': '*',
+                           'acl': 'authenticated-read',
+                           'bucket': 'astoragebucketname',
+                           'cache_control': 'max-age=2592000',
+                           'content_disposition': 'attachment',
+                       }
                    })
 
 if hasattr(django, 'setup'):

@@ -1,4 +1,5 @@
 import json
+from base64 import b64decode
 
 from django.test.utils import override_settings
 from django.contrib.auth.models import User
@@ -105,12 +106,30 @@ class WidgetTestCase(TestCase):
         changed['key'] = 'images/unique.jpg'
         self.assertDictContainsSubset(changed, response_dict)
 
+    def check_policy_conditions(self):
+        self.client.login(username='admin', password='admin')
+        data = {'dest': 'cached', 'name': 'video.mp4', 'type': 'video/mp4'}
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 200)
+
+        response_dict = json.loads(response.content.decode())
+        self.assertTrue('policy' in response_dict)
+        policy_dict = json.loads(b64decode(response_dict['policy']))
+        self.assertTrue('conditions' in policy_dict)
+        conditions_dict = policy_dict['conditions']
+        self.assertEqual(conditions_dict[0]['bucket'], u'astoragebucketname')
+        self.assertEqual(conditions_dict[1]['acl'], u'authenticated-read')
+        self.assertEqual(conditions_dict[8]['Cache-Control'], u'max-age=2592000')
+        self.assertEqual(conditions_dict[9]['Content-Disposition'], u'attachment')
+
 
 @override_settings(S3DIRECT_DESTINATIONS={
     'misc': (lambda original_filename: 'images/unique.jpg',),
     'files': ('uploads/files', lambda u: u.is_staff,),
     'imgs': ('uploads/imgs', lambda u: True, ['image/jpeg', 'image/png'],),
-    'vids': ('uploads/vids', lambda u: u.is_authenticated(), ['video/mp4'],)
+    'vids': ('uploads/vids', lambda u: u.is_authenticated(), ['video/mp4'],),
+    'cached': ('uploads/vids', lambda u: u.is_authenticated(), '*', 'authenticated-read',
+               'astoragebucketname', 'max-age=2592000', 'attachment',),
 })
 class OldStyleSettingsWidgetTest(WidgetTestCase):
     """
@@ -151,6 +170,9 @@ class OldStyleSettingsWidgetTest(WidgetTestCase):
     def test_signing_fields_unique_filename(self):
         self.check_signing_fields_unique_filename()
 
+    def test_policy_conditions(self):
+        self.check_policy_conditions()
+
 
 class WidgetTest(WidgetTestCase):
     
@@ -186,3 +208,6 @@ class WidgetTest(WidgetTestCase):
 
     def test_signing_fields_unique_filename(self):
         self.check_signing_fields_unique_filename()
+
+    def test_policy_conditions(self):
+        self.check_policy_conditions()
