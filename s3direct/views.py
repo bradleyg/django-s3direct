@@ -2,12 +2,8 @@ import json
 
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
-from django.conf import settings
 
-from .utils import create_upload_data, get_at
-
-
-DESTINATIONS = getattr(settings, 'S3DIRECT_DESTINATIONS', None)
+from .utils import create_upload_data, get_at, get_s3direct_settings
 
 
 @require_POST
@@ -15,7 +11,7 @@ def get_upload_params(request):
     content_type = request.POST['type']
     filename = request.POST['name']
 
-    dest = DESTINATIONS.get(request.POST['dest'])
+    dest = get_s3direct_settings().get(request.POST['dest'])
 
     if not dest:
         data = json.dumps({'error': 'File destination does not exist.'})

@@ -27,10 +27,24 @@ settings.configure(DEBUG=True,
                                 'test-bucket'),
                    S3DIRECT_REGION='us-east-1',
                    S3DIRECT_DESTINATIONS={
-                       'misc': (lambda original_filename: 'images/unique.jpg',),
-                       'files': ('uploads/files', lambda u: u.is_staff,),
-                       'imgs': ('uploads/imgs', lambda u: True, ['image/jpeg', 'image/png'],),
-                       'vids': ('uploads/vids', lambda u: u.is_authenticated(), ['video/mp4'],)
+                       'misc': {
+                           'key': lambda original_filename:
+                           'images/unique.jpg',
+                       },
+                       'files': {
+                           'key': 'uploads/files',
+                           'auth': lambda u: u.is_staff,
+                       },
+                       'imgs': {
+                           'key': 'uploads/imgs',
+                           'auth': lambda u: True,
+                           'allowed': ['image/jpeg', 'image/png'],
+                       },
+                       'vids': {
+                           'key': 'uploads/vids',
+                           'auth': lambda u: u.is_authenticated(),
+                           'allowed': ['video/mp4'],
+                       },
                    })
 
 if hasattr(django, 'setup'):

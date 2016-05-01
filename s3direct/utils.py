@@ -20,6 +20,11 @@ REGIONS = {
 }
 
 
+# NOTE: Don't use constant as it will break ability to change at runtime (E.g. tests)
+def get_s3direct_settings():
+    return getattr(settings, 'S3DIRECT_DESTINATIONS', None)
+
+
 def get_at(index, t):
     try:
         value = t[index]
