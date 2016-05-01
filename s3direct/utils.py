@@ -20,17 +20,38 @@ REGIONS = {
 }
 
 
-# NOTE: Don't use constant as it will break ability to change at runtime (E.g. tests)
-def get_s3direct_settings():
-    return getattr(settings, 'S3DIRECT_DESTINATIONS', None)
-
-
 def get_at(index, t):
     try:
         value = t[index]
     except IndexError:
         value = None
     return value
+
+
+# NOTE: Don't use constant as it will break ability to change at runtime (E.g. tests)
+def get_s3direct_destinations():
+    """Returns s3direct destinations, converting old format if necessary."""
+    destinations = getattr(settings, 'S3DIRECT_DESTINATIONS', None)
+    if destinations is None:
+        return None
+
+    # TODO: Remove when older "positional" style settings are no longer supported
+    converted_destinations = {}
+    key_mapping = {  # FIXME: Code has more but... tests or it didn't happen.
+        0: 'key',
+        1: 'auth',
+        2: 'allowed',
+    }
+    if destinations:
+        for dest, dest_value in destinations.items():
+            if type(dest_value) is tuple or type(dest_value) is list:
+                converted_destinations[dest] = {}
+                for index, key_name in key_mapping.items():
+                    converted_destinations[dest][key_name] = get_at(index, dest_value)
+            else:
+                converted_destinations[dest] = dest_value
+
+    return converted_destinations
 
 
 def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,

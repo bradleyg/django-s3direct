@@ -3,7 +3,6 @@ import os
 from django.forms import widgets
 from django.utils.safestring import mark_safe
 from django.core.urlresolvers import reverse
-from django.conf import settings
 
 
 class S3DirectWidget(widgets.TextInput):

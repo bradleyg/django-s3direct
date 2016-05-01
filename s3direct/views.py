@@ -3,7 +3,7 @@ import json
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
 
-from .utils import create_upload_data, get_at, get_s3direct_settings
+from .utils import create_upload_data, get_s3direct_destinations
 
 
 @require_POST
@@ -11,19 +11,19 @@ def get_upload_params(request):
     content_type = request.POST['type']
     filename = request.POST['name']
 
-    dest = get_s3direct_settings().get(request.POST['dest'])
+    dest = get_s3direct_destinations().get(request.POST['dest'])
 
     if not dest:
         data = json.dumps({'error': 'File destination does not exist.'})
         return HttpResponse(data, content_type="application/json", status=400)
 
-    key = get_at(0, dest)
-    auth = get_at(1, dest)
-    allowed = get_at(2, dest)
-    acl = get_at(3, dest)
-    bucket = get_at(4, dest)
-    cache_control = get_at(5, dest)
-    content_disposition = get_at(6, dest)
+    key = dest.get('key')
+    auth = dest.get('auth')
+    allowed = dest.get('allowed')
+    acl = dest.get('acl')
+    bucket = dest.get('bucket')
+    cache_control = dest.get('cache_control')
+    content_disposition = dest.get('content_disposition')
 
     if not acl:
         acl = 'public-read'
