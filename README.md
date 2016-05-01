@@ -67,7 +67,7 @@ S3DIRECT_REGION = 'us-east-1'
 # 'destination_key' is the key to use for the 'dest' attribute on your widget or model field
 S3DIRECT_DESTINATIONS = {
     # Allow anybody to upload any MIME type
-    'misc': ('uploads/misc',),
+    'misc': {'key': 'uploads/misc',},
 
     # Allow staff users to upload any MIME type
     'files': {'key': 'uploads/files', 'auth': lambda u: u.is_staff,},
@@ -89,7 +89,7 @@ S3DIRECT_DESTINATIONS = {
         'key': 'uploads/vids',
         'auth': lambda u: u.is_authenticated(),
         'allowed': '*',
-        'acl': 'private'}
+        'acl': 'private'},
 
     # Allow authenticated users to upload with cache-control for a month and content-disposition set to attachment
     'cached': {
@@ -99,10 +99,10 @@ S3DIRECT_DESTINATIONS = {
         'acl': 'public-read', 
         'bucket': AWS_STORAGE_BUCKET_NAME, 
         'cache_control': 'max-age=2592000', 
-        'content_disposition': 'attachment'}
+        'content_disposition': 'attachment'},
 }
 ```
-NOTE: See past README versions for, older, "positional" style destination settings.
+NOTE: See past README versions for older "positional" style destination settings.
 
 ### urls.py
 
