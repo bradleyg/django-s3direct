@@ -28,8 +28,7 @@ settings.configure(DEBUG=True,
                    S3DIRECT_REGION='us-east-1',
                    S3DIRECT_DESTINATIONS={
                        'misc': {
-                           'key': lambda original_filename:
-                           'images/unique.jpg',
+                           'key': lambda original_filename: 'images/unique.jpg',
                        },
                        'files': {
                            'key': 'uploads/files',

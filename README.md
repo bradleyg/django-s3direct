@@ -70,38 +70,39 @@ S3DIRECT_DESTINATIONS = {
     'misc': ('uploads/misc',),
 
     # Allow staff users to upload any MIME type
-    'files': ('uploads/files', lambda u: u.is_staff,),
+    'files': {'key': 'uploads/files', 'auth': lambda u: u.is_staff,},
 
     # Allow anybody to upload jpeg's and png's.
-    'imgs': ('uploads/imgs', lambda u: True, ['image/jpeg', 'image/png'],),
+    'imgs': {'key': 'uploads/imgs', 'auth': lambda u: True, 'allowed': ['image/jpeg', 'image/png'],},
 
     # Allow authenticated users to upload mp4's
-    'vids': ('uploads/vids', lambda u: u.is_authenticated(), ['video/mp4'],),
+    'vids': {'key': 'uploads/vids', 'auth': lambda u: u.is_authenticated(), 'allowed': ['video/mp4'],},
 
     # Allow anybody to upload any MIME type with a custom name function, eg:
-    'custom_filename': (lambda original_filename: 'images/unique.jpg',),
+    'custom_filename': {'key': lambda original_filename: 'images/unique.jpg',},
 
     # Specify a non-default bucket for PDFs
-    'pdfs': ('/', lambda u: True, ['application/pdf'], None, 'pdf-bucket',),
+    'pdfs': {'key': '/', 'auth': lambda u: True, 'allowed': ['application/pdf'], 'acl': None, 'bucket': 'pdf-bucket',},
 
     # Allow logged in users to upload any type of file and give it a private acl:
-    'private': (
-        'uploads/vids',
-        lambda u: u.is_authenticated(),
-        '*',
-        'private')
+    'private': {
+        'key': 'uploads/vids',
+        'auth': lambda u: u.is_authenticated(),
+        'allowed': '*',
+        'acl': 'private'}
 
     # Allow authenticated users to upload with cache-control for a month and content-disposition set to attachment
-    'cached': (
-        'uploads/vids', 
-        lambda u: u.is_authenticated(), 
-        '*', 
-        'public-read', 
-        AWS_STORAGE_BUCKET_NAME, 
-        'max-age=2592000', 
-        'attachment')
+    'cached': {
+        'key': 'uploads/vids', 
+        'auth': lambda u: u.is_authenticated(), 
+        'allowed': '*', 
+        'acl': 'public-read', 
+        'bucket': AWS_STORAGE_BUCKET_NAME, 
+        'cache_control': 'max-age=2592000', 
+        'content_disposition': 'attachment'}
 }
 ```
+NOTE: See past README versions for, older, "positional" style destination settings.
 
 ### urls.py
 
