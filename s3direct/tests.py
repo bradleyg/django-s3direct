@@ -81,13 +81,13 @@ class WidgetTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def check_disallowed_type_logged_out(self):
-        data = {'dest': 'vids', 'name': 'video.mp4', 'type': 'video/mp4'}
+        data = {u'dest': u'vids', u'name': u'video.mp4', u'type': u'video/mp4'}
         response = self.client.post(reverse('s3direct'), data)
         self.assertEqual(response.status_code, 403)
 
     def check_signing_fields(self):
         self.client.login(username='admin', password='admin')
-        data = {'dest': 'imgs', 'name': 'image.jpg', 'type': 'image/jpeg'}
+        data = {u'dest': u'imgs', u'name': u'image.jpg', u'type': u'image/jpeg'}
         response = self.client.post(reverse('s3direct'), data)
         response_dict = json.loads(response.content.decode())
         self.assertTrue(u'x-amz-signature' in response_dict)
@@ -96,7 +96,7 @@ class WidgetTestCase(TestCase):
         self.assertDictContainsSubset(FOO_RESPONSE, response_dict)
 
     def check_signing_fields_unique_filename(self):
-        data = {'dest': 'misc', 'name': 'image.jpg', 'type': 'image/jpeg'}
+        data = {u'dest': u'misc', u'name': u'image.jpg', u'type': u'image/jpeg'}
         response = self.client.post(reverse('s3direct'), data)
         response_dict = json.loads(response.content.decode())
         self.assertTrue(u'x-amz-credential' in response_dict)
@@ -108,13 +108,13 @@ class WidgetTestCase(TestCase):
 
     def check_policy_conditions(self):
         self.client.login(username='admin', password='admin')
-        data = {'dest': 'cached', 'name': 'video.mp4', 'type': 'video/mp4'}
+        data = {u'dest': u'cached', u'name': u'video.mp4', u'type': u'video/mp4'}
         response = self.client.post(reverse('s3direct'), data)
         self.assertEqual(response.status_code, 200)
 
         response_dict = json.loads(response.content.decode())
         self.assertTrue('policy' in response_dict)
-        policy_dict = json.loads(b64decode(response_dict['policy']))
+        policy_dict = json.loads(b64decode(response_dict['policy']).decode('utf-8'))
         self.assertTrue('conditions' in policy_dict)
         conditions_dict = policy_dict['conditions']
         self.assertEqual(conditions_dict[0]['bucket'], u'astoragebucketname')
