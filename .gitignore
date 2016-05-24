@@ -3,5 +3,7 @@
 dist/*
 *.egg-info
 venv
+venv3
 example/db.sqlite3
 /build
+.idea
