@@ -1,12 +1,10 @@
 django-s3direct
 ===============
 
-Upload files direct to S3 from Django
+Upload files directly to S3 from Django
 -------------------------------------
 
 [![Build Status](https://travis-ci.org/bradleyg/django-s3direct.svg?branch=master)](https://travis-ci.org/bradleyg/django-s3direct)
-[![PyPi Version](https://pypip.in/v/django-s3direct/badge.png)](https://crate.io/packages/django-s3direct)
-[![PyPi Downloads](https://pypip.in/d/django-s3direct/badge.png)](https://crate.io/packages/django-s3direct)
 
 Add direct uploads to AWS S3 functionality with a progress bar to file input fields.
 
@@ -61,35 +59,63 @@ AWS_STORAGE_BUCKET_NAME = ''
 # http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
 S3DIRECT_REGION = 'us-east-1'
 
-# Destinations in the following format:
-# {destination_key: (path_or_function, auth_test, [allowed_mime_types], permissions, custom_bucket)}
+# Destinations, with the following keys:
 #
-# 'destination_key' is the key to use for the 'dest' attribute on your widget or model field
+# key [required] Where to upload the file to
+# auth [optional] An ACL function to whether the current user can perform this action
+# allowed [optional] List of allowed MIME types
+# acl [optional] Give the object another ACL rather than 'public-read'
+# cache_control [optional] Cache control headers, eg 'max-age=2592000'
+# content_disposition [optional] Useful for sending files as attachements
+# bucket [optional] Specify a different bucket for this particular object
+#
 S3DIRECT_DESTINATIONS = {
     # Allow anybody to upload any MIME type
-    'misc': {'key': 'uploads/misc',},
+    'misc': {
+        'key': 'uploads/misc',
+    },
 
     # Allow staff users to upload any MIME type
-    'files': {'key': 'uploads/files', 'auth': lambda u: u.is_staff,},
+    'files': {
+        'key': 'uploads/files', 
+        'auth': lambda u: u.is_staff,
+    },
 
     # Allow anybody to upload jpeg's and png's.
-    'imgs': {'key': 'uploads/imgs', 'auth': lambda u: True, 'allowed': ['image/jpeg', 'image/png'],},
+    'imgs': {
+        'key': 'uploads/imgs', 
+        'auth': lambda u: True, 
+        'allowed': ['image/jpeg', 'image/png'],
+    },
 
     # Allow authenticated users to upload mp4's
-    'vids': {'key': 'uploads/vids', 'auth': lambda u: u.is_authenticated(), 'allowed': ['video/mp4'],},
+    'vids': {
+        'key': 'uploads/vids', 
+        'auth': lambda u: u.is_authenticated(), 
+        'allowed': ['video/mp4'],
+    },
 
     # Allow anybody to upload any MIME type with a custom name function, eg:
-    'custom_filename': {'key': lambda original_filename: 'images/unique.jpg',},
+    'custom_filename': {
+        'key': lambda original_filename: 'images/unique.jpg',
+    },
 
     # Specify a non-default bucket for PDFs
-    'pdfs': {'key': '/', 'auth': lambda u: True, 'allowed': ['application/pdf'], 'acl': None, 'bucket': 'pdf-bucket',},
+    'pdfs': {
+        'key': '/', 
+        'auth': lambda u: True, 
+        'allowed': ['application/pdf'], 
+        'acl': None, 
+        'bucket': 'pdf-bucket',
+    },
 
     # Allow logged in users to upload any type of file and give it a private acl:
     'private': {
         'key': 'uploads/vids',
         'auth': lambda u: u.is_authenticated(),
         'allowed': '*',
-        'acl': 'private'},
+        'acl': 'private'
+    },
 
     # Allow authenticated users to upload with cache-control for a month and content-disposition set to attachment
     'cached': {
@@ -99,7 +125,8 @@ S3DIRECT_DESTINATIONS = {
         'acl': 'public-read', 
         'bucket': AWS_STORAGE_BUCKET_NAME, 
         'cache_control': 'max-age=2592000', 
-        'content_disposition': 'attachment'},
+        'content_disposition': 'attachment'
+    },
 }
 ```
 NOTE: See past README versions for older "positional" style destination settings.
