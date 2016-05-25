@@ -81,10 +81,9 @@ S3DIRECT_DESTINATIONS = {
         'auth': lambda u: u.is_staff,
     },
 
-    # Allow anybody to upload jpeg's and png's.
+    # Limit uploads to jpeg's and png's.
     'imgs': {
         'key': 'uploads/imgs', 
-        'auth': lambda u: True, 
         'allowed': ['image/jpeg', 'image/png'],
     },
 
@@ -95,35 +94,26 @@ S3DIRECT_DESTINATIONS = {
         'allowed': ['video/mp4'],
     },
 
-    # Allow anybody to upload any MIME type with a custom name function, eg:
+    # Define a custom filename for the object.
     'custom_filename': {
         'key': lambda original_filename: 'images/unique.jpg',
     },
 
-    # Specify a non-default bucket for PDFs
+    # Specify a non-default bucket for this object
     'pdfs': {
         'key': '/', 
-        'auth': lambda u: True, 
-        'allowed': ['application/pdf'], 
-        'acl': None, 
         'bucket': 'pdf-bucket',
     },
 
-    # Allow logged in users to upload any type of file and give it a private acl:
+    # Give the object a private ACL:
     'private': {
-        'key': 'uploads/vids',
-        'auth': lambda u: u.is_authenticated(),
-        'allowed': '*',
+        'key': 'uploads/private',
         'acl': 'private'
     },
 
-    # Allow authenticated users to upload with cache-control for a month and content-disposition set to attachment
+    # Set custom cache control and content disposition headers.
     'cached': {
-        'key': 'uploads/vids', 
-        'auth': lambda u: u.is_authenticated(), 
-        'allowed': '*', 
-        'acl': 'public-read', 
-        'bucket': AWS_STORAGE_BUCKET_NAME, 
+        'key': 'uploads/vids',
         'cache_control': 'max-age=2592000', 
         'content_disposition': 'attachment'
     },
