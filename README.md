@@ -71,48 +71,48 @@ S3DIRECT_REGION = 'us-east-1'
 #
 S3DIRECT_DESTINATIONS = {
     # Allow anybody to upload any MIME type
-    'misc': {
+    'example1': {
         'key': 'uploads/misc',
     },
 
     # Allow staff users to upload any MIME type
-    'files': {
+    'example2': {
         'key': 'uploads/files', 
         'auth': lambda u: u.is_staff,
     },
 
     # Limit uploads to jpeg's and png's.
-    'imgs': {
+    'example3': {
         'key': 'uploads/imgs', 
         'allowed': ['image/jpeg', 'image/png'],
     },
 
     # Allow authenticated users to upload mp4's
-    'vids': {
+    'example4': {
         'key': 'uploads/vids', 
         'auth': lambda u: u.is_authenticated(), 
         'allowed': ['video/mp4'],
     },
 
     # Define a custom filename for the object.
-    'custom_filename': {
+    'example5': {
         'key': lambda original_filename: 'images/unique.jpg',
     },
 
     # Specify a non-default bucket for this object
-    'pdfs': {
+    'example6': {
         'key': '/', 
         'bucket': 'pdf-bucket',
     },
 
     # Give the object a private ACL:
-    'private': {
+    'example7': {
         'key': 'uploads/private',
         'acl': 'private'
     },
 
     # Set custom cache control and content disposition headers.
-    'cached': {
+    'example8': {
         'key': 'uploads/vids',
         'cache_control': 'max-age=2592000', 
         'content_disposition': 'attachment'
@@ -140,7 +140,7 @@ from django.db import models
 from s3direct.fields import S3DirectField
 
 class Example(models.Model):
-    video = S3DirectField(dest='destination_key_from_settings')
+    video = S3DirectField(dest='example1')
 ```
 
 ## Use the widget in a custom form
@@ -152,7 +152,7 @@ from django import forms
 from s3direct.widgets import S3DirectWidget
 
 class S3DirectUploadForm(forms.Form):
-    images = forms.URLField(widget=S3DirectWidget(dest='destination_key_from_settings'))
+    images = forms.URLField(widget=S3DirectWidget(dest='example2'))
 ```
 
 __*Optional.__ You can create a custom template by passing in a string with your own HTML to the `html` keyword argument. For example:
