@@ -62,11 +62,13 @@
         alert(msg)
     }
 
-    var update = function(el, xml) {
+    var update = function(el, xml, name) {
         var link = el.querySelector('.file-link'),
             url  = el.querySelector('.file-url')
 
-        url.value = parseURL(xml)
+        var parsedXML = parseURL(xml);
+        var path = parsedXML.substr(0,parsedXML.lastIndexOf('/')+1);
+        url.value = path+name;
         link.setAttribute('href', url.value)
         link.innerHTML = url.value.split('/').pop()
 
@@ -108,7 +110,7 @@
         request('POST', url, form, {}, el, true, function(status, xml){
             disableSubmit(false)
             if(status !== 201) return error(el, 'Sorry, failed to upload to S3.')
-            update(el, xml)
+            update(el, xml, file.name)
         })
     }
 
