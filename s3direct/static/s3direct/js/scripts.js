@@ -35,9 +35,13 @@
     var parseURL = function(text) {
         var xml = new DOMParser().parseFromString(text, 'text/xml'),
             tag = xml.getElementsByTagName('Location')[0],
-            url = unescape(tag.childNodes[0].nodeValue)
+            url = tag.childNodes[0].nodeValue
 
-        return url
+        return url;
+    }
+
+    var parseNameFromUrl = function(url) {
+        return decodeURIComponent((url + '').replace(/\+/g, '%20'));
     }
 
     var parseJson = function(json) {
@@ -68,7 +72,7 @@
 
         url.value = parseURL(xml)
         link.setAttribute('href', url.value)
-        link.innerHTML = url.value.split('/').pop()
+        link.innerHTML = parseNameFromUrl(url.value).split('/').pop();
 
         el.className = 's3direct link-active'
         el.querySelector('.bar').style.width = '0%'
