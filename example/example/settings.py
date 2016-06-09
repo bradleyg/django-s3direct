@@ -124,10 +124,13 @@ S3DIRECT_DESTINATIONS = {
     # Allow staff users to upload any MIME type
     'pdfs': {'key': '/uploads/pdfs', 'auth': lambda u: u.is_staff,},
 
-    # Allow anybody to upload jpeg's and png's.
-    'images': {'key': '/uploads/images', 'auth': lambda u: True, 'allowed': [
-        'image/jpeg',
-        'image/png']
+    # Allow anybody to upload jpeg's and png's. Limit sizes to 5kb - 20mb
+    'images': {
+        'key': '/uploads/images', 'auth': lambda u: True, 'allowed': [
+            'image/jpeg',
+            'image/png'
+        ],
+        'content_length_range': (5000, 20000000),
     },
 
     # Allow authenticated users to upload mp4's
