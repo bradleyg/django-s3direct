@@ -211,3 +211,17 @@ class WidgetTest(WidgetTestCase):
 
     def test_policy_conditions(self):
         self.check_policy_conditions()
+
+    """Tests for features only available with new-style settings"""
+    def test_content_length_range(self):
+        # Content_length_range setting is always sent as part of policy. Initial request data doesn't affect it.
+        data = {'dest': 'imgs', 'name': 'image.jpg', 'type': 'image/jpeg'}
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 200)
+
+        response_dict = json.loads(response.content.decode())
+        self.assertTrue('policy' in response_dict)
+        policy_dict = json.loads(b64decode(response_dict['policy']).decode('utf-8'))
+        self.assertTrue('conditions' in policy_dict)
+        conditions_dict = policy_dict['conditions']
+        self.assertEqual(conditions_dict[-1], ['content-length-range', 5000, 20000000])

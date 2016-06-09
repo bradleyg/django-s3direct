@@ -38,6 +38,7 @@ settings.configure(DEBUG=True,
                            'key': 'uploads/imgs',
                            'auth': lambda u: True,
                            'allowed': ['image/jpeg', 'image/png'],
+                           'content_length_range': (5000, 20000000),  # 5kb - 20mb
                        },
                        'vids': {
                            'key': 'uploads/vids',
