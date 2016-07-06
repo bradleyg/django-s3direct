@@ -117,6 +117,11 @@ S3DIRECT_DESTINATIONS = {
         'cache_control': 'max-age=2592000', 
         'content_disposition': 'attachment'
     },
+    
+    # Limit size of uploads to a min and max size range (in bytes)
+    'example9': {
+        'content_length_range': (5000, 20000000),
+    },
 }
 ```
 NOTE: See past README versions for older "positional" style destination settings.

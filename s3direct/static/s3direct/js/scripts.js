@@ -107,7 +107,16 @@
 
         request('POST', url, form, {}, el, true, function(status, xml){
             disableSubmit(false)
-            if(status !== 201) return error(el, 'Sorry, failed to upload to S3.')
+            if(status !== 201) {
+                if (xml.indexOf('<MinSizeAllowed>') > -1) {
+                    return error(el, 'Sorry, the file is too small to be uploaded.')
+                }
+                else if (xml.indexOf('<MaxSizeAllowed>') > -1) {
+                    return error(el, 'Sorry, the file is too large to be uploaded.')
+                }
+
+                return error(el, 'Sorry, failed to upload file.')
+            }
             update(el, xml)
         })
     }

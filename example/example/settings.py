@@ -119,22 +119,25 @@ def create_filename(filename):
 
 S3DIRECT_DESTINATIONS = {
     # Allow anybody to upload any MIME type
-    'misc': ('/',),
+    'misc': {'key': '/'},
 
     # Allow staff users to upload any MIME type
-    'pdfs': ('/uploads/pdfs', lambda u: u.is_staff,),
+    'pdfs': {'key': '/uploads/pdfs', 'auth': lambda u: u.is_staff,},
 
-    # Allow anybody to upload jpeg's and png's.
-    'images': ('/uploads/images', lambda u: True, [
-        'image/jpeg',
-        'image/png']
-    ),
+    # Allow anybody to upload jpeg's and png's. Limit sizes to 5kb - 20mb
+    'images': {
+        'key': '/uploads/images', 'auth': lambda u: True, 'allowed': [
+            'image/jpeg',
+            'image/png'
+        ],
+        'content_length_range': (5000, 20000000),
+    },
 
     # Allow authenticated users to upload mp4's
-    'videos': ('/uploads/videos', lambda u: u.is_authenticated(), [
+    'videos': {'key': '/uploads/videos', 'auth': lambda u: u.is_authenticated(), 'allowed': [
         'video/mp4'
-    ]),
+    ]},
 
     # Allow anybody to upload any MIME type with a custom name function
-    'custom_filename': (create_filename,),
+    'custom_filename': {'key': create_filename,},
 }

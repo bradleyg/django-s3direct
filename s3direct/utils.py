@@ -59,7 +59,7 @@ def get_s3direct_destinations():
 
 
 def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
-                       content_disposition=None):
+                       content_disposition=None, content_length_range=None):
     access_key = settings.AWS_ACCESS_KEY_ID
     secret_access_key = settings.AWS_SECRET_ACCESS_KEY
     bucket = bucket or settings.AWS_STORAGE_BUCKET_NAME
@@ -95,6 +95,11 @@ def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
         policy_dict['conditions'].append({
             'Content-Disposition': content_disposition
         })
+
+    if content_length_range:
+        policy_dict['conditions'].append(
+            ['content-length-range', content_length_range[0], content_length_range[1]]
+        )
 
     policy_object = json.dumps(policy_dict)
 
