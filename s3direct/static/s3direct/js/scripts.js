@@ -79,7 +79,7 @@
         var submitRow = document.querySelector('.submit-row')
         if( ! submitRow) return
 
-        var buttons = submitRow.querySelectorAll('input[type=submit]')
+        var buttons = submitRow.querySelectorAll('input[type=submit],button[type=submit]')
 
         if (status === true) concurrentUploads++
         else concurrentUploads--
