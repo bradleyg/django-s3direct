@@ -25,6 +25,7 @@ def get_upload_params(request):
     cache_control = dest.get('cache_control')
     content_disposition = dest.get('content_disposition')
     content_length_range = dest.get('content_length_range')
+    server_side_encryption = dest.get('server_side_encryption')
 
     if not acl:
         acl = 'public-read'
@@ -51,6 +52,8 @@ def get_upload_params(request):
         key = '%s/${filename}' % key
 
     data = create_upload_data(
-        content_type, key, acl, bucket, cache_control, content_disposition, content_length_range)
+        content_type, key, acl, bucket, cache_control, content_disposition, content_length_range,
+        server_side_encryption
+    )
 
     return HttpResponse(json.dumps(data), content_type="application/json")

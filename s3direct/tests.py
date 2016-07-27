@@ -38,17 +38,17 @@ class WidgetTestCase(TestCase):
     As opposed to inheriting test methods as doing that makes the failure stack hard to parse.
     TODO: Get rid of this base class and the appropriate subclass when positional setting support is dropped. See #48
     """
-    
+
     def setUp(self):
         admin = User.objects.create_superuser('admin', 'u@email.com', 'admin')
         admin.save()
-        
+
     def check_urls(self):
         reversed_url = reverse('s3direct')
         resolved_url = resolve('/get_upload_params/')
         self.assertEqual(reversed_url, '/get_upload_params/')
         self.assertEqual(resolved_url.view_name, 's3direct')
-        
+
     def check_widget_html(self):
         widget = widgets.S3DirectWidget(dest='foo')
         self.assertEqual(widget.render('filename', None), HTML_OUTPUT)
@@ -121,6 +121,7 @@ class WidgetTestCase(TestCase):
         self.assertEqual(conditions_dict[1]['acl'], u'authenticated-read')
         self.assertEqual(conditions_dict[8]['Cache-Control'], u'max-age=2592000')
         self.assertEqual(conditions_dict[9]['Content-Disposition'], u'attachment')
+        self.assertEqual(conditions_dict[10]['x-amz-server-side-encryption'], u'AES256')
 
 
 @override_settings(S3DIRECT_DESTINATIONS={
@@ -129,7 +130,8 @@ class WidgetTestCase(TestCase):
     'imgs': ('uploads/imgs', lambda u: True, ['image/jpeg', 'image/png'],),
     'vids': ('uploads/vids', lambda u: u.is_authenticated(), ['video/mp4'],),
     'cached': ('uploads/vids', lambda u: u.is_authenticated(), '*', 'authenticated-read',
-               'astoragebucketname', 'max-age=2592000', 'attachment',),
+               'astoragebucketname', 'max-age=2592000', 'attachment',
+               'AES256'),
 })
 class OldStyleSettingsWidgetTest(WidgetTestCase):
     """
@@ -175,7 +177,7 @@ class OldStyleSettingsWidgetTest(WidgetTestCase):
 
 
 class WidgetTest(WidgetTestCase):
-    
+
     def setUp(self):
         super(WidgetTest, self).setUp()
 

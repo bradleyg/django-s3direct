@@ -68,6 +68,7 @@ S3DIRECT_REGION = 'us-east-1'
 # cache_control [optional] Cache control headers, eg 'max-age=2592000'
 # content_disposition [optional] Useful for sending files as attachements
 # bucket [optional] Specify a different bucket for this particular object
+# server_side_encryption [optional] Encryption headers for buckets that require it
 #
 S3DIRECT_DESTINATIONS = {
     # Allow anybody to upload any MIME type
@@ -77,20 +78,20 @@ S3DIRECT_DESTINATIONS = {
 
     # Allow staff users to upload any MIME type
     'example2': {
-        'key': 'uploads/files', 
+        'key': 'uploads/files',
         'auth': lambda u: u.is_staff,
     },
 
     # Limit uploads to jpeg's and png's.
     'example3': {
-        'key': 'uploads/imgs', 
+        'key': 'uploads/imgs',
         'allowed': ['image/jpeg', 'image/png'],
     },
 
     # Allow authenticated users to upload mp4's
     'example4': {
-        'key': 'uploads/vids', 
-        'auth': lambda u: u.is_authenticated(), 
+        'key': 'uploads/vids',
+        'auth': lambda u: u.is_authenticated(),
         'allowed': ['video/mp4'],
     },
 
@@ -101,7 +102,7 @@ S3DIRECT_DESTINATIONS = {
 
     # Specify a non-default bucket for this object
     'example6': {
-        'key': '/', 
+        'key': '/',
         'bucket': 'pdf-bucket',
     },
 
@@ -114,13 +115,18 @@ S3DIRECT_DESTINATIONS = {
     # Set custom cache control and content disposition headers.
     'example8': {
         'key': 'uploads/vids',
-        'cache_control': 'max-age=2592000', 
+        'cache_control': 'max-age=2592000',
         'content_disposition': 'attachment'
     },
-    
+
     # Limit size of uploads to a min and max size range (in bytes)
     'example9': {
         'content_length_range': (5000, 20000000),
+    },
+
+    # Specify encryption header for buckets that require it.
+    'example10': {
+        'server_side_encryption': 'AES256',
     },
 }
 ```

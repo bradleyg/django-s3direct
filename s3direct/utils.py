@@ -45,6 +45,7 @@ def get_s3direct_destinations():
         4: 'bucket',
         5: 'cache_control',
         6: 'content_disposition',
+        7: 'server_side_encryption',
     }
     if destinations:
         for dest, dest_value in destinations.items():
@@ -59,7 +60,8 @@ def get_s3direct_destinations():
 
 
 def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
-                       content_disposition=None, content_length_range=None):
+                       content_disposition=None, content_length_range=None,
+                       server_side_encryption=None):
     access_key = settings.AWS_ACCESS_KEY_ID
     secret_access_key = settings.AWS_SECRET_ACCESS_KEY
     bucket = bucket or settings.AWS_STORAGE_BUCKET_NAME
@@ -95,6 +97,11 @@ def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
         policy_dict['conditions'].append({
             'Content-Disposition': content_disposition
         })
+
+    if server_side_encryption:
+        policy_dict['conditions'].append(
+            {'x-amz-server-side-encryption': server_side_encryption}
+        )
 
     if content_length_range:
         policy_dict['conditions'].append(
