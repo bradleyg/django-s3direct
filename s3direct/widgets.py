@@ -10,7 +10,7 @@ from django.utils.http import urlunquote_plus
 class S3DirectWidget(widgets.TextInput):
 
     default_html = (
-        '<div class="s3direct" data-policy-url="{policy_url}">'
+        '<div class="s3direct" data-policy-url="{policy_url}" style="{style}">'
         '  <a class="file-link" target="_blank" href="{file_url}">{file_name}</a>'
         '  <a class="file-remove" href="#remove">Remove</a>'
         '  <input class="file-url" type="hidden" value="{file_url}" id="{element_id}" name="{name}" />'
@@ -43,12 +43,14 @@ class S3DirectWidget(widgets.TextInput):
             file_name = os.path.basename(urlunquote_plus(value))
         else:
             file_name = ''
+
         output = self.html.format(
             policy_url=reverse('s3direct'),
             element_id=self.build_attrs(attrs).get('id'),
             file_name=file_name,
             dest=self.dest,
             file_url=value or '',
-            name=name)
+            name=name,
+            style=self.build_attrs(attrs).get('style'))
 
         return mark_safe(output)
