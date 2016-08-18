@@ -29,7 +29,7 @@ Setup a CORS policy on your S3 bucket.
 ```xml
 <CORSConfiguration>
     <CORSRule>
-        <AllowedOrigin>*</AllowedOrigin>
+        <AllowedOrigin>yourdomain.com</AllowedOrigin>
         <AllowedMethod>PUT</AllowedMethod>
         <AllowedMethod>POST</AllowedMethod>
         <AllowedMethod>GET</AllowedMethod>
@@ -38,6 +38,8 @@ Setup a CORS policy on your S3 bucket.
     </CORSRule>
 </CORSConfiguration>
 ```
+
+If you want to allow file uploads from any domain (unsafe), use: `<AllowedOrigin>*</AllowedOrigin>`
 
 ## Django Setup
 
