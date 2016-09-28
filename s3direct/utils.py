@@ -17,6 +17,7 @@ REGIONS = {
     'ap-southeast-2': 's3-ap-southeast-2.amazonaws.com',
     'ap-northeast-1': 's3-ap-northeast-1.amazonaws.com',
     'sa-east-1': 's3-sa-east-1.amazonaws.com',
+    'cn-north-1': 's3.cn-north-1.amazonaws.com.cn',
 }
 
 
