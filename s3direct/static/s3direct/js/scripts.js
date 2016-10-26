@@ -178,7 +178,7 @@
     document.addEventListener('DOMNodeInserted', function(e){
         if(e.target.tagName) {
             var el = e.target.querySelectorAll('.s3direct');
-	    el.forEach(function (element, index, array) {
+            [].forEach.call(el, function (element, index, array) {
 		addHandlers(element);
 	    });
         }
