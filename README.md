@@ -68,7 +68,7 @@ S3DIRECT_REGION = 'us-east-1'
 # allowed [optional] List of allowed MIME types
 # acl [optional] Give the object another ACL rather than 'public-read'
 # cache_control [optional] Cache control headers, eg 'max-age=2592000'
-# content_disposition [optional] Useful for sending files as attachements
+# content_disposition [optional] Useful for sending files as attachments
 # bucket [optional] Specify a different bucket for this particular object
 # server_side_encryption [optional] Encryption headers for buckets that require it
 #
