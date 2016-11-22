@@ -229,7 +229,8 @@ $ cd example
 
 # Add your AWS keys to settings.py
 
-$ python manage.py syncdb
+$ python manage.py migrate
+$ python manage.py createsuperuser
 $ python manage.py runserver 0.0.0.0:5000
 ```
 
