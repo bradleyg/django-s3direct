@@ -131,7 +131,24 @@
             dest     = el.querySelector('.file-dest').value,
             url      = el.getAttribute('data-policy-url'),
             form     = new FormData(),
-            headers  = {'X-CSRFToken': getCookie('csrftoken')}
+            headers  = {};
+
+        var csrfTokenField = document.querySelector("input[name='csrfmiddlewaretoken']");
+        var csrfToken;
+        
+        if (csrfTokenField) {
+            csrfToken = csrfTokenField.value;
+        } else {
+            csrfToken = false;
+        }
+        if (!csrfToken) {
+            csrfToken = getCookie('csrftoken');
+            if (!csrfToken) {
+                console.error("CSRF token can't be determined!")
+            }
+        }
+        
+        headers['X-CSRFToken'] = csrfToken;
 
         form.append('type', file.type)
         form.append('name', file.name)
