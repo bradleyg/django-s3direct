@@ -46,11 +46,12 @@ class S3DirectWidget(widgets.TextInput):
 
         output = self.html.format(
             policy_url=reverse('s3direct'),
-            element_id=self.build_attrs(attrs).get('id'),
+            element_id=self.build_attrs(attrs).get('id', ''),
             file_name=file_name,
             dest=self.dest,
             file_url=value or '',
             name=name,
-            style=self.build_attrs(attrs).get('style'))
+            style=self.build_attrs(attrs).get('style', '')
+        )
 
         return mark_safe(output)
