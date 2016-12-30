@@ -4,23 +4,11 @@ import os
 from django.forms import widgets
 from django.utils.safestring import mark_safe
 from django.core.urlresolvers import reverse
+from django.template.loader import get_template
 from django.utils.http import urlunquote_plus
 
 
 class S3DirectWidget(widgets.TextInput):
-
-    default_html = (
-        u'<div class="s3direct" data-policy-url="{policy_url}">'
-        '  <a class="file-link" target="_blank" href="{file_url}">{file_name}</a>'
-        '  <a class="file-remove" href="#remove">Remove</a>'
-        '  <input class="file-url" type="hidden" value="{file_url}" id="{element_id}" name="{name}" />'
-        '  <input class="file-dest" type="hidden" value="{dest}">'
-        '  <input class="file-input" type="file"  style="{style}"/>'
-        '  <div class="progress progress-striped active">'
-        '    <div class="bar"></div>'
-        '  </div>'
-        '</div>'
-    )
 
     class Media:
         js = (
@@ -35,7 +23,6 @@ class S3DirectWidget(widgets.TextInput):
 
     def __init__(self, *args, **kwargs):
         self.dest = kwargs.pop('dest', None)
-        self.html = kwargs.pop('html', self.default_html)
         super(S3DirectWidget, self).__init__(*args, **kwargs)
 
     def render(self, name, value, attrs=None):
@@ -44,14 +31,15 @@ class S3DirectWidget(widgets.TextInput):
         else:
             file_name = ''
 
-        output = self.html.format(
-            policy_url=reverse('s3direct'),
-            element_id=self.build_attrs(attrs).get('id', ''),
-            file_name=file_name,
-            dest=self.dest,
-            file_url=value or '',
-            name=name,
-            style=self.build_attrs(attrs).get('style', '')
-        )
+        tpl = get_template('s3direct-widget.tpl')
+        output = tpl.render({
+            'policy_url': reverse('s3direct'),
+            'element_id': self.build_attrs(attrs).get('id', ''),
+            'file_name': file_name,
+            'dest': self.dest,
+            'file_url': value or '',
+            'name': name,
+            'style': self.build_attrs(attrs).get('style', '')
+        })
 
         return mark_safe(output)
