@@ -52,8 +52,8 @@ def get_upload_params(request):
         key = '%s/${filename}' % key
 
     data = create_upload_data(
-        content_type, key, acl, bucket, cache_control, content_disposition, content_length_range,
-        server_side_encryption
+        content_type, key, acl, bucket, cache_control, content_disposition,
+        content_length_range, server_side_encryption
     )
 
     return HttpResponse(json.dumps(data), content_type="application/json")
