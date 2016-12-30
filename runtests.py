@@ -25,6 +25,12 @@ settings.configure(
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
     ),
+    TEMPLATES=[
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'APP_DIRS': True
+        }
+    ],
     AWS_ACCESS_KEY_ID=environ.get('AWS_ACCESS_KEY_ID', ''),
     AWS_SECRET_ACCESS_KEY=environ.get('AWS_SECRET_ACCESS_KEY', ''),
     AWS_STORAGE_BUCKET_NAME=environ.get(

@@ -10,16 +10,17 @@ from s3direct import widgets
 
 
 HTML_OUTPUT = (
-    '<div class="s3direct" data-policy-url="/get_upload_params/">'
-    '  <a class="file-link" target="_blank" href=""></a>'
-    '  <a class="file-remove" href="#remove">Remove</a>'
+    '<div class="s3direct" data-policy-url="/get_upload_params/">\n'
+    '  <a class="file-link" target="_blank" href=""></a>\n'
+    '  <a class="file-remove" href="#remove">Remove</a>\n'
     '  <input class="file-url" type="hidden" value="" id="" name="filename" />'
-    '  <input class="file-dest" type="hidden" value="foo">'
-    '  <input class="file-input" type="file"  style=""/>'
-    '  <div class="progress progress-striped active">'
-    '    <div class="bar"></div>'
-    '  </div>'
-    '</div>'
+    '\n'
+    '  <input class="file-dest" type="hidden" value="foo">\n'
+    '  <input class="file-input" type="file"  style=""/>\n'
+    '  <div class="progress progress-striped active">\n'
+    '    <div class="bar"></div>\n'
+    '  </div>\n'
+    '</div>\n'
 )
 
 FOO_RESPONSE = {

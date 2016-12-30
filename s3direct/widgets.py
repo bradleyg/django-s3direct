@@ -4,7 +4,7 @@ import os
 from django.forms import widgets
 from django.utils.safestring import mark_safe
 from django.core.urlresolvers import reverse
-from django.template.loader import get_template
+from django.template.loader import render_to_string
 from django.utils.http import urlunquote_plus
 
 
@@ -31,8 +31,7 @@ class S3DirectWidget(widgets.TextInput):
         else:
             file_name = ''
 
-        tpl = get_template('s3direct-widget.tpl')
-        output = tpl.render({
+        output = render_to_string('s3direct-widget.tpl', {
             'policy_url': reverse('s3direct'),
             'element_id': self.build_attrs(attrs).get('id', ''),
             'file_name': file_name,
