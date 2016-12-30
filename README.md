@@ -29,12 +29,9 @@ Setup a CORS policy on your S3 bucket.
 ```xml
 <CORSConfiguration>
     <CORSRule>
-        <AllowedOrigin>yourdomain.com</AllowedOrigin>
-        <AllowedMethod>PUT</AllowedMethod>
+        <AllowedOrigin>http://yourdomain.com</AllowedOrigin>
         <AllowedMethod>POST</AllowedMethod>
-        <AllowedMethod>GET</AllowedMethod>
         <MaxAgeSeconds>3000</MaxAgeSeconds>
-        <AllowedHeader>*</AllowedHeader>
     </CORSRule>
 </CORSConfiguration>
 ```

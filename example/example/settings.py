@@ -25,7 +25,7 @@ SECRET_KEY = ')nw@1z2xt-dy2f$1mfpzyuohxv-tmu4+5-q55)*(e6obam-p=4'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [u'0.0.0.0']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -119,14 +119,21 @@ def create_filename(filename):
 
 S3DIRECT_DESTINATIONS = {
     # Allow anybody to upload any MIME type
-    'misc': {'key': '/'},
+    'misc': {
+        'key': '/'
+    },
 
     # Allow staff users to upload any MIME type
-    'pdfs': {'key': '/uploads/pdfs', 'auth': lambda u: u.is_staff,},
+    'pdfs': {
+        'key': 'uploads/pdfs',
+        'auth': lambda u: u.is_staff
+    },
 
     # Allow anybody to upload jpeg's and png's. Limit sizes to 5kb - 20mb
     'images': {
-        'key': '/uploads/images', 'auth': lambda u: True, 'allowed': [
+        'key': 'uploads/images',
+        'auth': lambda u: True,
+        'allowed': [
             'image/jpeg',
             'image/png'
         ],
@@ -134,10 +141,14 @@ S3DIRECT_DESTINATIONS = {
     },
 
     # Allow authenticated users to upload mp4's
-    'videos': {'key': '/uploads/videos', 'auth': lambda u: u.is_authenticated(), 'allowed': [
-        'video/mp4'
-    ]},
+    'videos': {
+        'key': 'uploads/videos',
+        'auth': lambda u: u.is_authenticated(),
+        'allowed': ['video/mp4']
+    },
 
     # Allow anybody to upload any MIME type with a custom name function
-    'custom_filename': {'key': create_filename,},
+    'custom_filename': {
+        'key': create_filename
+    },
 }
