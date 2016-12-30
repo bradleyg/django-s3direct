@@ -7,20 +7,6 @@ from base64 import b64encode
 from django.conf import settings
 
 
-REGIONS = {
-    'us-east-1': 's3.amazonaws.com',
-    'us-west-2': 's3-us-west-2.amazonaws.com',
-    'us-west-1': 's3-us-west-1.amazonaws.com',
-    'eu-west-1': 's3-eu-west-1.amazonaws.com',
-    'eu-central-1': 's3.eu-central-1.amazonaws.com',
-    'ap-southeast-1': 's3-ap-southeast-1.amazonaws.com',
-    'ap-southeast-2': 's3-ap-southeast-2.amazonaws.com',
-    'ap-northeast-1': 's3-ap-northeast-1.amazonaws.com',
-    'sa-east-1': 's3-sa-east-1.amazonaws.com',
-    'cn-north-1': 's3.cn-north-1.amazonaws.com.cn',
-}
-
-
 def get_at(index, t):
     try:
         value = t[index]
@@ -29,14 +15,15 @@ def get_at(index, t):
     return value
 
 
-# NOTE: Don't use constant as it will break ability to change at runtime (E.g. tests)
+# NOTE: Don't use constant as it will break ability to change at runtime
+# (E.g. tests)
 def get_s3direct_destinations():
     """Returns s3direct destinations, converting old format if necessary."""
     destinations = getattr(settings, 'S3DIRECT_DESTINATIONS', None)
     if destinations is None:
         return None
 
-    # TODO: Remove when older "positional" style settings are no longer supported
+    # TODO: Remove when older "positional" settings are no longer supported
     converted_destinations = {}
     key_mapping = {
         0: 'key',
@@ -53,7 +40,8 @@ def get_s3direct_destinations():
             if type(dest_value) is tuple or type(dest_value) is list:
                 converted_destinations[dest] = {}
                 for index, key_name in key_mapping.items():
-                    converted_destinations[dest][key_name] = get_at(index, dest_value)
+                    converted_destinations[dest][key_name] = get_at(
+                            index, dest_value)
             else:
                 converted_destinations[dest] = dest_value
 
@@ -67,8 +55,10 @@ def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
     secret_access_key = settings.AWS_SECRET_ACCESS_KEY
     bucket = bucket or settings.AWS_STORAGE_BUCKET_NAME
     region = getattr(settings, 'S3DIRECT_REGION', None)
-    endpoint = REGIONS.get(region, 's3.amazonaws.com')
-
+    if not region or region == 'us-east-1':
+        endpoint = 's3.amazonaws.com'
+    else:
+        endpoint = 's3-%s.amazonaws.com' % region
     expires_in = datetime.utcnow() + timedelta(seconds=60*5)
     expires = expires_in.strftime('%Y-%m-%dT%H:%M:%S.000Z')
     now_date = datetime.utcnow().strftime('%Y%m%dT%H%M%S000Z')
@@ -106,7 +96,11 @@ def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
 
     if content_length_range:
         policy_dict['conditions'].append(
-            ['content-length-range', content_length_range[0], content_length_range[1]]
+            [
+                'content-length-range',
+                content_length_range[0],
+                content_length_range[1]
+            ]
         )
 
     policy_object = json.dumps(policy_dict)
@@ -134,7 +128,8 @@ def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
     bucket_url = structure.format(endpoint, bucket)
 
     return_dict = {
-        # FIXME: .decode() does nothing, b64decode works but is decoding really intended?
+        # FIXME: .decode() does nothing, b64decode works but is decoding
+        # really intended?
         "policy": policy.decode(),
         "success_action_status": 201,
         "x-amz-credential": "%s/%s/%s/s3/aws4_request" % (
