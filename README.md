@@ -29,14 +29,12 @@ Setup a CORS policy on your S3 bucket.
 ```xml
 <CORSConfiguration>
     <CORSRule>
-        <AllowedOrigin>http://yourdomain.com</AllowedOrigin>
+        <AllowedOrigin>http://yourdomain.com:8080</AllowedOrigin>
         <AllowedMethod>POST</AllowedMethod>
         <MaxAgeSeconds>3000</MaxAgeSeconds>
     </CORSRule>
 </CORSConfiguration>
 ```
-
-If you want to allow file uploads from any domain (unsafe), use: `<AllowedOrigin>*</AllowedOrigin>`
 
 ## Django Setup
 
@@ -60,7 +58,10 @@ S3DIRECT_REGION = 'us-east-1'
 
 # Destinations, with the following keys:
 #
-# key [required] Where to upload the file to
+# key [required] Where to upload the file to, can be either:
+#     1. '/' = Upload to root with the original filename.
+#     2. 'some/path' = Upload to some/path with the original filename.
+#     3. functionName = Pass a function and create your own path/filename.
 # auth [optional] An ACL function to whether the current user can perform this action
 # allowed [optional] List of allowed MIME types
 # acl [optional] Give the object another ACL rather than 'public-read'
@@ -70,66 +71,20 @@ S3DIRECT_REGION = 'us-east-1'
 # server_side_encryption [optional] Encryption headers for buckets that require it
 #
 S3DIRECT_DESTINATIONS = {
-    # Allow anybody to upload any MIME type
     'example1': {
-        'key': 'uploads/misc',
-    },
-
-    # Allow staff users to upload any MIME type
-    'example2': {
-        'key': 'uploads/files',
+        'key': 'uploads/images',
         'auth': lambda u: u.is_staff,
-    },
-
-    # Limit uploads to jpeg's and png's.
-    'example3': {
-        'key': 'uploads/imgs',
-        'allowed': ['image/jpeg', 'image/png'],
-    },
-
-    # Allow authenticated users to upload mp4's
-    'example4': {
-        'key': 'uploads/vids',
-        'auth': lambda u: u.is_authenticated(),
-        'allowed': ['video/mp4'],
-    },
-
-    # Define a custom filename for the object.
-    'example5': {
-        'key': lambda original_filename: 'images/unique.jpg',
-    },
-
-    # Specify a non-default bucket for this object
-    'example6': {
-        'key': '/',
+        'allowed': ['image/jpeg', 'image/png', video/mp4],
+        'key': lambda orig_name: 'images/%s-v1.jpg' % orig_name,
         'bucket': 'pdf-bucket',
-    },
-
-    # Give the object a private ACL:
-    'example7': {
-        'key': 'uploads/private',
-        'acl': 'private'
-    },
-
-    # Set custom cache control and content disposition headers.
-    'example8': {
-        'key': 'uploads/vids',
+        'acl': 'private',
         'cache_control': 'max-age=2592000',
         'content_disposition': 'attachment'
-    },
-
-    # Limit size of uploads to a min and max size range (in bytes)
-    'example9': {
         'content_length_range': (5000, 20000000),
-    },
-
-    # Specify encryption header for buckets that require it.
-    'example10': {
         'server_side_encryption': 'AES256',
-    },
+    }
 }
 ```
-NOTE: See past README versions for older "positional" style destination settings.
 
 ### urls.py
 
@@ -165,28 +120,7 @@ class S3DirectUploadForm(forms.Form):
     images = forms.URLField(widget=S3DirectWidget(dest='example2'))
 ```
 
-__*Optional.__ You can create a custom template by passing in a string with your own HTML to the `html` keyword argument. For example:
-
-```python
-from django import forms
-from s3direct.widgets import S3DirectWidget
-
-class S3DirectUploadForm(forms.Form):
-    images = forms.URLField(widget=S3DirectWidget(
-        dest='destination_key_from_settings',
-        html=(
-            '<div class="s3direct" data-policy-url="{policy_url}">'
-            '  <a class="file-link" target="_blank" href="{file_url}">{file_name}</a>'
-            '  <a class="file-remove" href="#remove">Remove</a>'
-            '  <input class="file-url" type="hidden" value="{file_url}" id="{element_id}" name="{name}" />'
-            '  <input class="file-dest" type="hidden" value="{dest}">'
-            '  <input class="file-input" type="file" />'
-            '  <div class="progress progress-striped active">'
-            '    <div class="bar"></div>'
-            '  </div>'
-            '</div>'
-        )))
-```
+__*Optional.__ You modify the HTML of the widget by overiding template _s3direct/templates/s3direct-widget.tpl_
 
 ### views.py
 
