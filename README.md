@@ -10,12 +10,6 @@ Add direct uploads to AWS S3 functionality with a progress bar to file input fie
 
 ![screenshot](https://raw.githubusercontent.com/bradleyg/django-s3direct/master/screenshot.png)
 
-## Support
-Python 2/3
-Chrome / Safari / Firefox / IE10+
-
-For older browser support use version 0.1.10.
-
 ## Installation
 
 Install with Pip:
@@ -62,26 +56,28 @@ S3DIRECT_REGION = 'us-east-1'
 #     1. '/' = Upload to root with the original filename.
 #     2. 'some/path' = Upload to some/path with the original filename.
 #     3. functionName = Pass a function and create your own path/filename.
-# auth [optional] An ACL function to whether the current user can perform this action
-# allowed [optional] List of allowed MIME types
-# acl [optional] Give the object another ACL rather than 'public-read'
-# cache_control [optional] Cache control headers, eg 'max-age=2592000'
-# content_disposition [optional] Useful for sending files as attachments
-# bucket [optional] Specify a different bucket for this particular object
-# server_side_encryption [optional] Encryption headers for buckets that require it
-#
+# auth [optional] An ACL function to whether the current Django user can perform this action.
+# allowed [optional] List of allowed MIME types.
+# acl [optional] Give the object another ACL rather than 'public-read'.
+# cache_control [optional] Cache control headers, eg 'max-age=2592000'.
+# content_disposition [optional] Useful for sending files as attachments.
+# bucket [optional] Specify a different bucket for this particular object.
+# server_side_encryption [optional] Encryption headers for buckets that require it.
+
 S3DIRECT_DESTINATIONS = {
-    'example1': {
+    'example_destination': {
+        # REQUIRED
         'key': 'uploads/images',
-        'auth': lambda u: u.is_staff,
-        'allowed': ['image/jpeg', 'image/png', video/mp4],
-        'key': lambda orig_name: 'images/%s-v1.jpg' % orig_name,
-        'bucket': 'pdf-bucket',
-        'acl': 'private',
-        'cache_control': 'max-age=2592000',
-        'content_disposition': 'attachment'
-        'content_length_range': (5000, 20000000),
-        'server_side_encryption': 'AES256',
+
+        # OPTIONAL
+        'auth': lambda u: u.is_staff, # Default allow anybody to upload
+        'allowed': ['image/jpeg', 'image/png', video/mp4], # Default allow all mime types
+        'bucket': 'pdf-bucket', # Default is 'AWS_STORAGE_BUCKET_NAME'
+        'acl': 'private', # Defaults to 'public-read'
+        'cache_control': 'max-age=2592000', # Default no cache-control
+        'content_disposition': 'attachment' # Default no content disposition
+        'content_length_range': (5000, 20000000), # Default allow any size
+        'server_side_encryption': 'AES256', # Default no encryption
     }
 }
 ```
@@ -105,7 +101,7 @@ from django.db import models
 from s3direct.fields import S3DirectField
 
 class Example(models.Model):
-    video = S3DirectField(dest='example1')
+    video = S3DirectField(dest='example_destination')
 ```
 
 ## Use the widget in a custom form
@@ -117,10 +113,10 @@ from django import forms
 from s3direct.widgets import S3DirectWidget
 
 class S3DirectUploadForm(forms.Form):
-    images = forms.URLField(widget=S3DirectWidget(dest='example2'))
+    images = forms.URLField(widget=S3DirectWidget(dest='example_destination'))
 ```
 
-__*Optional.__ You modify the HTML of the widget by overiding template _s3direct/templates/s3direct-widget.tpl_
+__*Optional.__ You can modify the HTML of the widget by overiding template __s3direct/templates/s3direct-widget.tpl__
 
 ### views.py
 
