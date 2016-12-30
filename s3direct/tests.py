@@ -34,9 +34,11 @@ FOO_RESPONSE = {
 
 class WidgetTestCase(TestCase):
     """
-    This allows us to have 2 version of the same tests but with different settings.
-    As opposed to inheriting test methods as doing that makes the failure stack hard to parse.
-    TODO: Get rid of this base class and the appropriate subclass when positional setting support is dropped. See #48
+    This allows us to have 2 version of the same tests but with different
+    settings. As opposed to inheriting test methods as doing that makes the
+    failure stack hard to parse.
+    TODO: Get rid of this base class and the appropriate subclass when
+    positional setting support is dropped. See #48
     """
 
     def setUp(self):
@@ -87,7 +89,8 @@ class WidgetTestCase(TestCase):
 
     def check_signing_fields(self):
         self.client.login(username='admin', password='admin')
-        data = {u'dest': u'imgs', u'name': u'image.jpg', u'type': u'image/jpeg'}
+        data = {u'dest': u'imgs', u'name': u'image.jpg',
+                u'type': u'image/jpeg'}
         response = self.client.post(reverse('s3direct'), data)
         response_dict = json.loads(response.content.decode())
         self.assertTrue(u'x-amz-signature' in response_dict)
@@ -96,7 +99,8 @@ class WidgetTestCase(TestCase):
         self.assertDictContainsSubset(FOO_RESPONSE, response_dict)
 
     def check_signing_fields_unique_filename(self):
-        data = {u'dest': u'misc', u'name': u'image.jpg', u'type': u'image/jpeg'}
+        data = {u'dest': u'misc', u'name': u'image.jpg',
+                u'type': u'image/jpeg'}
         response = self.client.post(reverse('s3direct'), data)
         response_dict = json.loads(response.content.decode())
         self.assertTrue(u'x-amz-credential' in response_dict)
@@ -108,20 +112,26 @@ class WidgetTestCase(TestCase):
 
     def check_policy_conditions(self):
         self.client.login(username='admin', password='admin')
-        data = {u'dest': u'cached', u'name': u'video.mp4', u'type': u'video/mp4'}
+        data = {u'dest': u'cached', u'name': u'video.mp4',
+                u'type': u'video/mp4'}
         response = self.client.post(reverse('s3direct'), data)
         self.assertEqual(response.status_code, 200)
-
         response_dict = json.loads(response.content.decode())
         self.assertTrue('policy' in response_dict)
-        policy_dict = json.loads(b64decode(response_dict['policy']).decode('utf-8'))
+        policy_dict = json.loads(
+                b64decode(response_dict['policy']).decode('utf-8'))
         self.assertTrue('conditions' in policy_dict)
         conditions_dict = policy_dict['conditions']
-        self.assertEqual(conditions_dict[0]['bucket'], u'astoragebucketname')
-        self.assertEqual(conditions_dict[1]['acl'], u'authenticated-read')
-        self.assertEqual(conditions_dict[8]['Cache-Control'], u'max-age=2592000')
-        self.assertEqual(conditions_dict[9]['Content-Disposition'], u'attachment')
-        self.assertEqual(conditions_dict[10]['x-amz-server-side-encryption'], u'AES256')
+        self.assertEqual(
+                conditions_dict[0]['bucket'], u'astoragebucketname')
+        self.assertEqual(
+                conditions_dict[1]['acl'], u'authenticated-read')
+        self.assertEqual(
+                conditions_dict[8]['Cache-Control'], u'max-age=2592000')
+        self.assertEqual(
+                conditions_dict[9]['Content-Disposition'], u'attachment')
+        self.assertEqual(
+                conditions_dict[10]['x-amz-server-side-encryption'], u'AES256')
 
 
 @override_settings(S3DIRECT_DESTINATIONS={
@@ -129,9 +139,9 @@ class WidgetTestCase(TestCase):
     'files': ('uploads/files', lambda u: u.is_staff,),
     'imgs': ('uploads/imgs', lambda u: True, ['image/jpeg', 'image/png'],),
     'vids': ('uploads/vids', lambda u: u.is_authenticated(), ['video/mp4'],),
-    'cached': ('uploads/vids', lambda u: u.is_authenticated(), '*', 'authenticated-read',
-               'astoragebucketname', 'max-age=2592000', 'attachment',
-               'AES256'),
+    'cached': ('uploads/vids', lambda u: u.is_authenticated(), '*',
+               'authenticated-read', 'astoragebucketname', 'max-age=2592000',
+               'attachment', 'AES256'),
 })
 class OldStyleSettingsWidgetTest(WidgetTestCase):
     """
@@ -216,14 +226,17 @@ class WidgetTest(WidgetTestCase):
 
     """Tests for features only available with new-style settings"""
     def test_content_length_range(self):
-        # Content_length_range setting is always sent as part of policy. Initial request data doesn't affect it.
+        # Content_length_range setting is always sent as part of policy.
+        # Initial request data doesn't affect it.
         data = {'dest': 'imgs', 'name': 'image.jpg', 'type': 'image/jpeg'}
         response = self.client.post(reverse('s3direct'), data)
         self.assertEqual(response.status_code, 200)
 
         response_dict = json.loads(response.content.decode())
         self.assertTrue('policy' in response_dict)
-        policy_dict = json.loads(b64decode(response_dict['policy']).decode('utf-8'))
+        policy_dict = json.loads(
+                b64decode(response_dict['policy']).decode('utf-8'))
         self.assertTrue('conditions' in policy_dict)
         conditions_dict = policy_dict['conditions']
-        self.assertEqual(conditions_dict[-1], ['content-length-range', 5000, 20000000])
+        self.assertEqual(
+                conditions_dict[-1], ['content-length-range', 5000, 20000000])

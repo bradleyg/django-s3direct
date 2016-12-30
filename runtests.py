@@ -57,6 +57,7 @@ settings.configure(
             'bucket': 'astoragebucketname',
             'cache_control': 'max-age=2592000',
             'content_disposition': 'attachment',
+            'server_side_encryption': 'AES256',
         }
     }
 )
