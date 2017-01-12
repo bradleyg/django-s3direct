@@ -50,6 +50,9 @@ def get_upload_params(request):
         # The literal string '${filename}' is an S3 field variable for key.
         # https://aws.amazon.com/articles/1434#aws-table
         key = '%s/${filename}' % key
+    
+    if auth:    
+        key = key.replace("%user", str(request.user))
 
     data = create_upload_data(
         content_type, key, acl, bucket, cache_control, content_disposition,

@@ -168,3 +168,25 @@ $ python manage.py runserver 0.0.0.0:5000
 ```
 
 Visit ```http://localhost:5000/admin``` to view the admin widget and ```http://localhost:5000/form``` to view the custom form widget.
+
+## Example usage of custom name function
+Using the custom name function you can change the name of the uploaded file. With the example bellow you can easily turn the filename into a UUID:
+
+### settings.py
+```python
+import uuid
+import string
+
+def uuidpathext(filename, prefix):
+    extension = "." + os.path.splitext(filename)[1][1:]
+    filepath = prefix + str(uuid.uuid4()) + extension
+    return filepath
+    
+S3DIRECT_DESTINATIONS = {
+    'pdf': (lambda f: uuidpathext(f,"prefixfolder/prefixname"), lambda u: u.is_authenticated(), ['application/pdf'], None, None),
+}
+
+```
+
+### String replacement
+To enable user based directories, all ocurrences of %user in the filename will be replaced by the current logged in user.
