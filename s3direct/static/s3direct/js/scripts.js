@@ -68,10 +68,13 @@
 
     var update = function(el, xml) {
         var link = el.querySelector('.file-link'),
-            url  = el.querySelector('.file-url')
+            url  = el.querySelector('.file-url'),
+            preview = el.querySelector('.file-preview')
 
         url.value = parseURL(xml)
         link.setAttribute('href', url.value)
+        preview.setAttribute('src', url.value)
+        preview.classList.remove('hidden')
         link.innerHTML = parseNameFromUrl(url.value).split('/').pop();
 
         el.className = 's3direct link-active'
@@ -160,6 +163,7 @@
         var el = e.target.parentElement
         el.querySelector('.file-url').value = ''
         el.querySelector('.file-input').value = ''
+        el.querySelector('.file-preview').classList.add('hidden')
         el.className = 's3direct form-active'
     }
 
@@ -167,6 +171,7 @@
         var url    = el.querySelector('.file-url'),
             input  = el.querySelector('.file-input'),
             remove = el.querySelector('.file-remove'),
+            preview = el.querySelector('.file-preview'),
             status = (url.value === '') ? 'form' : 'link'
 
         el.className = 's3direct ' + status + '-active'
