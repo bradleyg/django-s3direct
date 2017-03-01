@@ -1,22 +1,14 @@
 django-s3direct
 ===============
 
-Upload files direct to S3 from Django
+Upload files directly to S3 from Django
 -------------------------------------
 
 [![Build Status](https://travis-ci.org/bradleyg/django-s3direct.svg?branch=master)](https://travis-ci.org/bradleyg/django-s3direct)
-[![PyPi Version](https://pypip.in/v/django-s3direct/badge.png)](https://crate.io/packages/django-s3direct)
-[![PyPi Downloads](https://pypip.in/d/django-s3direct/badge.png)](https://crate.io/packages/django-s3direct)
 
 Add direct uploads to AWS S3 functionality with a progress bar to file input fields.
 
-![screenshot](https://raw.githubusercontent.com/bradleyg/django-s3direct/master/screenshot.png)
-
-## Support
-Python 2/3
-Chrome / Safari / Firefox / IE10+
-
-For older browser support use version 0.1.10.
+<img src="https://raw.githubusercontent.com/bradleyg/django-s3direct/master/screenshot.png" width="381"/>
 
 ## Installation
 
@@ -31,12 +23,10 @@ Setup a CORS policy on your S3 bucket.
 ```xml
 <CORSConfiguration>
     <CORSRule>
-        <AllowedOrigin>*</AllowedOrigin>
-        <AllowedMethod>PUT</AllowedMethod>
+        <AllowedOrigin>http://yourdomain.com:8080</AllowedOrigin>
         <AllowedMethod>POST</AllowedMethod>
-        <AllowedMethod>GET</AllowedMethod>
+        <AllowedMethod>PUT</AllowedMethod>
         <MaxAgeSeconds>3000</MaxAgeSeconds>
-        <AllowedHeader>*</AllowedHeader>
     </CORSRule>
 </CORSConfiguration>
 ```
@@ -52,6 +42,12 @@ INSTALLED_APPS = [
     ...
 ]
 
+TEMPLATES = [{
+    ...
+    'APP_DIRS': True,
+    ...
+}]
+
 # AWS keys
 AWS_SECRET_ACCESS_KEY = ''
 AWS_ACCESS_KEY_ID = ''
@@ -61,59 +57,49 @@ AWS_STORAGE_BUCKET_NAME = ''
 # http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
 S3DIRECT_REGION = 'us-east-1'
 
-# Destinations in the following format:
-# {destination_key: (path_or_function, auth_test, [allowed_mime_types], permissions, custom_bucket)}
+# Destinations, with the following keys:
 #
-# 'destination_key' is the key to use for the 'dest' attribute on your widget or model field
+# key [required] Where to upload the file to, can be either:
+#     1. '/' = Upload to root with the original filename.
+#     2. 'some/path' = Upload to some/path with the original filename.
+#     3. functionName = Pass a function and create your own path/filename.
+# auth [optional] An ACL function to whether the current Django user can perform this action.
+# allowed [optional] List of allowed MIME types.
+# acl [optional] Give the object another ACL rather than 'public-read'.
+# cache_control [optional] Cache control headers, eg 'max-age=2592000'.
+# content_disposition [optional] Useful for sending files as attachments.
+# bucket [optional] Specify a different bucket for this particular object.
+# server_side_encryption [optional] Encryption headers for buckets that require it.
+
 S3DIRECT_DESTINATIONS = {
-    # Allow anybody to upload any MIME type
-    'misc': ('uploads/misc',),
+    'example_destination': {
+        # REQUIRED
+        'key': 'uploads/images',
 
-    # Allow staff users to upload any MIME type
-    'files': ('uploads/files', lambda u: u.is_staff,),
-
-    # Allow anybody to upload jpeg's and png's.
-    'imgs': ('uploads/imgs', lambda u: True, ['image/jpeg', 'image/png'],),
-
-    # Allow authenticated users to upload mp4's
-    'vids': ('uploads/vids', lambda u: u.is_authenticated(), ['video/mp4'],),
-
-    # Allow anybody to upload any MIME type with a custom name function, eg:
-    'custom_filename': (lambda original_filename: 'images/unique.jpg',),
-
-    # Specify a non-default bucket for PDFs
-    'pdfs': ('/', lambda u: True, ['application/pdf'], None, 'pdf-bucket',),
-
-    # Allow logged in users to upload any type of file and give it a private acl:
-    'private': (
-        'uploads/vids',
-        lambda u: u.is_authenticated(),
-        '*',
-        'private')
-
-    # Allow authenticated users to upload with cache-control for a month and content-disposition set to attachment
-    'cached': (
-        'uploads/vids', 
-        lambda u: u.is_authenticated(), 
-        '*', 
-        'public-read', 
-        AWS_STORAGE_BUCKET_NAME, 
-        'max-age=2592000', 
-        'attachment')
+        # OPTIONAL
+        'auth': lambda u: u.is_staff, # Default allow anybody to upload
+        'allowed': ['image/jpeg', 'image/png', video/mp4], # Default allow all mime types
+        'bucket': 'pdf-bucket', # Default is 'AWS_STORAGE_BUCKET_NAME'
+        'acl': 'private', # Defaults to 'public-read'
+        'cache_control': 'max-age=2592000', # Default no cache-control
+        'content_disposition': 'attachment' # Default no content disposition
+        'content_length_range': (5000, 20000000), # Default allow any size
+        'server_side_encryption': 'AES256', # Default no encryption
+    }
 }
 ```
 
 ### urls.py
 
 ```python
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^s3direct/', include('s3direct.urls')),
-)
+]
 ```
 
 Run ```python manage.py collectstatic``` if required.
 
-## Use in Django admin only
+## Use in Django admin
 
 ### models.py
 
@@ -122,7 +108,7 @@ from django.db import models
 from s3direct.fields import S3DirectField
 
 class Example(models.Model):
-    video = S3DirectField(dest='destination_key_from_settings')
+    video = S3DirectField(dest='example_destination')
 ```
 
 ## Use the widget in a custom form
@@ -134,8 +120,10 @@ from django import forms
 from s3direct.widgets import S3DirectWidget
 
 class S3DirectUploadForm(forms.Form):
-    images = forms.URLField(widget=S3DirectWidget(dest='destination_key_from_settings'))
+    images = forms.URLField(widget=S3DirectWidget(dest='example_destination'))
 ```
+
+__*Optional.__ You can modify the HTML of the widget by overiding template __s3direct/templates/s3direct-widget.tpl__
 
 ### views.py
 
@@ -175,7 +163,8 @@ $ cd example
 
 # Add your AWS keys to settings.py
 
-$ python manage.py syncdb
+$ python manage.py migrate
+$ python manage.py createsuperuser
 $ python manage.py runserver 0.0.0.0:5000
 ```
 

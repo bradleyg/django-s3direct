@@ -35,9 +35,13 @@
     var parseURL = function(text) {
         var xml = new DOMParser().parseFromString(text, 'text/xml'),
             tag = xml.getElementsByTagName('Location')[0],
-            url = unescape(tag.childNodes[0].nodeValue)
+            url = decodeURIComponent(tag.childNodes[0].nodeValue)
 
-        return url
+        return url;
+    }
+
+    var parseNameFromUrl = function(url) {
+        return decodeURIComponent((url + '').replace(/\+/g, '%20'));
     }
 
     var parseJson = function(json) {
@@ -68,7 +72,7 @@
 
         url.value = parseURL(xml)
         link.setAttribute('href', url.value)
-        link.innerHTML = url.value.split('/').pop()
+        link.innerHTML = parseNameFromUrl(url.value).split('/').pop();
 
         el.className = 's3direct link-active'
         el.querySelector('.bar').style.width = '0%'
@@ -79,7 +83,7 @@
         var submitRow = document.querySelector('.submit-row')
         if( ! submitRow) return
 
-        var buttons = submitRow.querySelectorAll('input[type=submit]')
+        var buttons = submitRow.querySelectorAll('input[type=submit],button[type=submit]')
 
         if (status === true) concurrentUploads++
         else concurrentUploads--
@@ -107,7 +111,16 @@
 
         request('POST', url, form, {}, el, true, function(status, xml){
             disableSubmit(false)
-            if(status !== 201) return error(el, 'Sorry, failed to upload to S3.')
+            if(status !== 201) {
+                if (xml.indexOf('<MinSizeAllowed>') > -1) {
+                    return error(el, 'Sorry, the file is too small to be uploaded.')
+                }
+                else if (xml.indexOf('<MaxSizeAllowed>') > -1) {
+                    return error(el, 'Sorry, the file is too large to be uploaded.')
+                }
+
+                return error(el, 'Sorry, failed to upload file.')
+            }
             update(el, xml)
         })
     }
@@ -172,8 +185,10 @@
 
     document.addEventListener('DOMNodeInserted', function(e){
         if(e.target.tagName) {
-            var el = e.target.querySelector('.s3direct')
-            if(el) addHandlers(el)
+            var el = e.target.querySelectorAll('.s3direct');
+            [].forEach.call(el, function (element, index, array) {
+		addHandlers(element);
+	    });
         }
     })
 

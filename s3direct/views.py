@@ -2,12 +2,8 @@ import json
 
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
-from django.conf import settings
 
-from .utils import create_upload_data, get_at
-
-
-DESTINATIONS = getattr(settings, 'S3DIRECT_DESTINATIONS', None)
+from .utils import create_upload_data, get_s3direct_destinations
 
 
 @require_POST
@@ -15,20 +11,21 @@ def get_upload_params(request):
     content_type = request.POST['type']
     filename = request.POST['name']
 
-    dest = DESTINATIONS.get(request.POST['dest'])
-    file_extra = request.POST.get('file-extra', None)
+    dest = get_s3direct_destinations().get(request.POST['dest'])
 
     if not dest:
         data = json.dumps({'error': 'File destination does not exist.'})
         return HttpResponse(data, content_type="application/json", status=400)
 
-    key = get_at(0, dest)
-    auth = get_at(1, dest)
-    allowed = get_at(2, dest)
-    acl = get_at(3, dest)
-    bucket = get_at(4, dest)
-    cache_control = get_at(5, dest)
-    content_disposition = get_at(6, dest)
+    key = dest.get('key')
+    auth = dest.get('auth')
+    allowed = dest.get('allowed')
+    acl = dest.get('acl')
+    bucket = dest.get('bucket')
+    cache_control = dest.get('cache_control')
+    content_disposition = dest.get('content_disposition')
+    content_length_range = dest.get('content_length_range')
+    server_side_encryption = dest.get('server_side_encryption')
 
     if not acl:
         acl = 'public-read'
@@ -46,12 +43,17 @@ def get_upload_params(request):
         return HttpResponse(data, content_type="application/json", status=400)
 
     if hasattr(key, '__call__'):
-        key = key(filename, file_extra) if file_extra else key(filename)
+        key = key(filename, request)
+    elif key == '/':
+        key = '${filename}'
     else:
         # The literal string '${filename}' is an S3 field variable for key.
         # https://aws.amazon.com/articles/1434#aws-table
         key = '%s/${filename}' % key
 
-    data = create_upload_data(content_type, key, acl, bucket, cache_control, content_disposition)
+    data = create_upload_data(
+        content_type, key, acl, bucket, cache_control, content_disposition,
+        content_length_range, server_side_encryption
+    )
 
     return HttpResponse(json.dumps(data), content_type="application/json")
