@@ -169,18 +169,3 @@ $ python manage.py runserver 0.0.0.0:5000
 ```
 
 Visit ```http://localhost:5000/admin``` to view the admin widget and ```http://localhost:5000/form``` to view the custom form widget.
-
-
-## Pass in a value to use in a dynamic s3 key
-
-### Add _file-extra_ Field to Form
-    <form method="post">
-        {% csrf_token %}
-		{{ form.as_p }}
-		<input class="file-extra" type="hidden" value="{{ path_extra }}">
-		<input type="submit" name="save" value="Save"/>
-	</form>
-
-### Add key callable method
-    def key_name(filename, path_extra=None):
-        return u'{}/{}'.format(path_extra, filename) if path_extra else filename
