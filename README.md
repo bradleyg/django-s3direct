@@ -48,9 +48,13 @@ TEMPLATES = [{
     ...
 }]
 
-# AWS keys
-AWS_SECRET_ACCESS_KEY = ''
+# AWS 
+
+# If these are not defined, the EC2 instance profile is used.
+# This requires you to add boto3 or botocore to your project dependencies.
 AWS_ACCESS_KEY_ID = ''
+AWS_SECRET_ACCESS_KEY = ''
+
 AWS_STORAGE_BUCKET_NAME = ''
 
 # The region of your bucket, more info:
