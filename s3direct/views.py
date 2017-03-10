@@ -56,7 +56,7 @@ def get_upload_params(request):
     secret_access_key = getattr(settings, 'AWS_SECRET_ACCESS_KEY', None)
     token = None
 
-    if not all([access_key, secret_access_key]):
+    if access_key is None or secret_access_key is None:
         # Get credentials from instance profile if not defined in settings --
         # this avoids the need to put access credentials in the settings.py file.
         # Assumes we're running on EC2.
