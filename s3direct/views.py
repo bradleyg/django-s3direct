@@ -64,7 +64,8 @@ def get_upload_params(request):
         try:
             from botocore.credentials import InstanceMetadataProvider, InstanceMetadataFetcher
         except ImportError:
-            pass
+            InstanceMetadataProvider = None
+            InstanceMetadataFetcher = None
 
         if all([InstanceMetadataProvider, InstanceMetadataFetcher]):
             provider = InstanceMetadataProvider(iam_role_fetcher=InstanceMetadataFetcher(timeout=1000, num_attempts=2))
