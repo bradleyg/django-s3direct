@@ -104,8 +104,11 @@ USE_TZ = True
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 
+# If AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are not defined,
+# django-s3direct will attempt to use the EC2 instance profile instead.
 AWS_ACCESS_KEY_ID = ''
 AWS_SECRET_ACCESS_KEY = ''
+
 AWS_STORAGE_BUCKET_NAME = ''
 S3DIRECT_REGION = ''
 

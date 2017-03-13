@@ -104,7 +104,7 @@ class WidgetTestCase(TestCase):
                 u'type': u'image/jpeg'}
         response = self.client.post(reverse('s3direct'), data)
         response_dict = json.loads(response.content.decode())
-        self.assertTrue(u'x-amz-credential' in response_dict)
+        self.assertTrue(u'x-amz-signature' in response_dict)
         self.assertTrue(u'x-amz-credential' in response_dict)
         self.assertTrue(u'policy' in response_dict)
         changed = FOO_RESPONSE.copy()
