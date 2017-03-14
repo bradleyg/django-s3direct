@@ -69,6 +69,7 @@ Setup a CORS policy on your S3 bucket.
         <AllowedMethod>POST</AllowedMethod>
         <AllowedMethod>PUT</AllowedMethod>
         <MaxAgeSeconds>3000</MaxAgeSeconds>
+	<AllowedHeader>*</AllowedHeader>
     </CORSRule>
 </CORSConfiguration>
 ```
