@@ -28,8 +28,13 @@ settings.configure(
     TEMPLATES=[
         {
             'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'APP_DIRS': True
-        }
+            'APP_DIRS': True,
+            'OPTIONS': {
+                'context_processors': [
+                    "django.contrib.auth.context_processors.auth",
+                ]
+            }
+        },
     ],
     AWS_ACCESS_KEY_ID=environ.get('AWS_ACCESS_KEY_ID', ''),
     AWS_SECRET_ACCESS_KEY=environ.get('AWS_SECRET_ACCESS_KEY', ''),
