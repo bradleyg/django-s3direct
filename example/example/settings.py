@@ -106,11 +106,11 @@ STATIC_URL = '/static/'
 
 # If AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are not defined,
 # django-s3direct will attempt to use the EC2 instance profile instead.
-AWS_ACCESS_KEY_ID = ''
-AWS_SECRET_ACCESS_KEY = ''
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', '')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', '')
 
-AWS_STORAGE_BUCKET_NAME = ''
-S3DIRECT_REGION = ''
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', 'test-bucket')
+S3DIRECT_REGION = os.environ.get('S3DIRECT_REGION', 'us-east-1')
 
 
 def create_filename(filename):
