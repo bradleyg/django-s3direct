@@ -1,12 +1,9 @@
+var Cookies = require('js-cookie');
+
+
 (function(){
 
     "use strict"
-
-    var getCookie = function(name) {
-        var value = '; ' + document.cookie,
-            parts = value.split('; ' + name + '=')
-        if (parts.length == 2) return parts.pop().split(';').shift()
-    }
 
     var request = function(method, url, data, headers, el, showProgress, cb) {
         var req = new XMLHttpRequest()
@@ -131,7 +128,7 @@
             dest     = el.querySelector('.file-dest').value,
             url      = el.getAttribute('data-policy-url'),
             form     = new FormData(),
-            headers  = {'X-CSRFToken': getCookie('csrftoken')}
+            headers  = {'X-CSRFToken': Cookies.get('csrftoken')};
 
         form.append('type', file.type)
         form.append('name', file.name)

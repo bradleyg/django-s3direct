@@ -5,7 +5,9 @@
   "directories": {
     "example": "example"
   },
-  "dependencies": {},
+  "dependencies": {
+    "js-cookie": "^2.1.4"
+  },
   "devDependencies": {
     "browserify": "^14.3.0",
     "watchify": "^3.9.0"
