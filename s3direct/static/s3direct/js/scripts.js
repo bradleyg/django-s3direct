@@ -1,12 +1,15 @@
-var Cookies = require('js-cookie');
+const Cookies = require('js-cookie');
+const createHash = require('sha.js')
+const Evaporate = require('evaporate');
+const SparkMD5 = require('spark-md5');
 
 
 (function(){
 
     "use strict"
 
-    var request = function(method, url, data, headers, el, showProgress, cb) {
-        var req = new XMLHttpRequest()
+    var request = function(method, url, data, headers, el, cb) {
+        let req = new XMLHttpRequest()
         req.open(method, url, true)
 
         Object.keys(headers).forEach(function(key){
@@ -22,19 +25,7 @@ var Cookies = require('js-cookie');
             error(el, 'Sorry, failed to upload file.')
         }
 
-        req.upload.onprogress = function(data) {
-            progressBar(el, data, showProgress)
-        }
-
         req.send(data)
-    }
-
-    var parseURL = function(text) {
-        var xml = new DOMParser().parseFromString(text, 'text/xml'),
-            tag = xml.getElementsByTagName('Location')[0],
-            url = decodeURIComponent(tag.childNodes[0].nodeValue)
-
-        return url;
     }
 
     var parseNameFromUrl = function(url) {
@@ -48,14 +39,10 @@ var Cookies = require('js-cookie');
         return data
     }
 
-    var progressBar = function(el, data, showProgress) {
-        if(data.lengthComputable === false || showProgress === false) return
-
-        var pcnt = Math.round(data.loaded * 100 / data.total),
-            bar  = el.querySelector('.bar')
-
-        bar.style.width = pcnt + '%'
-    }
+    var updateProgressBar = function(element, progressRatio) {
+        var bar = element.querySelector('.bar');
+        bar.style.width = Math.round(progressRatio * 100) + '%';
+    };
 
     var error = function(el, msg) {
         el.className = 's3direct form-active'
@@ -63,19 +50,8 @@ var Cookies = require('js-cookie');
         alert(msg)
     }
 
-    var update = function(el, xml) {
-        var link = el.querySelector('.file-link'),
-            url  = el.querySelector('.file-url')
+    var concurrentUploads = 0;
 
-        url.value = parseURL(xml)
-        link.setAttribute('href', url.value)
-        link.innerHTML = parseNameFromUrl(url.value).split('/').pop();
-
-        el.className = 's3direct link-active'
-        el.querySelector('.bar').style.width = '0%'
-    }
-
-    var concurrentUploads = 0
     var disableSubmit = function(status) {
         var submitRow = document.querySelector('.submit-row')
         if( ! submitRow) return
@@ -90,63 +66,137 @@ var Cookies = require('js-cookie');
         })
     }
 
-    var upload = function(file, data, el) {
-        var form = new FormData()
+    const beginUpload = function (element) {
+        disableSubmit(true);
+        element.className = 's3direct progress-active'
+    };
 
-        disableSubmit(true)
+    const finishUpload = function (element, awsBucketUrl, objectKey) {
+        const link = element.querySelector('.file-link');
+        const url = element.querySelector('.file-url');
+        url.value = awsBucketUrl + '/' + objectKey;
+        link.setAttribute('href', url.value);
+        link.innerHTML = parseNameFromUrl(url.value).split('/').pop();
 
-        if (data === null) return error(el, 'Sorry, could not get upload URL.')
+        element.className = 's3direct link-active';
+        element.querySelector('.bar').style.width = '0%';
+        disableSubmit(false);
+    };
 
-        el.className = 's3direct progress-active'
-        var url  = data['form_action']
-        delete data['form_action']
+    const computeMd5 = function (data) {
+        return btoa(SparkMD5.ArrayBuffer.hash(data, true));
+    };
 
-        Object.keys(data).forEach(function(key){
-            form.append(key, data[key])
-        })
-        form.append('file', file)
+    const computeSha256 = function (data) {
+        return createHash('sha256').update(data, 'utf-8').digest('hex');
+    };
 
-        request('POST', url, form, {}, el, true, function(status, xml){
-            disableSubmit(false)
-            if(status !== 201) {
-                if (xml.indexOf('<MinSizeAllowed>') > -1) {
-                    return error(el, 'Sorry, the file is too small to be uploaded.')
-                }
-                else if (xml.indexOf('<MaxSizeAllowed>') > -1) {
-                    return error(el, 'Sorry, the file is too large to be uploaded.')
-                }
+    const initiateMultipartUpload = function (element, signingUrl, objectKey, awsKey, awsRegion, awsBucket, awsBucketUrl, cacheControl, contentDisposition, acl, serverSideEncryption, file) {
+        // Enclosed so we can propagate errors to the correct `element` in case of failure.
+        const getAwsV4Signature = function (signParams, signHeaders, stringToSign, signatureDateTime, canonicalRequest) {
+            return new Promise(function (resolve, reject) {
+                const form = new FormData();
+                form.append('to_sign', stringToSign);
+                form.append('datetime', signatureDateTime);
+                const headers = {'X-CSRFToken': Cookies.get('csrftoken')};
+                request('POST', signingUrl, form, headers, element, function (status, response) {
+                    switch (status) {
+                        case 200:
+                            resolve(response);
+                            break;
+                        default:
+                            error(element, 'Could not generate AWS v4 signature.')
+                            reject();
+                            break;
+                    }
+                });
+            })
+        };
 
-                return error(el, 'Sorry, failed to upload file.')
+        const generateAmazonHeaders = function (acl, serverSideEncryption) {
+            // Either of these may be null, so don't add them unless they exist:
+            let headers = {}
+            if (acl) headers['x-amz-acl'] = acl;
+            if (serverSideEncryption) headers['x-amz-server-side-encryption'] = serverSideEncryption;
+            return headers;
+        };
+
+        Evaporate.create(
+            {
+                //signerUrl: signingUrl,
+                customAuthMethod: getAwsV4Signature,
+                aws_key: awsKey,
+                bucket: awsBucket,
+                awsRegion: awsRegion,
+                computeContentMd5: true,
+                cryptoMd5Method: computeMd5,
+                cryptoHexEncodedHash256: computeSha256,
+                partSize: 20 * 1024 * 1024,
+                logging: true,
+                debug: true,
             }
-            update(el, xml)
-        })
-    }
+        ).then(function (evaporate) {
+            beginUpload(element);
+            evaporate.add({
+                name: objectKey,
+                file: file,
+                contentType: file.type,
+                xAmzHeadersAtInitiate: generateAmazonHeaders(acl, serverSideEncryption),
+                notSignedHeadersAtInitiate: {'Cache-Control': cacheControl, 'Content-Disposition': contentDisposition},
+                progress: function (progressRatio, stats) { updateProgressBar(element, progressRatio); },
+            }).then(
+                function (awsS3ObjectKey) {
+                    console.log('Successfully uploaded to:', awsS3ObjectKey);
+                    finishUpload(element, awsBucketUrl, awsS3ObjectKey);
+                },
+                function (reason) {
+                    console.error('Failed to upload because:', reason);
+                    return error(element, reason)
+                }
+            )
+        });
+    };
 
-    var getUploadURL = function(e) {
-        var el       = e.target.parentElement,
-            file     = el.querySelector('.file-input').files[0],
-            dest     = el.querySelector('.file-dest').value,
-            url      = el.getAttribute('data-policy-url'),
-            form     = new FormData(),
-            headers  = {'X-CSRFToken': Cookies.get('csrftoken')};
+    var checkFileAndInitiateUpload = function(event) {
+        console.log('Checking file and initiating upload…')
+        var element             = event.target.parentElement,
+            file                = element.querySelector('.file-input').files[0],
+            dest                = element.querySelector('.file-dest').value,
+            destinationCheckUrl = element.getAttribute('data-policy-url'),
+            signerUrl           = element.getAttribute('data-signing-url'),
+            form                = new FormData(),
+            headers             = {'X-CSRFToken': Cookies.get('csrftoken')};
 
-        form.append('type', file.type)
-        form.append('name', file.name)
         form.append('dest', dest)
-
-        request('POST', url, form, headers, el, false, function(status, json){
-            var data = parseJson(json)
-
+        form.append('name', file.name)
+        form.append('type', file.type)
+        form.append('size', file.size)
+        request('POST', destinationCheckUrl, form, headers, element, function(status, response) {
+            const uploadParameters = parseJson(response)
             switch(status) {
                 case 200:
-                    upload(file, data, el)
-                    break
+                    initiateMultipartUpload(
+                        element,
+                        signerUrl,
+                        uploadParameters.object_key,
+                        uploadParameters.access_key_id,
+                        uploadParameters.region,
+                        uploadParameters.bucket,
+                        uploadParameters.bucket_url,
+                        uploadParameters.cache_control,
+                        uploadParameters.content_disposition,
+                        uploadParameters.acl,
+                        uploadParameters.server_side_encryption,
+                        file
+                    );
+                    break;
                 case 400:
                 case 403:
-                    error(el, data.error)
+                case 500:
+                    error(element, uploadParameters.error)
                     break;
                 default:
-                    error(el, 'Sorry, could not get upload URL.')
+                    error(element, 'Sorry, could not get upload URL.')
             }
         })
     }
@@ -161,6 +211,7 @@ var Cookies = require('js-cookie');
     }
 
     var addHandlers = function(el) {
+        console.log('Adding django-s3direct handlers…');
         var url    = el.querySelector('.file-url'),
             input  = el.querySelector('.file-input'),
             remove = el.querySelector('.file-remove'),
@@ -169,7 +220,7 @@ var Cookies = require('js-cookie');
         el.className = 's3direct ' + status + '-active'
 
         remove.addEventListener('click', removeUpload, false)
-        input.addEventListener('change', getUploadURL, false)
+        input.addEventListener('change', checkFileAndInitiateUpload, false)
     }
 
     document.addEventListener('DOMContentLoaded', function(e) {

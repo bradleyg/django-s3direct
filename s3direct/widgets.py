@@ -34,6 +34,7 @@ class S3DirectWidget(widgets.TextInput):
         tpl = os.path.join('s3direct', 's3direct-widget.tpl')
         output = render_to_string(tpl, {
             'policy_url': reverse('s3direct'),
+            'signing_url': reverse('s3direct-signing'),
             'element_id': self.build_attrs(attrs).get('id', '') if attrs else '',
             'file_name': file_name,
             'dest': self.dest,

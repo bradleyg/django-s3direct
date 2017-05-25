@@ -6,7 +6,10 @@
     "example": "example"
   },
   "dependencies": {
-    "js-cookie": "^2.1.4"
+    "js-cookie": "^2.1.4",
+    "evaporate": "^2.1.1",
+    "sha.js": "^2.4.8",
+    "spark-md5": "^3.0.0"
   },
   "devDependencies": {
     "browserify": "^14.3.0",
