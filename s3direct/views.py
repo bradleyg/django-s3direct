@@ -46,11 +46,9 @@ def get_upload_params(request):
     elif hasattr(key, '__call__'):
         object_key = key(file_name)
     elif key == '/':
-        # The literal string '${filename}' is an S3 field variable for key.
-        # https://aws.amazon.com/articles/1434#aws-table
-        object_key = '${filename}'
+        object_key = file_name
     else:
-        object_key = '%s/${filename}' % key
+        object_key = '%s/%s' % (key, file_name)
 
     bucket = dest.get('bucket') or settings.AWS_STORAGE_BUCKET_NAME
     region = dest.get('region') or getattr(settings, 'S3DIRECT_REGION', None) or 'us-east-1'
