@@ -8,55 +8,59 @@ const SparkMD5 = require('spark-md5');
 
     "use strict"
 
-    var request = function(method, url, data, headers, el, cb) {
+    const request = function (method, url, data, headers, el, cb) {
         let req = new XMLHttpRequest()
         req.open(method, url, true)
 
-        Object.keys(headers).forEach(function(key){
+        Object.keys(headers).forEach(function (key) {
             req.setRequestHeader(key, headers[key])
-        })
+        });
 
-        req.onload = function() {
+        req.onload = function () {
             cb(req.status, req.responseText)
-        }
+        };
 
-        req.onerror = req.onabort = function() {
+        req.onerror = req.onabort = function () {
             disableSubmit(false)
             error(el, 'Sorry, failed to upload file.')
-        }
+        };
 
         req.send(data)
-    }
+    };
 
-    var parseNameFromUrl = function(url) {
+    const parseNameFromUrl = function (url) {
         return decodeURIComponent((url + '').replace(/\+/g, '%20'));
-    }
+    };
 
-    var parseJson = function(json) {
-        var data
-        try {data = JSON.parse(json)}
-        catch(e){ data = null }
+    const parseJson = function (json) {
+        let data;
+        try {
+            data = JSON.parse(json);
+        }
+        catch (e) {
+            data = null;
+        }
         return data
-    }
+    };
 
-    var updateProgressBar = function(element, progressRatio) {
-        var bar = element.querySelector('.bar');
+    const updateProgressBar = function (element, progressRatio) {
+        const bar = element.querySelector('.bar');
         bar.style.width = Math.round(progressRatio * 100) + '%';
     };
 
-    var error = function(el, msg) {
+    const error = function(el, msg) {
         el.className = 's3direct form-active'
         el.querySelector('.file-input').value = ''
         alert(msg)
-    }
+    };
 
-    var concurrentUploads = 0;
+    let concurrentUploads = 0;
 
-    var disableSubmit = function(status) {
-        var submitRow = document.querySelector('.submit-row')
+    const disableSubmit = function(status) {
+        const submitRow = document.querySelector('.submit-row')
         if( ! submitRow) return
 
-        var buttons = submitRow.querySelectorAll('input[type=submit],button[type=submit]')
+        const buttons = submitRow.querySelectorAll('input[type=submit],button[type=submit]');
 
         if (status === true) concurrentUploads++
         else concurrentUploads--
@@ -157,15 +161,15 @@ const SparkMD5 = require('spark-md5');
         });
     };
 
-    var checkFileAndInitiateUpload = function(event) {
+    const checkFileAndInitiateUpload = function(event) {
         console.log('Checking file and initiating upload…')
-        var element             = event.target.parentElement,
-            file                = element.querySelector('.file-input').files[0],
-            dest                = element.querySelector('.file-dest').value,
-            destinationCheckUrl = element.getAttribute('data-policy-url'),
-            signerUrl           = element.getAttribute('data-signing-url'),
-            form                = new FormData(),
-            headers             = {'X-CSRFToken': Cookies.get('csrftoken')};
+        const element             = event.target.parentElement,
+              file                = element.querySelector('.file-input').files[0],
+              dest                = element.querySelector('.file-dest').value,
+              destinationCheckUrl = element.getAttribute('data-policy-url'),
+              signerUrl           = element.getAttribute('data-signing-url'),
+              form                = new FormData(),
+              headers             = {'X-CSRFToken': Cookies.get('csrftoken')};
 
         form.append('dest', dest)
         form.append('name', file.name)
@@ -201,38 +205,38 @@ const SparkMD5 = require('spark-md5');
         })
     }
 
-    var removeUpload = function(e) {
+    const removeUpload = function (e) {
         e.preventDefault()
 
-        var el = e.target.parentElement
+        const el = e.target.parentElement
         el.querySelector('.file-url').value = ''
         el.querySelector('.file-input').value = ''
         el.className = 's3direct form-active'
-    }
+    };
 
-    var addHandlers = function(el) {
+    const addHandlers = function (el) {
         console.log('Adding django-s3direct handlers…');
-        var url    = el.querySelector('.file-url'),
-            input  = el.querySelector('.file-input'),
-            remove = el.querySelector('.file-remove'),
-            status = (url.value === '') ? 'form' : 'link'
+        const url = el.querySelector('.file-url'),
+              input = el.querySelector('.file-input'),
+              remove = el.querySelector('.file-remove'),
+              status = (url.value === '') ? 'form' : 'link';
 
         el.className = 's3direct ' + status + '-active'
 
         remove.addEventListener('click', removeUpload, false)
         input.addEventListener('change', checkFileAndInitiateUpload, false)
-    }
+    };
 
-    document.addEventListener('DOMContentLoaded', function(e) {
-        ;[].forEach.call(document.querySelectorAll('.s3direct'), addHandlers)
-    })
+    document.addEventListener('DOMContentLoaded', function(event) {
+        [].forEach.call(document.querySelectorAll('.s3direct'), addHandlers)
+    });
 
-    document.addEventListener('DOMNodeInserted', function(e){
-        if(e.target.tagName) {
-            var el = e.target.querySelectorAll('.s3direct');
+    document.addEventListener('DOMNodeInserted', function(event){
+        if(event.target.tagName) {
+            const el = event.target.querySelectorAll('.s3direct');
             [].forEach.call(el, function (element, index, array) {
-		addHandlers(element);
-	    });
+                addHandlers(element);
+            });
         }
     })
 
