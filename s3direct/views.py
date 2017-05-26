@@ -5,11 +5,13 @@ from urllib.parse import unquote
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotFound, \
     HttpResponseServerError
+from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 
 from .utils import get_aws_v4_signature, get_aws_v4_signing_key, get_s3direct_destinations
 
 
+@csrf_protect
 @require_POST
 def get_upload_params(request):
     """Authorises user and validates given file properties."""
@@ -73,6 +75,7 @@ def get_upload_params(request):
     return HttpResponse(json.dumps(upload_data), content_type='application/json')
 
 
+@csrf_protect
 @require_POST
 def generate_aws_v4_signature(request):
     message = unquote(request.POST['to_sign'])
