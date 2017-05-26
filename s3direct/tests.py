@@ -1,4 +1,6 @@
+import hashlib
 import json
+from datetime import datetime
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -36,17 +38,19 @@ POLICY_RESPONSE = {
     u'server_side_encryption': None,
 }
 
-
-@override_settings(S3DIRECT_DESTINATIONS={
+TEST_DESTINATIONS = {
     'misc': {'key': lambda original_filename: 'images/unique.jpg'},
     'files': {'key': 'uploads/files', 'auth': lambda u: u.is_staff},
-    'imgs': {'key': 'uploads/imgs', 'auth': lambda u: True, 'allowed': ['image/jpeg', 'image/png']},
+    'imgs': {'key': 'uploads/imgs', 'allowed': ['image/jpeg', 'image/png']},
     'thumbs': {'key': 'uploads/thumbs', 'allowed': ['image/jpeg'], 'content_length_range': (1000, 50000)},
     'vids': {'key': 'uploads/vids', 'auth': lambda u: u.is_authenticated(), 'allowed': ['video/mp4']},
     'cached': {'key': 'uploads/vids', 'auth': lambda u: u.is_authenticated(), 'allowed': '*',
                'acl': 'authenticated-read', 'bucket': 'astoragebucketname', 'cache_control': 'max-age=2592000',
                'content_disposition': 'attachment', 'server_side_encryption': 'AES256'},
-})
+}
+
+
+@override_settings(S3DIRECT_DESTINATIONS=TEST_DESTINATIONS)
 class WidgetTestCase(TestCase):
     """
     This allows us to have 2 version of the same tests but with different
@@ -136,18 +140,44 @@ class WidgetTestCase(TestCase):
 
 
 class SignatureViewTestCase(TestCase):
+    EXAMPLE_SIGNING_DATE = datetime(2017, 4, 6, 8, 30)
+    EXPECTED_SIGNATURE = b'5d8755e65140f66cff5ea78a0454177c366fa1ebaa4f87bd9df673a62c41f966'
+
     def setUp(self):
         admin = User.objects.create_superuser('admin', 'u@email.com', 'admin')
         admin.save()
 
-    def test_expected_signature(self):
-        # TODO - generate base64 encoding of a policy document and expected signature
-        pass
+    def create_dummy_signing_request(self):
+        signing_date = self.EXAMPLE_SIGNING_DATE
+        canonical_request = '{request_method}\n/{bucket}/{object_key}\nhost={host}\nx-amz-date:{request_datetime}\n\nhost;x-amz-date\n{hashed_payload}'.format(
+                request_method='GET',
+                bucket='abucketname',
+                object_key='an/object/key',
+                host='s3.amazonaws.com',
+                request_datetime=datetime.strftime(signing_date, '%Y%m%dT%H%M%SZ'),
+                hashed_payload='blahblahblah',
+        )
+        credential_scope = '{request_date}/{region}/s3/aws4_request'.format(
+                request_date=datetime.strftime(signing_date, '%Y%m%d'),
+                region='eu-west-1',
+        )
+        hashed_canonical_request = hashlib.sha256(canonical_request.encode('utf-8')).hexdigest()
+        string_to_sign = '{algorithm}\n{request_datetime}\n{credential_scope}\n{hashed_canonical_request}'.format(
+                algorithm='AWS-HMAC-SHA256',
+                request_datetime=datetime.strftime(signing_date, '%Y%m%dT%H%M%SZ'),
+                credential_scope=credential_scope,
+                hashed_canonical_request=hashed_canonical_request,
+        )
+        return string_to_sign, signing_date,
 
-    def test_signing_logged_in(self):
-        pass
-
-    def test_signing_logged_out(self):
-        pass
-
-    # TODO - test CSRF requirement
+    def test_signing(self):
+        """Check that the signature is as expected for a known signing request."""
+        string_to_sign, signing_date = self.create_dummy_signing_request()
+        self.client.login(username='admin', password='admin')
+        response = self.client.post(
+            reverse('s3direct-signing'),
+            data={'to_sign': string_to_sign, 'datetime': datetime.strftime(signing_date, '%Y%m%dT%H%M%SZ')},
+            enforce_csrf_checks=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, self.EXPECTED_SIGNATURE)
