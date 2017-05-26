@@ -40,7 +40,7 @@ POLICY_RESPONSE = {
 
 TEST_DESTINATIONS = {
     'misc': {'key': lambda original_filename: 'images/unique.jpg'},
-    'files': {'key': 'uploads/files', 'auth': lambda u: u.is_staff},
+    'files': {'key': '/', 'auth': lambda u: u.is_staff},
     'imgs': {'key': 'uploads/imgs', 'allowed': ['image/jpeg', 'image/png']},
     'thumbs': {'key': 'uploads/thumbs', 'allowed': ['image/jpeg'], 'content_length_range': (1000, 50000)},
     'vids': {'key': 'uploads/vids', 'auth': lambda u: u.is_authenticated(), 'allowed': ['video/mp4']},
@@ -109,15 +109,29 @@ class WidgetTestCase(TestCase):
         response = self.client.post(reverse('s3direct'), data)
         self.assertEqual(response.status_code, 403)
 
-    # TODO: test object key functions
     def test_default_upload_key(self):
-        pass
+        data = {'dest': 'files', 'name': 'image.jpg', 'type': 'image/jpeg', 'size': 1000}
+        self.client.login(username='admin', password='admin')
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 200)
+        policy_dict = json.loads(response.content.decode())
+        self.assertEqual(policy_dict['object_key'], data['name'])
 
     def test_directory_object_key(self):
-        pass
+        data = {'dest': 'imgs', 'name': 'image.jpg', 'type': 'image/jpeg', 'size': 1000}
+        self.client.login(username='admin', password='admin')
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 200)
+        policy_dict = json.loads(response.content.decode())
+        self.assertEqual(policy_dict['object_key'], 'uploads/imgs/%s' % data['name'])
 
     def test_function_object_key(self):
-        pass
+        data = {'dest': 'misc', 'name': 'image.jpg', 'type': 'image/jpeg', 'size': 1000}
+        self.client.login(username='admin', password='admin')
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 200)
+        policy_dict = json.loads(response.content.decode())
+        self.assertNotEqual(policy_dict['object_key'], data['name'])
 
     def test_policy_conditions(self):
         self.client.login(username='admin', password='admin')
