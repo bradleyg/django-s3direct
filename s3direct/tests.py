@@ -52,13 +52,6 @@ TEST_DESTINATIONS = {
 
 @override_settings(S3DIRECT_DESTINATIONS=TEST_DESTINATIONS)
 class WidgetTestCase(TestCase):
-    """
-    This allows us to have 2 version of the same tests but with different
-    settings. As opposed to inheriting test methods as doing that makes the
-    failure stack hard to parse.
-    TODO: Get rid of this base class and the appropriate subclass when
-    positional setting support is dropped. See #48
-    """
 
     def setUp(self):
         admin = User.objects.create_superuser('admin', 'u@email.com', 'admin')
