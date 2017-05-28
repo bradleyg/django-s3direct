@@ -47,7 +47,7 @@ def get_s3direct_destinations():
 # AWS Signature v4 Key derivation functions. See:
 # http://docs.aws.amazon.com/general/latest/gr/signature-v4-examples.html#signature-v4-examples-python
 
-def sign(key: bytes, message: str):
+def sign(key, message):
     return hmac.new(key, message.encode("utf-8"), hashlib.sha256).digest()
 
 

@@ -1,6 +1,9 @@
 import json
 from datetime import datetime
-from urllib.parse import unquote
+try:
+    from urllib.parse import unquote
+except ImportError:
+    from urlparse import unquote
 
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotFound, \
