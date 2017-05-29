@@ -146,9 +146,10 @@ class WidgetTestCase(TestCase):
         self.assertEqual(policy_dict['server_side_encryption'], u'AES256')
 
 
+@override_settings(AWS_ACCESS_KEY_ID='abc', AWS_SECRET_ACCESS_KEY='123')
 class SignatureViewTestCase(TestCase):
     EXAMPLE_SIGNING_DATE = datetime(2017, 4, 6, 8, 30)
-    EXPECTED_SIGNATURE = b'5d8755e65140f66cff5ea78a0454177c366fa1ebaa4f87bd9df673a62c41f966'
+    EXPECTED_SIGNATURE = b'76ea6730e10ddc9d392f40bf64872ddb1728cab58301dccb9efb67cb560a9272'
 
     def setUp(self):
         admin = User.objects.create_superuser('admin', 'u@email.com', 'admin')
