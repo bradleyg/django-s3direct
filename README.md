@@ -32,7 +32,13 @@ in effect that grants permission to upload to S3:
 "Statement": [
   {
     "Effect": "Allow",
-    "Action": ["s3:PutObject", "s3:PutObjectAcl"],
+    "Action": [
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:PutObjectAcl",
+      "s3:ListMultipartUploadParts",
+      "s3:AbortMultipartUpload"
+    ],
     "Resource": "arn:aws:s3:::your-bucket-name/*"
   }
 ]
@@ -66,9 +72,12 @@ Setup a CORS policy on your S3 bucket.
 <CORSConfiguration>
     <CORSRule>
         <AllowedOrigin>http://yourdomain.com:8080</AllowedOrigin>
-        <AllowedMethod>POST</AllowedMethod>
+        <AllowedMethod>GET</AllowedMethod>
+        <AllowedMethod>HEAD</AllowedMethod>
         <AllowedMethod>PUT</AllowedMethod>
+        <AllowedMethod>POST</AllowedMethod>
         <MaxAgeSeconds>3000</MaxAgeSeconds>
+        <ExposeHeader>ETag</ExposeHeader>
         <AllowedHeader>*</AllowedHeader>
     </CORSRule>
 </CORSConfiguration>
