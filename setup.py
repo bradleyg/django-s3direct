@@ -7,7 +7,7 @@ f.close()
 
 setup(
     name='django-s3direct',
-    version='0.4.11',
+    version='0.4.11.multipart-upload.3',
     description=('Add direct uploads to S3 functionality with a progress bar'
                  ' to file input fields.'),
     long_description=readme,

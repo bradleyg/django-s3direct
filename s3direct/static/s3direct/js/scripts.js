@@ -138,6 +138,8 @@ const SparkMD5 = require('spark-md5');
                 partSize: 20 * 1024 * 1024,
                 logging: true,
                 debug: true,
+                allowS3ExistenceOptimization: true,
+                s3FileCacheHoursAgo: 12,
             }
         ).then(function (evaporate) {
             beginUpload(element);
