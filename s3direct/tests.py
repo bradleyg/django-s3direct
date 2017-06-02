@@ -47,6 +47,8 @@ TEST_DESTINATIONS = {
     'cached': {'key': 'uploads/vids', 'auth': lambda u: u.is_authenticated(), 'allowed': '*',
                'acl': 'authenticated-read', 'bucket': 'astoragebucketname', 'cache_control': 'max-age=2592000',
                'content_disposition': 'attachment', 'server_side_encryption': 'AES256'},
+    'accidental-leading-slash': {'key': '/directory/leading'},
+    'accidental-trailing-slash': {'key': 'directory/trailing/'},
 }
 
 
@@ -124,6 +126,24 @@ class WidgetTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         policy_dict = json.loads(response.content.decode())
         self.assertEqual(policy_dict['object_key'], 'uploads/imgs/%s' % data['name'])
+
+    def test_directory_object_key_with_leading_slash(self):
+        """Don't want <bucket>//directory/leading/filename.jpeg"""
+        data = {'dest': 'accidental-leading-slash', 'name': 'filename.jpeg', 'type': 'image/jpeg', 'size': 1000}
+        self.client.login(username='admin', password='admin')
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 200)
+        policy_dict = json.loads(response.content.decode())
+        self.assertEqual(policy_dict['object_key'], 'directory/leading/filename.jpeg')
+
+    def test_directory_object_key_with_trailing_slash(self):
+        """Don't want <bucket>/directory/trailing//filename.jpeg"""
+        data = {'dest': 'accidental-trailing-slash', 'name': 'filename.jpeg', 'type': 'image/jpeg', 'size': 1000}
+        self.client.login(username='admin', password='admin')
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 200)
+        policy_dict = json.loads(response.content.decode())
+        self.assertEqual(policy_dict['object_key'], 'directory/trailing/filename.jpeg')
 
     def test_function_object_key(self):
         data = {'dest': 'misc', 'name': 'image.jpg', 'type': 'image/jpeg', 'size': 1000}

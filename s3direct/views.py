@@ -53,7 +53,7 @@ def get_upload_params(request):
     elif key == '/':
         object_key = file_name
     else:
-        object_key = '%s/%s' % (key, file_name)
+        object_key = '%s/%s' % (key.strip('/'), file_name)
 
     bucket = dest.get('bucket') or settings.AWS_STORAGE_BUCKET_NAME
     region = dest.get('region') or getattr(settings, 'S3DIRECT_REGION', None) or 'us-east-1'
