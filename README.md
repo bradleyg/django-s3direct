@@ -16,6 +16,23 @@ Install with Pip:
 
 ```pip install django-s3direct```
 
+### Backwards-Compatiblity
+
+With 1.0.0 supporting multipart-upload, most of the internals have been
+changed, a new endpoint has been added, and support has been dropped for
+old style positional settings. There are also new requirements to allow
+`GET` and `HEAD` cross-origin requests to S3, as well as
+the `ETAG` header. Django compatibility has been raised to `>=1.8`.
+
+If you used any of these features or relied on the previous behaviour,
+it's recommended that you pin `django-s3direct` to `<1.0` until you
+can test the new version in your project:
+
+```sh
+pip install 'django-s3direct <1.0'
+```
+
+
 ## AWS Setup
 
 ### Access Credentials
