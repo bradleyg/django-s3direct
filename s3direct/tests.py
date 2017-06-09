@@ -1,6 +1,7 @@
 import json
 from base64 import b64decode
 
+from django.conf import settings
 from django.test.utils import override_settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse, resolve
@@ -25,7 +26,7 @@ HTML_OUTPUT = (
 
 FOO_RESPONSE = {
     u'x-amz-algorithm': u'AWS4-HMAC-SHA256',
-    u'form_action': u'https://s3.amazonaws.com/test-bucket',
+    u'form_action': u'https://s3.amazonaws.com/{}'.format(settings.AWS_STORAGE_BUCKET_NAME),
     u'success_action_status': 201,
     u'acl': u'public-read',
     u'key': u'uploads/imgs/${filename}',
@@ -104,7 +105,7 @@ class WidgetTestCase(TestCase):
                 u'type': u'image/jpeg'}
         response = self.client.post(reverse('s3direct'), data)
         response_dict = json.loads(response.content.decode())
-        self.assertTrue(u'x-amz-credential' in response_dict)
+        self.assertTrue(u'x-amz-signature' in response_dict)
         self.assertTrue(u'x-amz-credential' in response_dict)
         self.assertTrue(u'policy' in response_dict)
         changed = FOO_RESPONSE.copy()

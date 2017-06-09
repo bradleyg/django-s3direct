@@ -16,7 +16,49 @@ Install with Pip:
 
 ```pip install django-s3direct```
 
-## S3 Setup
+## AWS Setup
+
+### Access Credentials
+
+You have two options of providing access to AWS resources:
+
+1. Add credentials of an IAM user to your Django settings (see below)
+2. Use the EC2 instance profile and its attached IAM role
+
+Whether you are using an IAM user or a role, there needs to be an IAM policy
+in effect that grants permission to upload to S3:
+
+```json
+"Statement": [
+  {
+    "Effect": "Allow",
+    "Action": ["s3:PutObject", "s3:PutObjectAcl"],
+    "Resource": "arn:aws:s3:::your-bucket-name/*"
+  }
+]
+```
+
+If the instance profile is to be used, the IAM role needs to have a
+Trust Relationship configuration applied:
+
+```json
+"Statement": [
+	{
+		"Effect": "Allow",
+		"Principal": {
+			"Service": "ec2.amazonaws.com"
+		},
+		"Action": "sts:AssumeRole"
+	}
+]
+```
+
+Note that in order to use the EC2 instance profile, django-s3direct needs
+to query the EC2 instance metadata using utility functions from the
+[botocore] [] package. You already have `botocore` installed if `boto3`
+is a dependency of your project.
+
+### S3 CORS
 
 Setup a CORS policy on your S3 bucket.
 
@@ -27,6 +69,7 @@ Setup a CORS policy on your S3 bucket.
         <AllowedMethod>POST</AllowedMethod>
         <AllowedMethod>PUT</AllowedMethod>
         <MaxAgeSeconds>3000</MaxAgeSeconds>
+        <AllowedHeader>*</AllowedHeader>
     </CORSRule>
 </CORSConfiguration>
 ```
@@ -48,9 +91,14 @@ TEMPLATES = [{
     ...
 }]
 
-# AWS keys
-AWS_SECRET_ACCESS_KEY = ''
+# AWS
+
+# If these are not defined, the EC2 instance profile and IAM role are used.
+# This requires you to add boto3 (or botocore, which is a dependency of boto3)
+# to your project dependencies.
 AWS_ACCESS_KEY_ID = ''
+AWS_SECRET_ACCESS_KEY = ''
+
 AWS_STORAGE_BUCKET_NAME = ''
 
 # The region of your bucket, more info:
@@ -78,11 +126,11 @@ S3DIRECT_DESTINATIONS = {
 
         # OPTIONAL
         'auth': lambda u: u.is_staff, # Default allow anybody to upload
-        'allowed': ['image/jpeg', 'image/png', video/mp4], # Default allow all mime types
+        'allowed': ['image/jpeg', 'image/png', 'video/mp4'],  # Default allow all mime types
         'bucket': 'pdf-bucket', # Default is 'AWS_STORAGE_BUCKET_NAME'
         'acl': 'private', # Defaults to 'public-read'
         'cache_control': 'max-age=2592000', # Default no cache-control
-        'content_disposition': 'attachment' # Default no content disposition
+        'content_disposition': 'attachment',  # Default no content disposition
         'content_length_range': (5000, 20000000), # Default allow any size
         'server_side_encryption': 'AES256', # Default no encryption
     }
@@ -153,15 +201,22 @@ class MyView(FormView):
 </html>
 ```
 
+
 ## Examples
+
 Examples of both approaches can be found in the examples folder. To run them:
+
 ```shell
 $ git clone git@github.com:bradleyg/django-s3direct.git
 $ cd django-s3direct
 $ python setup.py install
 $ cd example
 
-# Add your AWS keys to settings.py
+# Add your AWS keys to your environment
+export AWS_ACCESS_KEY_ID='…'
+export AWS_SECRET_ACCESS_KEY='…'
+export AWS_STORAGE_BUCKET_NAME='…'
+export S3DIRECT_REGION='…'    # e.g. 'eu-west-1'
 
 $ python manage.py migrate
 $ python manage.py createsuperuser
@@ -169,3 +224,5 @@ $ python manage.py runserver 0.0.0.0:5000
 ```
 
 Visit ```http://localhost:5000/admin``` to view the admin widget and ```http://localhost:5000/form``` to view the custom form widget.
+
+[botocore]: https://github.com/boto/botocore
