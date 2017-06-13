@@ -1,4 +1,5 @@
 import json
+from boto.s3.connection import S3Connection
 
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
@@ -77,10 +78,31 @@ def get_upload_params(request):
             data = json.dumps({'error': 'Failed to access EC2 instance metadata due to missing dependency.'})
             return HttpResponse(data, content_type="application/json", status=500)
 
-
     data = create_upload_data(
         content_type, key, acl, bucket, cache_control, content_disposition,
         content_length_range, server_side_encryption, access_key, secret_access_key, token
     )
 
-    return HttpResponse(json.dumps(data), content_type="application/json")
+    url = None
+
+    # Generate signed URL for private document access
+    if acl == "private":
+        c = S3Connection(
+            settings.AWS_ACCESS_KEY_ID,
+            settings.AWS_SECRET_ACCESS_KEY
+        )
+        url = c.generate_url(
+            expires_in=long(5*60),  # 5 mins
+            method='GET',
+            bucket=settings.AWS_PRIVATE_STORAGE_BUCKET_NAME,
+            key=data["key"],
+            query_auth=True,
+            force_http=True
+        )
+
+    response = {
+        "aws_payload": data,
+        "private_access_url": url,
+    }
+
+    return HttpResponse(json.dumps(response), content_type="application/json")

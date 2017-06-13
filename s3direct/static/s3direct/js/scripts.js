@@ -2,6 +2,18 @@
 
     "use strict"
 
+    var i18n_strings;
+    try {
+        i18n_strings = djangoS3Upload.i18n_strings;
+    } catch(e) {
+        i18n_strings = {
+            "no_upload_failed": "Sorry, failed to upload file.",
+            "no_upload_url": "Sorry, could not get upload URL.",
+            "no_file_too_large": "Sorry, the file is too large to be uploaded.",
+            "no_file_too_small": "Sorry, the file is too small to be uploaded."
+        };
+    }
+
     var getCookie = function(name) {
         var value = '; ' + document.cookie,
             parts = value.split('; ' + name + '=')
@@ -22,7 +34,7 @@
 
         req.onerror = req.onabort = function() {
             disableSubmit(false)
-            error(el, 'Sorry, failed to upload file.')
+            error(el, i18n_strings.no_upload_failed)
         }
 
         req.upload.onprogress = function(data) {
@@ -98,7 +110,7 @@
 
         disableSubmit(true)
 
-        if (data === null) return error(el, 'Sorry, could not get upload URL.')
+        if (data === null) return error(el, i18n_strings.no_upload_url)
 
         el.className = 's3direct progress-active'
         var url  = data['form_action']
@@ -113,13 +125,13 @@
             disableSubmit(false)
             if(status !== 201) {
                 if (xml.indexOf('<MinSizeAllowed>') > -1) {
-                    return error(el, 'Sorry, the file is too small to be uploaded.')
+                    return error(el, i18n_strings.no_file_too_small)
                 }
                 else if (xml.indexOf('<MaxSizeAllowed>') > -1) {
-                    return error(el, 'Sorry, the file is too large to be uploaded.')
+                    return error(el, i18n_strings.no_file_too_large)
                 }
 
-                return error(el, 'Sorry, failed to upload file.')
+                return error(el, i18n_strings.no_upload_failed)
             }
             update(el, xml)
         })
@@ -149,7 +161,7 @@
                     error(el, data.error)
                     break;
                 default:
-                    error(el, 'Sorry, could not get upload URL.')
+                    error(el, i18n_strings.no_upload_url)
             }
         })
     }
@@ -183,9 +195,8 @@
         if(e.target.tagName) {
             var el = e.target.querySelectorAll('.s3direct');
             [].forEach.call(el, function (element, index, array) {
-		addHandlers(element);
-	    });
+        addHandlers(element);
+        });
         }
     })
-
 })()
