@@ -18,6 +18,8 @@
             req.setRequestHeader(key, headers[key])
         })
 
+        console.log(headers);
+
         req.onload = function() {
             cb(req.status, req.responseText)
         }
@@ -114,6 +116,8 @@
         console.log('upload', url);
 
         request('POST', url, form, {}, el, true, function(status, xml){
+            console.log(xml);
+
             disableSubmit(false)
             if(status !== 201) {
                 if (xml.indexOf('<MinSizeAllowed>') > -1) {
@@ -153,7 +157,7 @@
                     break
                 case 400:
                 case 403:
-                    error(el, data.error)
+                    error(el, data.aws_payload.error)
                     break;
                 default:
                     error(el, 'Sorry, could not get upload URL.')

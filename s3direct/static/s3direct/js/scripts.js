@@ -18,6 +18,8 @@
             req.setRequestHeader(key, headers[key])
         })
 
+        console.log(headers);
+
         req.onload = function() {
             cb(req.status, req.responseText)
         }
