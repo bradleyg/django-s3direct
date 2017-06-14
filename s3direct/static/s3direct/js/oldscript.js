@@ -9,8 +9,6 @@
     }
 
     var request = function(method, url, data, headers, el, showProgress, cb) {
-        console.log(url);
-
         var req = new XMLHttpRequest()
         req.open(method, url, true)
 
@@ -111,11 +109,7 @@
         })
         form.append('file', file)
 
-        console.log('upload', url);
-
         request('POST', url, form, {}, el, true, function(status, xml){
-            console.log(xml);
-
             disableSubmit(false)
             if(status !== 201) {
                 if (xml.indexOf('<MinSizeAllowed>') > -1) {
@@ -143,19 +137,16 @@
         form.append('name', file.name)
         form.append('dest', dest)
 
-        console.log('uploadURL', url);
-
         request('POST', url, form, headers, el, false, function(status, json){
             var data = parseJson(json)
 
             switch(status) {
                 case 200:
-                    console.log('uploadURL', data);
-                    upload(file, data.aws_payload, el)
+                    upload(file, data, el)
                     break
                 case 400:
                 case 403:
-                    error(el, data.aws_payload.error)
+                    error(el, data.error)
                     break;
                 default:
                     error(el, 'Sorry, could not get upload URL.')

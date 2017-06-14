@@ -114,8 +114,6 @@
         console.log('upload', url);
 
         request('POST', url, form, {}, el, true, function(status, xml){
-            console.log(xml);
-
             disableSubmit(false)
             if(status !== 201) {
                 if (xml.indexOf('<MinSizeAllowed>') > -1) {
@@ -155,7 +153,7 @@
                     break
                 case 400:
                 case 403:
-                    error(el, data.aws_payload.error)
+                    error(el, data.error)
                     break;
                 default:
                     error(el, 'Sorry, could not get upload URL.')
