@@ -2,6 +2,18 @@
 
     "use strict"
 
+    var i18n_strings;
+    try {
+        i18n_strings = djangoS3Upload.i18n_strings;
+    } catch(e) {
+        i18n_strings = {
+            "no_upload_failed": "Sorry, failed to upload file.",
+            "no_upload_url": "Sorry, could not get upload URL.",
+            "no_file_too_large": "Sorry, the file is too large to be uploaded.",
+            "no_file_too_small": "Sorry, the file is too small to be uploaded."
+        };
+    }
+
     var getCookie = function(name) {
         var value = '; ' + document.cookie,
             parts = value.split('; ' + name + '=')
@@ -9,8 +21,6 @@
     }
 
     var request = function(method, url, data, headers, el, showProgress, cb) {
-        console.log(url);
-
         var req = new XMLHttpRequest()
         req.open(method, url, true)
 
@@ -18,15 +28,13 @@
             req.setRequestHeader(key, headers[key])
         })
 
-        console.log(headers);
-
         req.onload = function() {
             cb(req.status, req.responseText)
         }
 
         req.onerror = req.onabort = function() {
             disableSubmit(false)
-            error(el, 'Sorry, failed to upload file.')
+            error(el, i18n_strings.no_upload_failed)
         }
 
         req.upload.onprogress = function(data) {
@@ -102,7 +110,7 @@
 
         disableSubmit(true)
 
-        if (data === null) return error(el, 'Sorry, could not get upload URL.')
+        if (data === null) return error(el, i18n_strings.no_upload_url)
 
         el.className = 's3direct progress-active'
         var url  = data['form_action']
@@ -113,21 +121,17 @@
         })
         form.append('file', file)
 
-        console.log('upload', url);
-
         request('POST', url, form, {}, el, true, function(status, xml){
-            console.log(xml);
-
             disableSubmit(false)
             if(status !== 201) {
                 if (xml.indexOf('<MinSizeAllowed>') > -1) {
-                    return error(el, 'Sorry, the file is too small to be uploaded.')
+                    return error(el, i18n_strings.no_file_too_small)
                 }
                 else if (xml.indexOf('<MaxSizeAllowed>') > -1) {
-                    return error(el, 'Sorry, the file is too large to be uploaded.')
+                    return error(el, i18n_strings.no_file_too_large)
                 }
 
-                return error(el, 'Sorry, failed to upload file.')
+                return error(el, i18n_strings.no_upload_failed)
             }
             update(el, xml)
         })
@@ -145,22 +149,19 @@
         form.append('name', file.name)
         form.append('dest', dest)
 
-        console.log('uploadURL', url);
-
         request('POST', url, form, headers, el, false, function(status, json){
             var data = parseJson(json)
 
             switch(status) {
                 case 200:
-                    console.log('uploadURL', data);
                     upload(file, data.aws_payload, el)
                     break
                 case 400:
                 case 403:
-                    error(el, data.aws_payload.error)
+                    error(el, data.error)
                     break;
                 default:
-                    error(el, 'Sorry, could not get upload URL.')
+                    error(el, i18n_strings.no_upload_url)
             }
         })
     }
@@ -198,5 +199,4 @@
         });
         }
     })
-
 })()
