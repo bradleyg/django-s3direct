@@ -9,5 +9,5 @@ example/example/settings-test.py
 /build
 .idea
 
-s3direct/static/s3direct/js/node_modules/
+s3direct/src/node_modules/
 
