@@ -1,0 +1,22 @@
+{
+  "name": "django-s3-uploads",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "transpile": "browserify src/ -t babelify --outfile dist/django-s3-uploads.js",
+    "uglify": "uglifyjs dist/django-s3-uploads.js -m -c -o dist/django-s3-uploads.min.js",
+    "build": "npm run transpile && npm run uglify"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-preset-env": "^1.5.2",
+    "babelify": "^7.3.0",
+    "browserify": "^14.4.0",
+    "redux": "^3.6.0",
+    "uglify-js": "^3.0.15"
+  }
+}
