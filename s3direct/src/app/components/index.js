@@ -10,9 +10,9 @@ const View = function(element, store) {
 
         getUploadURL: function(event) {
 
-            file = element.querySelector('.file-input').files[0],
-            dest = element.querySelector('.file-dest').value,
-            url  = element.getAttribute('data-policy-url');
+            const file = element.querySelector('.file-input').files[0],
+                dest = element.querySelector('.file-dest').value,
+                url  = element.getAttribute('data-policy-url');
                 // form     = new FormData(),
                 // headers  = {'X-CSRFToken': getCookie('csrftoken')}
 
@@ -36,18 +36,18 @@ const View = function(element, store) {
             //     }
             // })
 
-            store.dispatch(getUploadURL(file, dest, url));
+            store.dispatch(getUploadURL(file, dest, url, store));
         },
 
         init: function() {
             console.log(element, store);
 
-            var url = el.querySelector('.file-url'),
-            input  = el.querySelector('.file-input'),
-            remove = el.querySelector('.file-remove'),
+            var url = element.querySelector('.file-url'),
+            input  = element.querySelector('.file-input'),
+            remove = element.querySelector('.file-remove'),
             status = (url.value === '') ? 'form' : 'link'
 
-            el.className = 's3direct ' + status + '-active'
+            element.className = 's3direct ' + status + '-active'
 
 
             // store.subscribe(this.updateScore.bind(this))

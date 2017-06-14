@@ -10,17 +10,52 @@ var _constants = require('../constants');
 
 var _constants2 = _interopRequireDefault(_constants);
 
+var _utils = require('../utils');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var getUploadURL = exports.getUploadURL = function getUploadURL() {
+var getUploadURL = exports.getUploadURL = function getUploadURL(file, dest, url, store) {
+
+    console.log('ACTION getUploadURL', file, dest, url);
+
+    var form = new FormData(),
+        headers = { 'X-CSRFToken': (0, _utils.getCookie)('csrftoken') };
+
+    form.append('type', file.type);
+    form.append('name', file.name);
+    form.append('dest', dest);
+
+    console.log(form);
+
+    // AJAX SHIT HAPPENS HERE YO
+    (0, _utils.request)('POST', url, form, headers, false, function (status, json) {
+        var data = (0, _utils.parseJson)(json);
+
+        console.log(status, data);
+
+        switch (status) {
+            case 200:
+                store.dispatch(receiveAWSUploadParams(data.aws_payload));
+                // upload(file, data.aws_payload, el)
+                break;
+            case 400:
+            case 403:
+                // error(el, data.error)
+                break;
+            default:
+            // error(el, i18n_strings.no_upload_url)
+        }
+    });
+
     return {
         type: _constants2.default.REQUEST_AWS_UPLOAD_PARAMS
     };
 };
 
-var receiveAWSUploadParams = exports.receiveAWSUploadParams = function receiveAWSUploadParams() {
+var receiveAWSUploadParams = exports.receiveAWSUploadParams = function receiveAWSUploadParams(aws_payload) {
     return {
-        type: _constants2.default.RECEIVE_AWS_UPLOAD_PARAMS
+        type: _constants2.default.RECEIVE_AWS_UPLOAD_PARAMS,
+        aws_payload: aws_payload
     };
 };
 
@@ -36,7 +71,7 @@ var removeUpload = exports.removeUpload = function removeUpload() {
     };
 };
 
-},{"../constants":3}],2:[function(require,module,exports){
+},{"../constants":3,"../utils":7}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -53,7 +88,9 @@ var View = function View(element, store) {
 
         getUploadURL: function getUploadURL(event) {
 
-            file = element.querySelector('.file-input').files[0], dest = element.querySelector('.file-dest').value, url = element.getAttribute('data-policy-url');
+            var file = element.querySelector('.file-input').files[0],
+                dest = element.querySelector('.file-dest').value,
+                url = element.getAttribute('data-policy-url');
             // form     = new FormData(),
             // headers  = {'X-CSRFToken': getCookie('csrftoken')}
 
@@ -77,18 +114,18 @@ var View = function View(element, store) {
             //     }
             // })
 
-            store.dispatch((0, _actions.getUploadURL)(file, dest, url));
+            store.dispatch((0, _actions.getUploadURL)(file, dest, url, store));
         },
 
         init: function init() {
             console.log(element, store);
 
-            var url = el.querySelector('.file-url'),
-                input = el.querySelector('.file-input'),
-                remove = el.querySelector('.file-remove'),
+            var url = element.querySelector('.file-url'),
+                input = element.querySelector('.file-input'),
+                remove = element.querySelector('.file-remove'),
                 status = url.value === '' ? 'form' : 'link';
 
-            el.className = 's3direct ' + status + '-active';
+            element.className = 's3direct ' + status + '-active';
 
             // store.subscribe(this.updateScore.bind(this))
             remove.addEventListener('click', this.removeUpload.bind(this));
@@ -100,16 +137,33 @@ var View = function View(element, store) {
 exports.View = View;
 
 },{"../actions":1}],3:[function(require,module,exports){
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
 exports.default = {
-    REQUEST_AWS_UPLOAD_PARAMS: REQUEST_AWS_UPLOAD_PARAMS,
-    RECEIVE_AWS_UPLOAD_PARAMS: RECEIVE_AWS_UPLOAD_PARAMS,
-    DID_NOT_RECEIVE_AWS_UPLOAD_PARAMS: DID_NOT_RECEIVE_AWS_UPLOAD_PARAMS
+    REQUEST_AWS_UPLOAD_PARAMS: 'REQUEST_AWS_UPLOAD_PARAMS',
+    RECEIVE_AWS_UPLOAD_PARAMS: 'RECEIVE_AWS_UPLOAD_PARAMS',
+    DID_NOT_RECEIVE_AWS_UPLOAD_PARAMS: 'DID_NOT_RECEIVE_AWS_UPLOAD_PARAMS',
+    REMOVE_UPLOAD: 'REMOVE_UPLOAD'
 };
+
+
+var i18n_strings = void 0;
+
+try {
+    exports.i18n_strings = i18n_strings = djangoS3Upload.i18n_strings;
+} catch (e) {
+    exports.i18n_strings = i18n_strings = {
+        "no_upload_failed": "Sorry, failed to upload file.",
+        "no_upload_url": "Sorry, could not get upload URL.",
+        "no_file_too_large": "Sorry, the file is too large to be uploaded.",
+        "no_file_too_small": "Sorry, the file is too small to be uploaded."
+    };
+}
+
+exports.i18n_strings = i18n_strings;
 
 },{}],4:[function(require,module,exports){
 'use strict';
@@ -125,7 +179,7 @@ var _constants2 = _interopRequireDefault(_constants);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = function () {
-    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : reportsInitial;
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
     var action = arguments[1];
 
     switch (action.type) {
@@ -136,7 +190,7 @@ exports.default = function () {
         case _constants2.default.RECEIVE_AWS_UPLOAD_PARAMS:
             return Object.assign({}, state, {
                 isLoading: false,
-                items: action.reports
+                AWSPayload: action.aws_payload
                 //widths: getReportItemWidths(action.reports)
             });
             return reportState;
@@ -170,7 +224,7 @@ exports.default = (0, _redux.combineReducers)({
   // TODO - add more reducers
 });
 
-},{"./aws-uploads-params":4,"redux":24}],6:[function(require,module,exports){
+},{"./aws-uploads-params":4,"redux":25}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -192,7 +246,77 @@ function configureStore(initialState) {
     return (0, _redux.createStore)(_reducers2.default, initialState, devToolsExtension && devToolsExtension());
 }
 
-},{"../reducers":5,"redux":24}],7:[function(require,module,exports){
+},{"../reducers":5,"redux":25}],7:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.error = exports.parseJson = exports.parseNameFromUrl = exports.parseURL = exports.request = exports.getCookie = undefined;
+
+var _constants = require('../constants');
+
+var getCookie = exports.getCookie = function getCookie(name) {
+    var value = '; ' + document.cookie,
+        parts = value.split('; ' + name + '=');
+    if (parts.length == 2) return parts.pop().split(';').shift();
+};
+
+var request = exports.request = function request(method, url, data, headers, showProgress, callback) {
+    var request = new XMLHttpRequest();
+    request.open(method, url, true);
+
+    Object.keys(headers).forEach(function (key) {
+        request.setRequestHeader(key, headers[key]);
+    });
+
+    request.onload = function () {
+        callback(request.status, request.responseText);
+    };
+
+    // req.onerror = req.onabort = function() {
+    //     // disableSubmit(false);
+    //     error(element, i18n_strings.no_upload_failed);
+    // }
+
+    // req.upload.onprogress = function(data) {
+    //     progressBar(element, data, showProgress);
+    // }
+
+    request.send(data);
+};
+
+var parseURL = exports.parseURL = function parseURL(text) {
+    var xml = new DOMParser().parseFromString(text, 'text/xml'),
+        tag = xml.getElementsByTagName('Location')[0],
+        url = decodeURIComponent(tag.childNodes[0].nodeValue);
+
+    return url;
+};
+
+var parseNameFromUrl = exports.parseNameFromUrl = function parseNameFromUrl(url) {
+    return decodeURIComponent((url + '').replace(/\+/g, '%20'));
+};
+
+var parseJson = exports.parseJson = function parseJson(json) {
+    var data;
+
+    try {
+        data = JSON.parse(json);
+    } catch (error) {
+        data = null;
+    };
+
+    return data;
+};
+
+var error = exports.error = function error(element, message) {
+    element.className = 's3direct form-active';
+    element.querySelector('.file-input').value = '';
+    alert(message);
+};
+
+},{"../constants":3}],8:[function(require,module,exports){
 'use strict';
 
 var _store = require('./store');
@@ -222,7 +346,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
     elements.forEach(function (element) {
         // initialise instance for each element
         var store = (0, _store2.default)();
-        var view = new View(element, store);
+        var view = new _components.View(element, store);
         view.init();
     });
 }
@@ -237,7 +361,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
 // })
 );
 
-},{"./components":2,"./store":6}],8:[function(require,module,exports){
+},{"./components":2,"./store":6}],9:[function(require,module,exports){
 var root = require('./_root');
 
 /** Built-in value references. */
@@ -245,7 +369,7 @@ var Symbol = root.Symbol;
 
 module.exports = Symbol;
 
-},{"./_root":15}],9:[function(require,module,exports){
+},{"./_root":16}],10:[function(require,module,exports){
 var Symbol = require('./_Symbol'),
     getRawTag = require('./_getRawTag'),
     objectToString = require('./_objectToString');
@@ -275,7 +399,7 @@ function baseGetTag(value) {
 
 module.exports = baseGetTag;
 
-},{"./_Symbol":8,"./_getRawTag":12,"./_objectToString":13}],10:[function(require,module,exports){
+},{"./_Symbol":9,"./_getRawTag":13,"./_objectToString":14}],11:[function(require,module,exports){
 (function (global){
 /** Detect free variable `global` from Node.js. */
 var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
@@ -283,7 +407,7 @@ var freeGlobal = typeof global == 'object' && global && global.Object === Object
 module.exports = freeGlobal;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var overArg = require('./_overArg');
 
 /** Built-in value references. */
@@ -291,7 +415,7 @@ var getPrototype = overArg(Object.getPrototypeOf, Object);
 
 module.exports = getPrototype;
 
-},{"./_overArg":14}],12:[function(require,module,exports){
+},{"./_overArg":15}],13:[function(require,module,exports){
 var Symbol = require('./_Symbol');
 
 /** Used for built-in method references. */
@@ -339,7 +463,7 @@ function getRawTag(value) {
 
 module.exports = getRawTag;
 
-},{"./_Symbol":8}],13:[function(require,module,exports){
+},{"./_Symbol":9}],14:[function(require,module,exports){
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
 
@@ -363,7 +487,7 @@ function objectToString(value) {
 
 module.exports = objectToString;
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 /**
  * Creates a unary function that invokes `func` with its argument transformed.
  *
@@ -380,7 +504,7 @@ function overArg(func, transform) {
 
 module.exports = overArg;
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 var freeGlobal = require('./_freeGlobal');
 
 /** Detect free variable `self`. */
@@ -391,7 +515,7 @@ var root = freeGlobal || freeSelf || Function('return this')();
 
 module.exports = root;
 
-},{"./_freeGlobal":10}],16:[function(require,module,exports){
+},{"./_freeGlobal":11}],17:[function(require,module,exports){
 /**
  * Checks if `value` is object-like. A value is object-like if it's not `null`
  * and has a `typeof` result of "object".
@@ -422,7 +546,7 @@ function isObjectLike(value) {
 
 module.exports = isObjectLike;
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var baseGetTag = require('./_baseGetTag'),
     getPrototype = require('./_getPrototype'),
     isObjectLike = require('./isObjectLike');
@@ -486,7 +610,7 @@ function isPlainObject(value) {
 
 module.exports = isPlainObject;
 
-},{"./_baseGetTag":9,"./_getPrototype":11,"./isObjectLike":16}],18:[function(require,module,exports){
+},{"./_baseGetTag":10,"./_getPrototype":12,"./isObjectLike":17}],19:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -672,7 +796,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -731,7 +855,7 @@ function applyMiddleware() {
     };
   };
 }
-},{"./compose":22}],20:[function(require,module,exports){
+},{"./compose":23}],21:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -783,7 +907,7 @@ function bindActionCreators(actionCreators, dispatch) {
   }
   return boundActionCreators;
 }
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -928,7 +1052,7 @@ function combineReducers(reducers) {
   };
 }
 }).call(this,require('_process'))
-},{"./createStore":23,"./utils/warning":25,"_process":18,"lodash/isPlainObject":17}],22:[function(require,module,exports){
+},{"./createStore":24,"./utils/warning":26,"_process":19,"lodash/isPlainObject":18}],23:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -967,7 +1091,7 @@ function compose() {
     }, last.apply(undefined, arguments));
   };
 }
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1229,7 +1353,7 @@ function createStore(reducer, preloadedState, enhancer) {
     replaceReducer: replaceReducer
   }, _ref2[_symbolObservable2['default']] = observable, _ref2;
 }
-},{"lodash/isPlainObject":17,"symbol-observable":26}],24:[function(require,module,exports){
+},{"lodash/isPlainObject":18,"symbol-observable":27}],25:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -1278,7 +1402,7 @@ exports.bindActionCreators = _bindActionCreators2['default'];
 exports.applyMiddleware = _applyMiddleware2['default'];
 exports.compose = _compose2['default'];
 }).call(this,require('_process'))
-},{"./applyMiddleware":19,"./bindActionCreators":20,"./combineReducers":21,"./compose":22,"./createStore":23,"./utils/warning":25,"_process":18}],25:[function(require,module,exports){
+},{"./applyMiddleware":20,"./bindActionCreators":21,"./combineReducers":22,"./compose":23,"./createStore":24,"./utils/warning":26,"_process":19}],26:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1304,10 +1428,10 @@ function warning(message) {
   } catch (e) {}
   /* eslint-enable no-empty */
 }
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 module.exports = require('./lib/index');
 
-},{"./lib/index":27}],27:[function(require,module,exports){
+},{"./lib/index":28}],28:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1339,7 +1463,7 @@ if (typeof self !== 'undefined') {
 var result = (0, _ponyfill2['default'])(root);
 exports['default'] = result;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./ponyfill":28}],28:[function(require,module,exports){
+},{"./ponyfill":29}],29:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1363,4 +1487,4 @@ function symbolObservablePonyfill(root) {
 
 	return result;
 };
-},{}]},{},[7]);
+},{}]},{},[8]);

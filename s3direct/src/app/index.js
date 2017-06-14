@@ -1,5 +1,5 @@
 import configureStore from './store';
-import {view} from './components';
+import {View} from './components';
 
 
 // var addHandlers = function(el) {

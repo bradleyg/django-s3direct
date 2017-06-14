@@ -1,6 +1,6 @@
 import constants from '../constants';
 
-export default (state = reportsInitial, action) => {
+export default (state = {}, action) => {
     switch (action.type) {
         case constants.REQUEST_AWS_UPLOAD_PARAMS:
             return Object.assign({}, state, {
@@ -9,7 +9,7 @@ export default (state = reportsInitial, action) => {
         case constants.RECEIVE_AWS_UPLOAD_PARAMS:
             return Object.assign({}, state, {
                 isLoading: false,
-                items: action.reports
+                AWSPayload: action.aws_payload
                 //widths: getReportItemWidths(action.reports)
             });
             return reportState;

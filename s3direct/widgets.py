@@ -12,7 +12,7 @@ class S3DirectWidget(widgets.TextInput):
 
     class Media:
         js = (
-            's3direct/js/scripts.js',
+            's3direct/js/django-s3-uploads.js',
         )
         css = {
             'all': (
