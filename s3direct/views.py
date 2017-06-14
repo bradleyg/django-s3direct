@@ -1,11 +1,17 @@
 import json
 from boto.s3.connection import S3Connection
 
-from django.http import HttpResponse
+from django.http import (
+    HttpResponse,
+    HttpResponseRedirect
+)
 from django.views.decorators.http import require_POST
 from django.conf import settings
 
-from .utils import create_upload_data, get_s3direct_destinations
+from .utils import (
+    create_upload_data,
+    get_s3direct_destinations,
+)
 
 
 @require_POST
@@ -91,11 +97,12 @@ def get_upload_params(request):
             settings.AWS_ACCESS_KEY_ID,
             settings.AWS_SECRET_ACCESS_KEY
         )
+        
         url = c.generate_url(
             expires_in=long(5*60),  # 5 mins
             method='GET',
-            bucket=settings.AWS_PRIVATE_STORAGE_BUCKET_NAME,
-            key=data["key"],
+            bucket=bucket or settings.AWS_STORAGE_BUCKET_NAME,
+            key=key.replace("${filename}", filename),
             query_auth=True,
             force_http=True
         )

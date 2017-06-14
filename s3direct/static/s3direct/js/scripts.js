@@ -78,13 +78,19 @@
         alert(msg)
     }
 
-    var update = function(el, xml) {
+    var update = function(el, xml, signedURL) {
         var link = el.querySelector('.file-link'),
             url  = el.querySelector('.file-url')
+        url.value = parseURL(xml);
+        var fileName = parseNameFromUrl(url.value).split('/').pop();
+        var target = url.value
 
-        url.value = parseURL(xml)
-        link.setAttribute('href', url.value)
-        link.innerHTML = parseNameFromUrl(url.value).split('/').pop();
+        if (signedURL) {
+            var securedURL = decodeURIComponent(signedURL).replace("${filename}", fileName);
+            target = securedURL;
+        }
+        link.setAttribute('href', target);
+        link.innerHTML = fileName;
 
         el.className = 's3direct link-active'
         el.querySelector('.bar').style.width = '0%'
@@ -110,16 +116,20 @@
 
         disableSubmit(true)
 
-        if (data === null) return error(el, i18n_strings.no_upload_url)
+        if (data.aws_payload === null) return error(el, i18n_strings.no_upload_url)
+
+        var payload = data.aws_payload
 
         el.className = 's3direct progress-active'
-        var url  = data['form_action']
-        delete data['form_action']
+        var url  = payload['form_action']
+        delete payload['form_action']
 
-        Object.keys(data).forEach(function(key){
-            form.append(key, data[key])
+        Object.keys(payload).forEach(function(key){
+            form.append(key, payload[key])
         })
         form.append('file', file)
+
+        var signedURL = data['private_access_url'];
 
         request('POST', url, form, {}, el, true, function(status, xml){
             disableSubmit(false)
@@ -133,7 +143,7 @@
 
                 return error(el, i18n_strings.no_upload_failed)
             }
-            update(el, xml)
+            update(el, xml, signedURL)
         })
     }
 
@@ -154,7 +164,7 @@
 
             switch(status) {
                 case 200:
-                    upload(file, data.aws_payload, el)
+                    upload(file, data, el)
                     break
                 case 400:
                 case 403:
