@@ -20,6 +20,13 @@
         if (parts.length == 2) return parts.pop().split(';').shift()
     }
 
+    var raiseEvent = function(name, content) {
+        if (window.CustomEvent) {
+            var event = new CustomEvent(name, content);
+            document.dispatchEvent(event);
+        }
+    }
+
     var request = function(method, url, data, headers, el, showProgress, cb) {
         var req = new XMLHttpRequest()
         req.open(method, url, true)
@@ -35,6 +42,9 @@
         req.onerror = req.onabort = function() {
             disableSubmit(false)
             error(el, i18n_strings.no_upload_failed)
+            raiseEvent("s3directRequestFailed", {
+                "todo": "error content"
+            })
         }
 
         req.upload.onprogress = function(data) {
@@ -70,12 +80,18 @@
             bar  = el.querySelector('.bar')
 
         bar.style.width = pcnt + '%'
+
+        raiseEvent("s3directProgressUpdated", {
+            "pcnt": pcnt
+        })
     }
 
     var error = function(el, msg) {
         el.className = 's3direct form-active'
         el.querySelector('.file-input').value = ''
-        alert(msg)
+        raiseEvent("s3directUploadError", {
+            "errorMsg": msg,
+        })
     }
 
     var update = function(el, xml, signedURL) {
@@ -94,6 +110,11 @@
 
         el.className = 's3direct link-active'
         el.querySelector('.bar').style.width = '0%'
+
+        raiseEvent("s3directUpdateProgressBar", {
+            "fileName": fileName,
+            "url": target
+        })
     }
 
     var concurrentUploads = 0
@@ -155,8 +176,10 @@
             form     = new FormData(),
             headers  = {'X-CSRFToken': getCookie('csrftoken')}
 
+        var rx = /[^A-Za-z0-9.]/g;
+
         form.append('type', file.type)
-        form.append('name', file.name)
+        form.append('name', file.name.replace(rx, "-"));
         form.append('dest', dest)
 
         request('POST', url, form, headers, el, false, function(status, json){
@@ -183,6 +206,8 @@
         el.querySelector('.file-url').value = ''
         el.querySelector('.file-input').value = ''
         el.className = 's3direct form-active'
+
+        raiseEvent("s3directRemoveUpload", {})
     }
 
     var addHandlers = function(el) {
