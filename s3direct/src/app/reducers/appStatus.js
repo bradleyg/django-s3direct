@@ -25,6 +25,16 @@ export default (state = {}, action) => {
             return Object.assign({}, state, {
                 error: null
             });
+        case constants.UPDATE_PROGRESS:
+            let progress = null;
+
+            if (action.data.lengthComputable) {
+                progress = Math.round(action.data.loaded * 100 / action.data.total);
+            }
+
+            return Object.assign({}, state, {
+                uploadProgress: progress
+            });
 
         default:
             return state;

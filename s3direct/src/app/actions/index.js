@@ -36,10 +36,8 @@ export const getUploadURL = (file, dest, url, store) => {
         console.log('onError', data);
     }
 
-    // AJAX SHIT HAPPENS HERE YO
     request('POST', url, form, headers, false, onLoad, onError);
 
-    // return action type for logging an ting
     return {
         type: constants.REQUEST_AWS_UPLOAD_PARAMS
     }
@@ -106,10 +104,16 @@ export const beginUploadToAWS = (file, store) => {
     };
 
     const onError = function(status, xml) {
-        console.log('onError', xml);
+        console.error('Error uploading', status, xml);
+        store.dispatch(addError(i18n_strings.no_upload_url));
     }
 
-    request('POST', url, form, headers, false, onLoad, onError);
+    const onProgress = function(data) {
+        console.log('progress', data);
+        store.dispatch(updateProgress(data));
+    }
+
+    request('POST', url, form, headers, onProgress, onLoad, onError);
 
     return {
         type: constants.BEGIN_UPLOAD_TO_AWS
@@ -134,5 +138,12 @@ export const addError = (error) => {
 export const clearErrors = () => {
     return {
         type: constants.CLEAR_ERRORS
+    }
+}
+
+export const updateProgress = (data = {}) => {
+    return {
+        type: constants.UPDATE_PROGRESS,
+        data
     }
 }

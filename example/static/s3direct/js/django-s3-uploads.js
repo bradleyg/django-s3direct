@@ -4,7 +4,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.clearErrors = exports.addError = exports.completeUploadToAWS = exports.beginUploadToAWS = exports.removeUpload = exports.didNotReceivAWSUploadParams = exports.receiveAWSUploadParams = exports.getUploadURL = undefined;
+exports.updateProgress = exports.clearErrors = exports.addError = exports.completeUploadToAWS = exports.beginUploadToAWS = exports.removeUpload = exports.didNotReceivAWSUploadParams = exports.receiveAWSUploadParams = exports.getUploadURL = undefined;
 
 var _constants = require('../constants');
 
@@ -48,10 +48,8 @@ var getUploadURL = exports.getUploadURL = function getUploadURL(file, dest, url,
         console.log('onError', data);
     };
 
-    // AJAX SHIT HAPPENS HERE YO
     (0, _utils.request)('POST', url, form, headers, false, onLoad, onError);
 
-    // return action type for logging an ting
     return {
         type: _constants2.default.REQUEST_AWS_UPLOAD_PARAMS
     };
@@ -116,10 +114,16 @@ var beginUploadToAWS = exports.beginUploadToAWS = function beginUploadToAWS(file
     };
 
     var onError = function onError(status, xml) {
-        console.log('onError', xml);
+        console.error('Error uploading', status, xml);
+        store.dispatch(addError(_constants.i18n_strings.no_upload_url));
     };
 
-    (0, _utils.request)('POST', url, form, headers, false, onLoad, onError);
+    var onProgress = function onProgress(data) {
+        console.log('progress', data);
+        store.dispatch(updateProgress(data));
+    };
+
+    (0, _utils.request)('POST', url, form, headers, onProgress, onLoad, onError);
 
     return {
         type: _constants2.default.BEGIN_UPLOAD_TO_AWS
@@ -147,6 +151,15 @@ var clearErrors = exports.clearErrors = function clearErrors() {
     };
 };
 
+var updateProgress = exports.updateProgress = function updateProgress() {
+    var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+    return {
+        type: _constants2.default.UPDATE_PROGRESS,
+        data: data
+    };
+};
+
 },{"../constants":3,"../utils":9}],2:[function(require,module,exports){
 'use strict';
 
@@ -167,7 +180,8 @@ var View = function View(element, store) {
         render: function render() {
             var filename = (0, _store.getFilename)(store),
                 url = (0, _store.getUrl)(store),
-                error = (0, _store.getError)(store);
+                error = (0, _store.getError)(store),
+                uploadProgress = (0, _store.getUploadProgress)(store);
 
             // if there is a filename, we want to display it and a "remove" link
             if (filename) {
@@ -203,9 +217,18 @@ var View = function View(element, store) {
                     this.$element.classList.remove('has-error');
                     this.$element.querySelector('.error').innerHTML = '';
                 }
+
+            if (uploadProgress && uploadProgress < 100) {
+                this.$element.classList.add('progress-active');
+                this.$bar.style.width = uploadProgress + '%';
+            } else {
+                this.$element.classList.remove('progress-active');
+                this.$bar.style.width = '0';
+            }
         },
 
         removeUpload: function removeUpload(event) {
+            store.dispatch((0, _actions.updateProgress)());
             store.dispatch((0, _actions.removeUpload)());
         },
 
@@ -227,6 +250,7 @@ var View = function View(element, store) {
             this.$dest = element.querySelector('.file-dest');
             this.$link = element.querySelector('.file-link');
             this.$error = element.querySelector('.error');
+            this.$bar = element.querySelector('.bar');
 
             // set initial DOM state
             var status = this.$url.value === '' ? 'form' : 'link';
@@ -258,7 +282,8 @@ exports.default = {
     BEGIN_UPLOAD_TO_AWS: 'BEGIN_UPLOAD_TO_AWS',
     COMPLETE_UPLOAD_TO_AWS: 'COMPLETE_UPLOAD_TO_AWS',
     ADD_ERROR: 'ADD_ERROR',
-    CLEAR_ERRORS: 'CLEAR_ERRORS'
+    CLEAR_ERRORS: 'CLEAR_ERRORS',
+    UPDATE_PROGRESS: 'UPDATE_PROGRESS'
 };
 
 
@@ -317,6 +342,16 @@ exports.default = function () {
         case _constants2.default.CLEAR_ERRORS:
             return Object.assign({}, state, {
                 error: null
+            });
+        case _constants2.default.UPDATE_PROGRESS:
+            var progress = null;
+
+            if (action.data.lengthComputable) {
+                progress = Math.round(action.data.loaded * 100 / action.data.total);
+            }
+
+            return Object.assign({}, state, {
+                uploadProgress: progress
             });
 
         default:
@@ -395,6 +430,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.getFilename = getFilename;
 exports.getUrl = getUrl;
 exports.getError = getError;
+exports.getUploadProgress = getUploadProgress;
 function getFilename(store) {
     return store.getState().appStatus.filename;
 }
@@ -405,6 +441,10 @@ function getUrl(store) {
 
 function getError(store) {
     return store.getState().appStatus.error;
+}
+
+function getUploadProgress(store) {
+    return store.getState().appStatus.uploadProgress;
 }
 
 },{}],8:[function(require,module,exports){

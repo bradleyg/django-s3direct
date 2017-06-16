@@ -9,3 +9,7 @@ export function getUrl (store) {
 export function getError (store) {
     return store.getState().appStatus.error;
 }
+
+export function getUploadProgress (store) {
+    return store.getState().appStatus.uploadProgress;
+}

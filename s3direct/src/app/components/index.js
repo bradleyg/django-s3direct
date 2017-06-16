@@ -1,5 +1,5 @@
-import {removeUpload, getUploadURL, clearErrors} from '../actions';
-import {getFilename, getUrl, getError} from '../store';
+import {removeUpload, getUploadURL, clearErrors, updateProgress} from '../actions';
+import {getFilename, getUrl, getError, getUploadProgress} from '../store';
 import {raiseEvent} from '../utils';
 
 
@@ -9,7 +9,8 @@ const View = function(element, store) {
         render: function(){
             const filename = getFilename(store),
                 url = getUrl(store),
-                error = getError(store);
+                error = getError(store),
+                uploadProgress = getUploadProgress(store);
 
             // if there is a filename, we want to display it and a "remove" link
             if (filename) {
@@ -45,9 +46,19 @@ const View = function(element, store) {
                 this.$element.classList.remove('has-error');
                 this.$element.querySelector('.error').innerHTML = '';
             }
+
+            if (uploadProgress && uploadProgress < 100) {
+                this.$element.classList.add('progress-active');
+                this.$bar.style.width = uploadProgress + '%';
+            }
+            else {
+                this.$element.classList.remove('progress-active');
+                this.$bar.style.width = '0';
+            }
         },
 
         removeUpload: function(event) {
+            store.dispatch(updateProgress());
             store.dispatch(removeUpload());
         },
 
@@ -69,6 +80,7 @@ const View = function(element, store) {
             this.$dest    = element.querySelector('.file-dest');
             this.$link    = element.querySelector('.file-link');
             this.$error   = element.querySelector('.error');
+            this.$bar     = element.querySelector('.bar');
 
             // set initial DOM state
             const status = (this.$url.value === '') ? 'form' : 'link';
