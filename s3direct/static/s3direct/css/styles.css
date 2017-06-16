@@ -30,10 +30,7 @@
 .s3direct.progress-active .progress,
 .s3direct.link-active .file-link,
 .s3direct.link-active .file-remove,
-.s3direct.form-active .file-input {
-  display: block;
-}
-
+.s3direct.form-active .file-input,
 .s3direct.has-error .error {
   display: block;
 }
