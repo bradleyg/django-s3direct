@@ -1,5 +1,5 @@
-import { createStore } from 'redux'
-import reducers from '../reducers'
+import { createStore } from 'redux';
+import reducers from '../reducers';
 
 const { devToolsExtension } = window;
 
@@ -10,3 +10,5 @@ export default function configureStore (initialState) {
         devToolsExtension && devToolsExtension()
     );
 }
+
+export * from './connect';

@@ -2,6 +2,11 @@
   float: left;
 }
 
+.s3direct .error {
+  margin-top: 10px;
+  color: red;
+}
+
 .s3direct .progress {
   background: #333;
   width: 200px;
@@ -15,7 +20,8 @@
 .s3direct .progress,
 .s3direct .file-link,
 .s3direct .file-remove,
-.s3direct .file-input {
+.s3direct .file-input,
+.s3direct .error {
   display: none;
   float: left;
   clear: left;
@@ -25,5 +31,9 @@
 .s3direct.link-active .file-link,
 .s3direct.link-active .file-remove,
 .s3direct.form-active .file-input {
+  display: block;
+}
+
+.s3direct.has-error .error {
   display: block;
 }

@@ -4,7 +4,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.removeUpload = exports.didNotReceivAWSUploadParams = exports.receiveAWSUploadParams = exports.getUploadURL = undefined;
+exports.clearErrors = exports.addError = exports.completeUploadToAWS = exports.beginUploadToAWS = exports.removeUpload = exports.didNotReceivAWSUploadParams = exports.receiveAWSUploadParams = exports.getUploadURL = undefined;
 
 var _constants = require('../constants');
 
@@ -16,8 +16,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var getUploadURL = exports.getUploadURL = function getUploadURL(file, dest, url, store) {
 
-    console.log('ACTION getUploadURL', file, dest, url);
-
     var form = new FormData(),
         headers = { 'X-CSRFToken': (0, _utils.getCookie)('csrftoken') };
 
@@ -25,28 +23,35 @@ var getUploadURL = exports.getUploadURL = function getUploadURL(file, dest, url,
     form.append('name', file.name);
     form.append('dest', dest);
 
-    console.log(form);
-
-    // AJAX SHIT HAPPENS HERE YO
-    (0, _utils.request)('POST', url, form, headers, false, function (status, json) {
+    var onLoad = function onLoad(status, json) {
         var data = (0, _utils.parseJson)(json);
-
-        console.log(status, data);
 
         switch (status) {
             case 200:
                 store.dispatch(receiveAWSUploadParams(data.aws_payload));
-                // upload(file, data.aws_payload, el)
+                store.dispatch(beginUploadToAWS(file, store));
                 break;
             case 400:
             case 403:
-                // error(el, data.error)
+                console.error('Error uploading', status, data.error);
+                store.dispatch(addError(data.error));
                 break;
             default:
-            // error(el, i18n_strings.no_upload_url)
+                console.error('Error uploading', status, _constants.i18n_strings.no_upload_url);
+                store.dispatch(addError(_constants.i18n_strings.no_upload_url));
         }
-    });
+    };
 
+    var onError = function onError(status, json) {
+        var data = (0, _utils.parseJson)(json);
+
+        console.log('onError', data);
+    };
+
+    // AJAX SHIT HAPPENS HERE YO
+    (0, _utils.request)('POST', url, form, headers, false, onLoad, onError);
+
+    // return action type for logging an ting
     return {
         type: _constants2.default.REQUEST_AWS_UPLOAD_PARAMS
     };
@@ -71,7 +76,78 @@ var removeUpload = exports.removeUpload = function removeUpload() {
     };
 };
 
-},{"../constants":3,"../utils":7}],2:[function(require,module,exports){
+var beginUploadToAWS = exports.beginUploadToAWS = function beginUploadToAWS(file, store) {
+    var AWSPayload = store.getState().AWSUploadParams.AWSPayload,
+        url = AWSPayload.form_action,
+        headers = {};
+
+    var form = new FormData();
+
+    delete AWSPayload['form_action'];
+
+    Object.keys(AWSPayload).forEach(function (key) {
+        form.append(key, AWSPayload[key]);
+    });
+
+    form.append('file', file);
+
+    var onLoad = function onLoad(status, xml) {
+        switch (status) {
+            case 201:
+                var _url = (0, _utils.parseURL)(xml),
+                    filename = (0, _utils.parseNameFromUrl)(_url).split('/').pop();
+
+                store.dispatch(completeUploadToAWS(_url, filename));
+
+                break;
+            default:
+                console.error('Error uploading', status, xml);
+
+                if (xml.indexOf('<MinSizeAllowed>') > -1) {
+                    store.dispatch(addError(_constants.i18n_strings.no_file_too_small));
+                } else if (xml.indexOf('<MaxSizeAllowed>') > -1) {
+                    store.dispatch(addError(_constants.i18n_strings.no_file_too_large));
+                } else {
+                    store.dispatch(addError(_constants.i18n_strings.no_upload_url));
+                }
+
+                break;
+        }
+    };
+
+    var onError = function onError(status, xml) {
+        console.log('onError', xml);
+    };
+
+    (0, _utils.request)('POST', url, form, headers, false, onLoad, onError);
+
+    return {
+        type: _constants2.default.BEGIN_UPLOAD_TO_AWS
+    };
+};
+
+var completeUploadToAWS = exports.completeUploadToAWS = function completeUploadToAWS(url, filename) {
+    return {
+        type: _constants2.default.COMPLETE_UPLOAD_TO_AWS,
+        url: url,
+        filename: filename
+    };
+};
+
+var addError = exports.addError = function addError(error) {
+    return {
+        type: _constants2.default.ADD_ERROR,
+        error: error
+    };
+};
+
+var clearErrors = exports.clearErrors = function clearErrors() {
+    return {
+        type: _constants2.default.CLEAR_ERRORS
+    };
+};
+
+},{"../constants":3,"../utils":9}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -81,39 +157,60 @@ exports.View = undefined;
 
 var _actions = require('../actions');
 
+var _store = require('../store');
+
+var _utils = require('../utils');
+
 var View = function View(element, store) {
 
     return {
-        removeUpload: function removeUpload(event) {},
+        render: function render() {
+            var filename = (0, _store.getFilename)(store),
+                url = (0, _store.getUrl)(store),
+                error = (0, _store.getError)(store);
+
+            if (filename) {
+                var link = element.querySelector('.file-link');
+
+                link.innerHTML = filename;
+                link.setAttribute('href', url);
+
+                element.classList.add('link-active');
+                element.classList.remove('form-active');
+            } else {
+                element.querySelector('.file-url').value = '';
+                element.querySelector('.file-input').value = '';
+
+                element.classList.add('form-active');
+                element.classList.remove('link-active');
+            }
+
+            if (error) {
+                element.classList.add('has-error');
+                element.classList.add('form-active');
+                element.classList.remove('link-active');
+
+                element.querySelector('.file-input').value = '';
+                element.querySelector('.error').innerHTML = error;
+
+                // dispatch event on the element for external use
+                (0, _utils.raiseEvent)(element, 's3uploads:error', error);
+            } else {
+                element.classList.remove('has-error');
+                element.querySelector('.error').innerHTML = '';
+            }
+        },
+
+        removeUpload: function removeUpload(event) {
+            store.dispatch((0, _actions.removeUpload)());
+        },
 
         getUploadURL: function getUploadURL(event) {
-
             var file = element.querySelector('.file-input').files[0],
                 dest = element.querySelector('.file-dest').value,
                 url = element.getAttribute('data-policy-url');
-            // form     = new FormData(),
-            // headers  = {'X-CSRFToken': getCookie('csrftoken')}
 
-            // form.append('type', file.type)
-            // form.append('name', file.name)
-            // form.append('dest', dest)
-
-            // request('POST', url, form, headers, el, false, function(status, json){
-            //     var data = parseJson(json)
-
-            //     switch(status) {
-            //         case 200:
-            //             upload(file, data, el)
-            //             break
-            //         case 400:
-            //         case 403:
-            //             error(el, data.error)
-            //             break;
-            //         default:
-            //             error(el, i18n_strings.no_upload_url)
-            //     }
-            // })
-
+            store.dispatch((0, _actions.clearErrors)());
             store.dispatch((0, _actions.getUploadURL)(file, dest, url, store));
         },
 
@@ -130,13 +227,15 @@ var View = function View(element, store) {
             // store.subscribe(this.updateScore.bind(this))
             remove.addEventListener('click', this.removeUpload.bind(this));
             input.addEventListener('change', this.getUploadURL.bind(this));
+
+            store.subscribe(this.render.bind(this));
         }
     };
 };
 
 exports.View = View;
 
-},{"../actions":1}],3:[function(require,module,exports){
+},{"../actions":1,"../store":8,"../utils":9}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -146,7 +245,11 @@ exports.default = {
     REQUEST_AWS_UPLOAD_PARAMS: 'REQUEST_AWS_UPLOAD_PARAMS',
     RECEIVE_AWS_UPLOAD_PARAMS: 'RECEIVE_AWS_UPLOAD_PARAMS',
     DID_NOT_RECEIVE_AWS_UPLOAD_PARAMS: 'DID_NOT_RECEIVE_AWS_UPLOAD_PARAMS',
-    REMOVE_UPLOAD: 'REMOVE_UPLOAD'
+    REMOVE_UPLOAD: 'REMOVE_UPLOAD',
+    BEGIN_UPLOAD_TO_AWS: 'BEGIN_UPLOAD_TO_AWS',
+    COMPLETE_UPLOAD_TO_AWS: 'COMPLETE_UPLOAD_TO_AWS',
+    ADD_ERROR: 'ADD_ERROR',
+    CLEAR_ERRORS: 'CLEAR_ERRORS'
 };
 
 
@@ -183,6 +286,53 @@ exports.default = function () {
     var action = arguments[1];
 
     switch (action.type) {
+        case _constants2.default.BEGIN_UPLOAD_TO_AWS:
+            return Object.assign({}, state, {
+                isUploading: true
+            });
+        case _constants2.default.COMPLETE_UPLOAD_TO_AWS:
+            return Object.assign({}, state, {
+                isUploading: false,
+                filename: action.filename,
+                url: action.url
+            });
+        case _constants2.default.REMOVE_UPLOAD:
+            return Object.assign({}, state, {
+                filename: null,
+                url: null
+            });
+        case _constants2.default.ADD_ERROR:
+            return Object.assign({}, state, {
+                error: action.error
+            });
+        case _constants2.default.CLEAR_ERRORS:
+            return Object.assign({}, state, {
+                error: null
+            });
+
+        default:
+            return state;
+    }
+};
+
+},{"../constants":3}],5:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _constants = require('../constants');
+
+var _constants2 = _interopRequireDefault(_constants);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = function () {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    var action = arguments[1];
+
+    switch (action.type) {
         case _constants2.default.REQUEST_AWS_UPLOAD_PARAMS:
             return Object.assign({}, state, {
                 isLoading: true
@@ -191,9 +341,7 @@ exports.default = function () {
             return Object.assign({}, state, {
                 isLoading: false,
                 AWSPayload: action.aws_payload
-                //widths: getReportItemWidths(action.reports)
             });
-            return reportState;
         case _constants2.default.DID_NOT_RECEIVE_AWS_UPLOAD_PARAMS:
             // Returns current state and sets loading to false
             return Object.assign({}, state, {
@@ -204,7 +352,7 @@ exports.default = function () {
     }
 };
 
-},{"../constants":3}],5:[function(require,module,exports){
+},{"../constants":3}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -213,24 +361,62 @@ Object.defineProperty(exports, "__esModule", {
 
 var _redux = require('redux');
 
-var _awsUploadsParams = require('./aws-uploads-params');
+var _awsUploadsParams = require('./awsUploadsParams');
 
 var _awsUploadsParams2 = _interopRequireDefault(_awsUploadsParams);
+
+var _appStatus = require('./appStatus');
+
+var _appStatus2 = _interopRequireDefault(_appStatus);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = (0, _redux.combineReducers)({
-  AWSUploadParams: _awsUploadsParams2.default
+  AWSUploadParams: _awsUploadsParams2.default,
+  appStatus: _appStatus2.default
   // TODO - add more reducers
 });
 
-},{"./aws-uploads-params":4,"redux":25}],6:[function(require,module,exports){
+},{"./appStatus":4,"./awsUploadsParams":5,"redux":27}],7:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.getFilename = getFilename;
+exports.getUrl = getUrl;
+exports.getError = getError;
+function getFilename(store) {
+    return store.getState().appStatus.filename;
+}
+
+function getUrl(store) {
+    return store.getState().appStatus.url;
+}
+
+function getError(store) {
+    return store.getState().appStatus.error;
+}
+
+},{}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
 exports.default = configureStore;
+
+var _connect = require('./connect');
+
+Object.keys(_connect).forEach(function (key) {
+    if (key === "default" || key === "__esModule") return;
+    Object.defineProperty(exports, key, {
+        enumerable: true,
+        get: function get() {
+            return _connect[key];
+        }
+    });
+});
 
 var _redux = require('redux');
 
@@ -246,13 +432,13 @@ function configureStore(initialState) {
     return (0, _redux.createStore)(_reducers2.default, initialState, devToolsExtension && devToolsExtension());
 }
 
-},{"../reducers":5,"redux":25}],7:[function(require,module,exports){
+},{"../reducers":6,"./connect":7,"redux":27}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.error = exports.parseJson = exports.parseNameFromUrl = exports.parseURL = exports.request = exports.getCookie = undefined;
+exports.raiseEvent = exports.parseJson = exports.parseNameFromUrl = exports.parseURL = exports.request = exports.getCookie = undefined;
 
 var _constants = require('../constants');
 
@@ -262,7 +448,7 @@ var getCookie = exports.getCookie = function getCookie(name) {
     if (parts.length == 2) return parts.pop().split(';').shift();
 };
 
-var request = exports.request = function request(method, url, data, headers, showProgress, callback) {
+var request = exports.request = function request(method, url, data, headers, onProgress, onLoad, onError) {
     var request = new XMLHttpRequest();
     request.open(method, url, true);
 
@@ -271,17 +457,21 @@ var request = exports.request = function request(method, url, data, headers, sho
     });
 
     request.onload = function () {
-        callback(request.status, request.responseText);
+        onLoad(request.status, request.responseText);
     };
 
-    // req.onerror = req.onabort = function() {
-    //     // disableSubmit(false);
-    //     error(element, i18n_strings.no_upload_failed);
-    // }
+    if (onError) {
+        request.onerror = request.onabort = function () {
+            // disableSubmit(false);
+            onError(request.status, request.responseText);
+        };
+    }
 
-    // req.upload.onprogress = function(data) {
-    //     progressBar(element, data, showProgress);
-    // }
+    if (onProgress) {
+        request.upload.onprogress = function (data) {
+            onProgress(data);
+        };
+    }
 
     request.send(data);
 };
@@ -310,13 +500,14 @@ var parseJson = exports.parseJson = function parseJson(json) {
     return data;
 };
 
-var error = exports.error = function error(element, message) {
-    element.className = 's3direct form-active';
-    element.querySelector('.file-input').value = '';
-    alert(message);
+var raiseEvent = exports.raiseEvent = function raiseEvent(element, name, content) {
+    if (window.CustomEvent) {
+        var event = new CustomEvent(name, content);
+        element.dispatchEvent(event);
+    }
 };
 
-},{"../constants":3}],8:[function(require,module,exports){
+},{"../constants":3}],10:[function(require,module,exports){
 'use strict';
 
 var _store = require('./store');
@@ -361,7 +552,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
 // })
 );
 
-},{"./components":2,"./store":6}],9:[function(require,module,exports){
+},{"./components":2,"./store":8}],11:[function(require,module,exports){
 var root = require('./_root');
 
 /** Built-in value references. */
@@ -369,7 +560,7 @@ var Symbol = root.Symbol;
 
 module.exports = Symbol;
 
-},{"./_root":16}],10:[function(require,module,exports){
+},{"./_root":18}],12:[function(require,module,exports){
 var Symbol = require('./_Symbol'),
     getRawTag = require('./_getRawTag'),
     objectToString = require('./_objectToString');
@@ -399,7 +590,7 @@ function baseGetTag(value) {
 
 module.exports = baseGetTag;
 
-},{"./_Symbol":9,"./_getRawTag":13,"./_objectToString":14}],11:[function(require,module,exports){
+},{"./_Symbol":11,"./_getRawTag":15,"./_objectToString":16}],13:[function(require,module,exports){
 (function (global){
 /** Detect free variable `global` from Node.js. */
 var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
@@ -407,7 +598,7 @@ var freeGlobal = typeof global == 'object' && global && global.Object === Object
 module.exports = freeGlobal;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],12:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 var overArg = require('./_overArg');
 
 /** Built-in value references. */
@@ -415,7 +606,7 @@ var getPrototype = overArg(Object.getPrototypeOf, Object);
 
 module.exports = getPrototype;
 
-},{"./_overArg":15}],13:[function(require,module,exports){
+},{"./_overArg":17}],15:[function(require,module,exports){
 var Symbol = require('./_Symbol');
 
 /** Used for built-in method references. */
@@ -463,7 +654,7 @@ function getRawTag(value) {
 
 module.exports = getRawTag;
 
-},{"./_Symbol":9}],14:[function(require,module,exports){
+},{"./_Symbol":11}],16:[function(require,module,exports){
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
 
@@ -487,7 +678,7 @@ function objectToString(value) {
 
 module.exports = objectToString;
 
-},{}],15:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 /**
  * Creates a unary function that invokes `func` with its argument transformed.
  *
@@ -504,7 +695,7 @@ function overArg(func, transform) {
 
 module.exports = overArg;
 
-},{}],16:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var freeGlobal = require('./_freeGlobal');
 
 /** Detect free variable `self`. */
@@ -515,7 +706,7 @@ var root = freeGlobal || freeSelf || Function('return this')();
 
 module.exports = root;
 
-},{"./_freeGlobal":11}],17:[function(require,module,exports){
+},{"./_freeGlobal":13}],19:[function(require,module,exports){
 /**
  * Checks if `value` is object-like. A value is object-like if it's not `null`
  * and has a `typeof` result of "object".
@@ -546,7 +737,7 @@ function isObjectLike(value) {
 
 module.exports = isObjectLike;
 
-},{}],18:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var baseGetTag = require('./_baseGetTag'),
     getPrototype = require('./_getPrototype'),
     isObjectLike = require('./isObjectLike');
@@ -610,7 +801,7 @@ function isPlainObject(value) {
 
 module.exports = isPlainObject;
 
-},{"./_baseGetTag":10,"./_getPrototype":12,"./isObjectLike":17}],19:[function(require,module,exports){
+},{"./_baseGetTag":12,"./_getPrototype":14,"./isObjectLike":19}],21:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -796,7 +987,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],20:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -855,7 +1046,7 @@ function applyMiddleware() {
     };
   };
 }
-},{"./compose":23}],21:[function(require,module,exports){
+},{"./compose":25}],23:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -907,7 +1098,7 @@ function bindActionCreators(actionCreators, dispatch) {
   }
   return boundActionCreators;
 }
-},{}],22:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -1052,7 +1243,7 @@ function combineReducers(reducers) {
   };
 }
 }).call(this,require('_process'))
-},{"./createStore":24,"./utils/warning":26,"_process":19,"lodash/isPlainObject":18}],23:[function(require,module,exports){
+},{"./createStore":26,"./utils/warning":28,"_process":21,"lodash/isPlainObject":20}],25:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -1091,7 +1282,7 @@ function compose() {
     }, last.apply(undefined, arguments));
   };
 }
-},{}],24:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1353,7 +1544,7 @@ function createStore(reducer, preloadedState, enhancer) {
     replaceReducer: replaceReducer
   }, _ref2[_symbolObservable2['default']] = observable, _ref2;
 }
-},{"lodash/isPlainObject":18,"symbol-observable":27}],25:[function(require,module,exports){
+},{"lodash/isPlainObject":20,"symbol-observable":29}],27:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -1402,7 +1593,7 @@ exports.bindActionCreators = _bindActionCreators2['default'];
 exports.applyMiddleware = _applyMiddleware2['default'];
 exports.compose = _compose2['default'];
 }).call(this,require('_process'))
-},{"./applyMiddleware":20,"./bindActionCreators":21,"./combineReducers":22,"./compose":23,"./createStore":24,"./utils/warning":26,"_process":19}],26:[function(require,module,exports){
+},{"./applyMiddleware":22,"./bindActionCreators":23,"./combineReducers":24,"./compose":25,"./createStore":26,"./utils/warning":28,"_process":21}],28:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1428,10 +1619,10 @@ function warning(message) {
   } catch (e) {}
   /* eslint-enable no-empty */
 }
-},{}],27:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 module.exports = require('./lib/index');
 
-},{"./lib/index":28}],28:[function(require,module,exports){
+},{"./lib/index":30}],30:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1463,7 +1654,7 @@ if (typeof self !== 'undefined') {
 var result = (0, _ponyfill2['default'])(root);
 exports['default'] = result;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./ponyfill":29}],29:[function(require,module,exports){
+},{"./ponyfill":31}],31:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1487,4 +1678,4 @@ function symbolObservablePonyfill(root) {
 
 	return result;
 };
-},{}]},{},[8]);
+},{}]},{},[10]);

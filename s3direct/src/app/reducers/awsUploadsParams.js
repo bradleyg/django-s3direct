@@ -10,9 +10,7 @@ export default (state = {}, action) => {
             return Object.assign({}, state, {
                 isLoading: false,
                 AWSPayload: action.aws_payload
-                //widths: getReportItemWidths(action.reports)
             });
-            return reportState;
         case constants.DID_NOT_RECEIVE_AWS_UPLOAD_PARAMS:
             // Returns current state and sets loading to false
             return Object.assign({}, state, {

@@ -6,7 +6,7 @@ export const getCookie = function(name) {
     if (parts.length == 2) return parts.pop().split(';').shift();
 }
 
-export const request = function(method, url, data, headers, showProgress, callback) {
+export const request = function(method, url, data, headers, onProgress, onLoad, onError) {
     var request = new XMLHttpRequest();
     request.open(method, url, true);
 
@@ -15,17 +15,21 @@ export const request = function(method, url, data, headers, showProgress, callba
     });
 
     request.onload = function() {
-        callback(request.status, request.responseText);
+        onLoad(request.status, request.responseText);
     }
 
-    // req.onerror = req.onabort = function() {
-    //     // disableSubmit(false);
-    //     error(element, i18n_strings.no_upload_failed);
-    // }
+    if (onError) {
+        request.onerror = request.onabort = function() {
+            // disableSubmit(false);
+            onError(request.status, request.responseText);
+        }
+    }
 
-    // req.upload.onprogress = function(data) {
-    //     progressBar(element, data, showProgress);
-    // }
+    if (onProgress) {
+        request.upload.onprogress = function(data) {
+            onProgress(data);
+        }
+    }
 
     request.send(data);
 }
@@ -55,8 +59,9 @@ export const parseJson = function(json) {
     return data;
 }
 
-export const error = function(element, message) {
-    element.className = 's3direct form-active';
-    element.querySelector('.file-input').value = '';
-    alert(message);
+export const raiseEvent = function(element, name, content) {
+    if (window.CustomEvent) {
+        var event = new CustomEvent(name, content);
+        element.dispatchEvent(event);
+    }
 }

@@ -1,41 +1,60 @@
-import {removeUpload, getUploadURL} from '../actions';
+import {removeUpload, getUploadURL, clearErrors} from '../actions';
+import {getFilename, getUrl, getError} from '../store';
+import {raiseEvent} from '../utils';
 
 
 const View = function(element, store) {
 
     return {
-        removeUpload: function(event) {
+        render: function(){
+            const filename = getFilename(store),
+                url = getUrl(store),
+                error = getError(store);
 
+            if (filename) {
+                const link = element.querySelector('.file-link');
+
+                link.innerHTML = filename;
+                link.setAttribute('href', url);
+
+                element.classList.add('link-active');
+                element.classList.remove('form-active');
+            }
+            else {
+                element.querySelector('.file-url').value = '';
+                element.querySelector('.file-input').value = '';
+
+                element.classList.add('form-active');
+                element.classList.remove('link-active');
+            }
+
+            if (error) {
+                element.classList.add('has-error');
+                element.classList.add('form-active');
+                element.classList.remove('link-active');
+
+                element.querySelector('.file-input').value = '';
+                element.querySelector('.error').innerHTML = error;
+
+                // dispatch event on the element for external use
+                raiseEvent(element, 's3uploads:error', error);
+            }
+            else {
+                element.classList.remove('has-error');
+                element.querySelector('.error').innerHTML = '';
+            }
+        },
+
+        removeUpload: function(event) {
+            store.dispatch(removeUpload());
         },
 
         getUploadURL: function(event) {
-
             const file = element.querySelector('.file-input').files[0],
                 dest = element.querySelector('.file-dest').value,
                 url  = element.getAttribute('data-policy-url');
-                // form     = new FormData(),
-                // headers  = {'X-CSRFToken': getCookie('csrftoken')}
 
-            // form.append('type', file.type)
-            // form.append('name', file.name)
-            // form.append('dest', dest)
-
-            // request('POST', url, form, headers, el, false, function(status, json){
-            //     var data = parseJson(json)
-
-            //     switch(status) {
-            //         case 200:
-            //             upload(file, data, el)
-            //             break
-            //         case 400:
-            //         case 403:
-            //             error(el, data.error)
-            //             break;
-            //         default:
-            //             error(el, i18n_strings.no_upload_url)
-            //     }
-            // })
-
+            store.dispatch(clearErrors());
             store.dispatch(getUploadURL(file, dest, url, store));
         },
 
@@ -53,6 +72,8 @@ const View = function(element, store) {
             // store.subscribe(this.updateScore.bind(this))
             remove.addEventListener('click', this.removeUpload.bind(this))
             input.addEventListener('change', this.getUploadURL.bind(this))
+
+            store.subscribe(this.render.bind(this));
         }
     }
 }
