@@ -95,22 +95,24 @@ class WidgetTestCase(TestCase):
                 u'type': u'image/jpeg'}
         response = self.client.post(reverse('s3direct'), data)
         response_dict = json.loads(response.content.decode())
-        self.assertTrue(u'x-amz-signature' in response_dict)
-        self.assertTrue(u'x-amz-credential' in response_dict)
-        self.assertTrue(u'policy' in response_dict)
-        self.assertDictContainsSubset(FOO_RESPONSE, response_dict)
+        aws_payload = response_dict["aws_payload"]
+        self.assertTrue(u'x-amz-signature' in aws_payload)
+        self.assertTrue(u'x-amz-credential' in aws_payload)
+        self.assertTrue(u'policy' in aws_payload)
+        self.assertDictContainsSubset(FOO_RESPONSE, aws_payload)
 
     def check_signing_fields_unique_filename(self):
         data = {u'dest': u'misc', u'name': u'image.jpg',
                 u'type': u'image/jpeg'}
         response = self.client.post(reverse('s3direct'), data)
         response_dict = json.loads(response.content.decode())
-        self.assertTrue(u'x-amz-signature' in response_dict)
-        self.assertTrue(u'x-amz-credential' in response_dict)
-        self.assertTrue(u'policy' in response_dict)
+        aws_payload = response_dict["aws_payload"]
+        self.assertTrue(u'x-amz-signature' in aws_payload)
+        self.assertTrue(u'x-amz-credential' in aws_payload)
+        self.assertTrue(u'policy' in aws_payload)
         changed = FOO_RESPONSE.copy()
         changed['key'] = 'images/unique.jpg'
-        self.assertDictContainsSubset(changed, response_dict)
+        self.assertDictContainsSubset(changed, aws_payload)
 
     def check_policy_conditions(self):
         self.client.login(username='admin', password='admin')
@@ -119,9 +121,10 @@ class WidgetTestCase(TestCase):
         response = self.client.post(reverse('s3direct'), data)
         self.assertEqual(response.status_code, 200)
         response_dict = json.loads(response.content.decode())
-        self.assertTrue('policy' in response_dict)
+        aws_payload = response_dict["aws_payload"]
+        self.assertTrue('policy' in aws_payload)
         policy_dict = json.loads(
-                b64decode(response_dict['policy']).decode('utf-8'))
+                b64decode(aws_payload['policy']).decode('utf-8'))
         self.assertTrue('conditions' in policy_dict)
         conditions_dict = policy_dict['conditions']
         self.assertEqual(
@@ -134,6 +137,27 @@ class WidgetTestCase(TestCase):
                 conditions_dict[9]['Content-Disposition'], u'attachment')
         self.assertEqual(
                 conditions_dict[10]['x-amz-server-side-encryption'], u'AES256')
+
+    @override_settings(S3DIRECT_DESTINATIONS={
+        'misc': {
+            'key': '/',
+            'auth': lambda u: True,
+            'acl': 'private',
+        }
+    })
+    def check_signed_url(self):
+        data = {
+            u'dest': u'misc',
+            u'name': u'image.jpg',
+            u'type': u'image/jpeg'
+        }
+        response = self.client.post(reverse('s3direct'), data)
+        response_dict = json.loads(response.content.decode())
+        private_access_url = response_dict["private_access_url"]
+        
+        self.assertTrue(
+            "http://test-bucket.s3.amazonaws.com/image.jpg?Signature=" in private_access_url
+        )
 
 
 @override_settings(S3DIRECT_DESTINATIONS={
@@ -187,6 +211,9 @@ class OldStyleSettingsWidgetTest(WidgetTestCase):
     def test_policy_conditions(self):
         self.check_policy_conditions()
 
+    def test_signed_url(self):
+        self.check_signed_url()
+
 
 class WidgetTest(WidgetTestCase):
 
@@ -226,6 +253,9 @@ class WidgetTest(WidgetTestCase):
     def test_policy_conditions(self):
         self.check_policy_conditions()
 
+    def test_signed_url(self):
+        self.check_signed_url()
+
     """Tests for features only available with new-style settings"""
     def test_content_length_range(self):
         # Content_length_range setting is always sent as part of policy.
@@ -235,9 +265,11 @@ class WidgetTest(WidgetTestCase):
         self.assertEqual(response.status_code, 200)
 
         response_dict = json.loads(response.content.decode())
-        self.assertTrue('policy' in response_dict)
+        aws_payload = response_dict["aws_payload"]
+
+        self.assertTrue('policy' in aws_payload)
         policy_dict = json.loads(
-                b64decode(response_dict['policy']).decode('utf-8'))
+                b64decode(aws_payload['policy']).decode('utf-8'))
         self.assertTrue('conditions' in policy_dict)
         conditions_dict = policy_dict['conditions']
         self.assertEqual(
