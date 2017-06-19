@@ -13,9 +13,11 @@ export const getUploadURL = (file, dest, url, store) => {
 
     const onLoad = function(status, json) {
         const data = parseJson(json);
+        const signedURL = data.private_access_url;
 
         switch(status) {
             case 200:
+                store.dispatch(receiveSignedURL(signedURL));
                 store.dispatch(receiveAWSUploadParams(data.aws_payload));
                 store.dispatch(beginUploadToAWS(file, store));
                 break;
@@ -47,6 +49,13 @@ export const receiveAWSUploadParams = (aws_payload) => {
     return {
         type: constants.RECEIVE_AWS_UPLOAD_PARAMS,
         aws_payload: aws_payload
+    }
+}
+
+export const receiveSignedURL = (signedURL) => {
+    return {
+        type: constants.RECEIVE_SIGNED_URL,
+        signedURL,
     }
 }
 

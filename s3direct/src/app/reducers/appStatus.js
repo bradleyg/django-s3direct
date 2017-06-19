@@ -35,6 +35,11 @@ export default (state = {}, action) => {
             return Object.assign({}, state, {
                 uploadProgress: progress
             });
+        case constants.RECEIVE_SIGNED_URL: {
+            return Object.assign({}, state, {
+                signedURL: action.signedURL
+            });
+        }
 
         default:
             return state;

@@ -4,7 +4,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.updateProgress = exports.clearErrors = exports.addError = exports.completeUploadToAWS = exports.beginUploadToAWS = exports.removeUpload = exports.didNotReceivAWSUploadParams = exports.receiveAWSUploadParams = exports.getUploadURL = undefined;
+exports.updateProgress = exports.clearErrors = exports.addError = exports.completeUploadToAWS = exports.beginUploadToAWS = exports.removeUpload = exports.didNotReceivAWSUploadParams = exports.receiveSignedURL = exports.receiveAWSUploadParams = exports.getUploadURL = undefined;
 
 var _constants = require('../constants');
 
@@ -25,9 +25,11 @@ var getUploadURL = exports.getUploadURL = function getUploadURL(file, dest, url,
 
     var onLoad = function onLoad(status, json) {
         var data = (0, _utils.parseJson)(json);
+        var signedURL = data.private_access_url;
 
         switch (status) {
             case 200:
+                store.dispatch(receiveSignedURL(signedURL));
                 store.dispatch(receiveAWSUploadParams(data.aws_payload));
                 store.dispatch(beginUploadToAWS(file, store));
                 break;
@@ -59,6 +61,13 @@ var receiveAWSUploadParams = exports.receiveAWSUploadParams = function receiveAW
     return {
         type: _constants2.default.RECEIVE_AWS_UPLOAD_PARAMS,
         aws_payload: aws_payload
+    };
+};
+
+var receiveSignedURL = exports.receiveSignedURL = function receiveSignedURL(signedURL) {
+    return {
+        type: _constants2.default.RECEIVE_SIGNED_URL,
+        signedURL: signedURL
     };
 };
 
@@ -283,7 +292,8 @@ exports.default = {
     COMPLETE_UPLOAD_TO_AWS: 'COMPLETE_UPLOAD_TO_AWS',
     ADD_ERROR: 'ADD_ERROR',
     CLEAR_ERRORS: 'CLEAR_ERRORS',
-    UPDATE_PROGRESS: 'UPDATE_PROGRESS'
+    UPDATE_PROGRESS: 'UPDATE_PROGRESS',
+    RECEIVE_SIGNED_URL: 'RECEIVE_SIGNED_URL'
 };
 
 
@@ -353,6 +363,12 @@ exports.default = function () {
             return Object.assign({}, state, {
                 uploadProgress: progress
             });
+        case _constants2.default.RECEIVE_SIGNED_URL:
+            {
+                return Object.assign({}, state, {
+                    signedURL: action.signedURL
+                });
+            }
 
         default:
             return state;
@@ -436,7 +452,9 @@ function getFilename(store) {
 }
 
 function getUrl(store) {
-    return store.getState().appStatus.url;
+    var url = store.getState().appStatus.signedURL || store.getState().appStatus.url;
+
+    return url;
 }
 
 function getError(store) {

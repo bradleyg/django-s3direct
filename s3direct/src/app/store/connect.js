@@ -3,7 +3,9 @@ export function getFilename (store) {
 }
 
 export function getUrl (store) {
-    return store.getState().appStatus.url;
+    const url = store.getState().appStatus.signedURL || store.getState().appStatus.url;
+
+    return url;
 }
 
 export function getError (store) {
