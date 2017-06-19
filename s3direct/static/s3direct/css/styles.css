@@ -21,7 +21,8 @@
 .s3direct .file-link,
 .s3direct .file-remove,
 .s3direct .file-input,
-.s3direct .error {
+.s3direct .error,
+.s3direct.form-active.progress-active .file-input {
   display: none;
   float: left;
   clear: left;
