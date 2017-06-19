@@ -4,7 +4,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.updateProgress = exports.clearErrors = exports.addError = exports.completeUploadToAWS = exports.beginUploadToAWS = exports.removeUpload = exports.didNotReceivAWSUploadParams = exports.receiveSignedURL = exports.receiveAWSUploadParams = exports.getUploadURL = undefined;
+exports.updateProgress = exports.clearErrors = exports.addError = exports.didNotCompleteUploadToAWS = exports.completeUploadToAWS = exports.beginUploadToAWS = exports.removeUpload = exports.didNotReceivAWSUploadParams = exports.receiveSignedURL = exports.receiveAWSUploadParams = exports.getUploadURL = undefined;
 
 var _constants = require('../constants');
 
@@ -37,17 +37,20 @@ var getUploadURL = exports.getUploadURL = function getUploadURL(file, dest, url,
             case 403:
                 console.error('Error uploading', status, data.error);
                 store.dispatch(addError(data.error));
+                store.dispatch(didNotReceivAWSUploadParams());
                 break;
             default:
                 console.error('Error uploading', status, _constants.i18n_strings.no_upload_url);
                 store.dispatch(addError(_constants.i18n_strings.no_upload_url));
+                store.dispatch(didNotReceivAWSUploadParams());
         }
     };
 
     var onError = function onError(status, json) {
         var data = (0, _utils.parseJson)(json);
-
         console.log('onError', data);
+
+        store.dispatch(addError(_constants.i18n_strings.no_upload_url));
     };
 
     (0, _utils.request)('POST', url, form, headers, false, onLoad, onError);
@@ -115,7 +118,7 @@ var beginUploadToAWS = exports.beginUploadToAWS = function beginUploadToAWS(file
                 } else if (xml.indexOf('<MaxSizeAllowed>') > -1) {
                     store.dispatch(addError(_constants.i18n_strings.no_file_too_large));
                 } else {
-                    store.dispatch(addError(_constants.i18n_strings.no_upload_url));
+                    store.dispatch(addError(_constants.i18n_strings.no_upload_failed));
                 }
 
                 break;
@@ -124,11 +127,10 @@ var beginUploadToAWS = exports.beginUploadToAWS = function beginUploadToAWS(file
 
     var onError = function onError(status, xml) {
         console.error('Error uploading', status, xml);
-        store.dispatch(addError(_constants.i18n_strings.no_upload_url));
+        store.dispatch(addError(_constants.i18n_strings.no_upload_failed));
     };
 
     var onProgress = function onProgress(data) {
-        console.log('progress', data);
         store.dispatch(updateProgress(data));
     };
 
@@ -144,6 +146,12 @@ var completeUploadToAWS = exports.completeUploadToAWS = function completeUploadT
         type: _constants2.default.COMPLETE_UPLOAD_TO_AWS,
         url: url,
         filename: filename
+    };
+};
+
+var didNotCompleteUploadToAWS = exports.didNotCompleteUploadToAWS = function didNotCompleteUploadToAWS() {
+    return {
+        type: _constants2.default.DID_NOT_COMPLETE_UPLOAD_TO_AWS
     };
 };
 
@@ -184,7 +192,6 @@ var _store = require('../store');
 var _utils = require('../utils');
 
 var View = function View(element, store) {
-
     return {
         render: function render() {
             var filename = (0, _store.getFilename)(store),
@@ -252,6 +259,7 @@ var View = function View(element, store) {
 
         init: function init() {
             // cache all the query selectors
+            // $variables represent DOM elements
             this.$element = element;
             this.$url = element.querySelector('.file-url');
             this.$input = element.querySelector('.file-input');
@@ -290,6 +298,7 @@ exports.default = {
     REMOVE_UPLOAD: 'REMOVE_UPLOAD',
     BEGIN_UPLOAD_TO_AWS: 'BEGIN_UPLOAD_TO_AWS',
     COMPLETE_UPLOAD_TO_AWS: 'COMPLETE_UPLOAD_TO_AWS',
+    DID_NOT_COMPLETE_UPLOAD_TO_AWS: 'DID_NOT_COMPLETE_UPLOAD_TO_AWS',
     ADD_ERROR: 'ADD_ERROR',
     CLEAR_ERRORS: 'CLEAR_ERRORS',
     UPDATE_PROGRESS: 'UPDATE_PROGRESS',
@@ -339,6 +348,10 @@ exports.default = function () {
                 isUploading: false,
                 filename: action.filename,
                 url: action.url
+            });
+        case _constants2.default.DID_NOT_COMPLETE_UPLOAD_TO_AWS:
+            return Object.assign({}, state, {
+                isUploading: false
             });
         case _constants2.default.REMOVE_UPLOAD:
             return Object.assign({}, state, {

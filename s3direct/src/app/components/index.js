@@ -4,7 +4,6 @@ import {raiseEvent} from '../utils';
 
 
 const View = function(element, store) {
-
     return {
         render: function(){
             const filename = getFilename(store),
@@ -73,6 +72,7 @@ const View = function(element, store) {
 
         init: function() {
             // cache all the query selectors
+            // $variables represent DOM elements
             this.$element = element;
             this.$url     = element.querySelector('.file-url');
             this.$input   = element.querySelector('.file-input');

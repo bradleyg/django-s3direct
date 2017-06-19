@@ -1,6 +1,6 @@
 import constants from '../constants';
 import {i18n_strings} from '../constants';
-import {request, parseJson, error, getCookie, parseURL, parseNameFromUrl} from '../utils';
+import {request, parseJson, getCookie, parseURL, parseNameFromUrl} from '../utils';
 
 export const getUploadURL = (file, dest, url, store) => {
 
@@ -25,17 +25,20 @@ export const getUploadURL = (file, dest, url, store) => {
             case 403:
                 console.error('Error uploading', status, data.error);
                 store.dispatch(addError(data.error));
+                store.dispatch(didNotReceivAWSUploadParams());
                 break;
             default:
                 console.error('Error uploading', status, i18n_strings.no_upload_url);
                 store.dispatch(addError(i18n_strings.no_upload_url));
+                store.dispatch(didNotReceivAWSUploadParams());
         }
     }
 
     const onError = function(status, json) {
         const data = parseJson(json);
-
         console.log('onError', data);
+
+        store.dispatch(addError(i18n_strings.no_upload_url));
     }
 
     request('POST', url, form, headers, false, onLoad, onError);
@@ -78,12 +81,15 @@ export const beginUploadToAWS = (file, store) => {
 
     let form = new FormData();
 
+    // we need to remove this key because otherwise S3 will trigger a 403
+    // when we send the payload along with the file.
     delete AWSPayload['form_action'];
 
     Object.keys(AWSPayload).forEach(function(key){
         form.append(key, AWSPayload[key]);
     });
 
+    // the file has to be appended at the end, or else S3 will throw a wobbly
     form.append('file', file);
 
     const onLoad = function(status, xml) {
@@ -97,6 +103,7 @@ export const beginUploadToAWS = (file, store) => {
                 break;
             default:
                 console.error('Error uploading', status, xml);
+                store.dispatch(didNotCompleteUploadToAWS());
 
                 if (xml.indexOf('<MinSizeAllowed>') > -1) {
                     store.dispatch(addError(i18n_strings.no_file_too_small));
@@ -105,7 +112,7 @@ export const beginUploadToAWS = (file, store) => {
                     store.dispatch(addError(i18n_strings.no_file_too_large));
                 }
                 else {
-                    store.dispatch(addError(i18n_strings.no_upload_url));
+                    store.dispatch(addError(i18n_strings.no_upload_failed));
                 }
 
                 break;
@@ -114,11 +121,11 @@ export const beginUploadToAWS = (file, store) => {
 
     const onError = function(status, xml) {
         console.error('Error uploading', status, xml);
-        store.dispatch(addError(i18n_strings.no_upload_url));
+        store.dispatch(didNotCompleteUploadToAWS());
+        store.dispatch(addError(i18n_strings.no_upload_failed));
     }
 
     const onProgress = function(data) {
-        console.log('progress', data);
         store.dispatch(updateProgress(data));
     }
 
@@ -134,6 +141,12 @@ export const completeUploadToAWS = (url, filename) => {
         type: constants.COMPLETE_UPLOAD_TO_AWS,
         url,
         filename
+    }
+}
+
+export const didNotCompleteUploadToAWS = () => {
+    return {
+        type: constants.DID_NOT_COMPLETE_UPLOAD_TO_AWS
     }
 }
 

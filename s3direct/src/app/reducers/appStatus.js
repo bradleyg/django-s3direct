@@ -12,6 +12,10 @@ export default (state = {}, action) => {
                 filename: action.filename,
                 url: action.url
             });
+        case constants.DID_NOT_COMPLETE_UPLOAD_TO_AWS:
+            return Object.assign({}, state, {
+                isUploading: false
+            });
         case constants.REMOVE_UPLOAD:
             return Object.assign({}, state, {
                 filename: null,
