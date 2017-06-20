@@ -64,3 +64,20 @@ export const raiseEvent = function(element, name, detail) {
         element.dispatchEvent(event);
     }
 }
+
+export const observeStore = function(store, select, onChange) {
+    let currentState;
+
+    function handleChange() {
+        let nextState = select(store.getState());
+
+        if (nextState !== currentState) {
+            currentState = nextState;
+            onChange(currentState);
+        }
+    }
+
+    let unsubscribe = store.subscribe(handleChange);
+    handleChange();
+    return unsubscribe;
+}

@@ -1,6 +1,7 @@
 import constants from '../constants';
 import {i18n_strings} from '../constants';
-import {request, parseJson, getCookie, parseURL, parseNameFromUrl} from '../utils';
+import {request, parseJson, getCookie, parseURL, parseNameFromUrl, raiseEvent} from '../utils';
+import {getElement, getAWSPayload} from '../store';
 
 export const getUploadURL = (file, dest, url, store) => {
 
@@ -24,11 +25,13 @@ export const getUploadURL = (file, dest, url, store) => {
             case 400:
             case 403:
                 console.error('Error uploading', status, data.error);
+                raiseEvent(getElement(store), 's3uploads:error', {status, error: data});
                 store.dispatch(addError(data.error));
                 store.dispatch(didNotReceivAWSUploadParams());
                 break;
             default:
                 console.error('Error uploading', status, i18n_strings.no_upload_url);
+                raiseEvent(getElement(store), 's3uploads:error', {status, error: data});
                 store.dispatch(addError(i18n_strings.no_upload_url));
                 store.dispatch(didNotReceivAWSUploadParams());
         }
@@ -36,7 +39,9 @@ export const getUploadURL = (file, dest, url, store) => {
 
     const onError = function(status, json) {
         const data = parseJson(json);
+
         console.error('Error uploading', data);
+        raiseEvent(getElement(store), 's3uploads:error', {status, error: data});
 
         store.dispatch(addError(i18n_strings.no_upload_url));
     }
@@ -75,7 +80,7 @@ export const removeUpload = () => {
 }
 
 export const beginUploadToAWS = (file, store) => {
-    const AWSPayload = store.getState().AWSUploadParams.AWSPayload,
+    const AWSPayload = getAWSPayload(store),
         url = AWSPayload.form_action,
         headers = {};
 
@@ -98,11 +103,13 @@ export const beginUploadToAWS = (file, store) => {
                 const url = parseURL(xml),
                     filename = parseNameFromUrl(url).split('/').pop();
 
-                store.dispatch(completeUploadToAWS(url, filename));
-
+                store.dispatch(completeUploadToAWS(filename, url));
+                raiseEvent(getElement(store), 's3uploads:file-uploaded', {filename, url});
                 break;
             default:
                 console.error('Error uploading', status, xml);
+                raiseEvent(getElement(store), 's3uploads:error', {status, error: xml});
+
                 store.dispatch(didNotCompleteUploadToAWS());
 
                 if (xml.indexOf('<MinSizeAllowed>') > -1) {
@@ -121,12 +128,21 @@ export const beginUploadToAWS = (file, store) => {
 
     const onError = function(status, xml) {
         console.error('Error uploading', status, xml);
+        raiseEvent(getElement(store), 's3uploads:error', {status, xml});
+
         store.dispatch(didNotCompleteUploadToAWS());
         store.dispatch(addError(i18n_strings.no_upload_failed));
     }
 
     const onProgress = function(data) {
-        store.dispatch(updateProgress(data));
+        let progress = null;
+
+        if (data.lengthComputable) {
+            progress = Math.round(data.loaded * 100 / data.total);
+        }
+
+        store.dispatch(updateProgress(progress));
+        raiseEvent(getElement(store), 's3uploads:progress-updated', {progress});
     }
 
     request('POST', url, form, headers, onProgress, onLoad, onError);
@@ -136,7 +152,7 @@ export const beginUploadToAWS = (file, store) => {
     }
 }
 
-export const completeUploadToAWS = (url, filename) => {
+export const completeUploadToAWS = (filename, url) => {
     return {
         type: constants.COMPLETE_UPLOAD_TO_AWS,
         url,
@@ -163,9 +179,9 @@ export const clearErrors = () => {
     }
 }
 
-export const updateProgress = (data = {}) => {
+export const updateProgress = (progress = {}) => {
     return {
         type: constants.UPDATE_PROGRESS,
-        data
+        progress
     }
 }

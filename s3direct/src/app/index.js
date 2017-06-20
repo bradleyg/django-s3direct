@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function(e) {
 
     elements.forEach(function(element) {
         // initialise instance for each element
-        const store = configureStore();
+        const store = configureStore({element});
         const view = new View(element, store);
         view.init();
     });

@@ -30,14 +30,8 @@ export default (state = {}, action) => {
                 error: null
             });
         case constants.UPDATE_PROGRESS:
-            let progress = null;
-
-            if (action.data.lengthComputable) {
-                progress = Math.round(action.data.loaded * 100 / action.data.total);
-            }
-
             return Object.assign({}, state, {
-                uploadProgress: progress
+                uploadProgress: action.progress
             });
         case constants.RECEIVE_SIGNED_URL: {
             return Object.assign({}, state, {
