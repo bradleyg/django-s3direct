@@ -99,23 +99,6 @@ const View = function(element, store) {
             const errorObserver = observeStore(store, state => state.appStatus.error, this.renderError.bind(this));
 
             const uploadProgressObserver = observeStore(store, state => state.appStatus.uploadProgress, this.renderUploadProgress.bind(this));
-
-
-            this.$element.addEventListener('s3uploads:progress-updated', event => {
-                console.log(event);
-            });
-
-            this.$element.addEventListener('s3uploads:file-uploaded', event => {
-                console.log(event);
-            })
-
-            this.$element.addEventListener('s3uploads:error', event => {
-                console.log(event);
-            })
-
-            this.$element.addEventListener('s3uploads:clear-upload', event => {
-                console.log(event);
-            })
         }
     }
 }
