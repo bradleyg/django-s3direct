@@ -18,6 +18,8 @@ const View = function(element, store) {
 
                 this.$element.classList.add('link-active');
                 this.$element.classList.remove('form-active');
+
+                raiseEvent(this.$element, 's3uploads:file-uploaded', {filename, url});
             }
             // if not, let's empty the form and revert to default state
             else {
@@ -26,6 +28,8 @@ const View = function(element, store) {
 
                 this.$element.classList.add('form-active');
                 this.$element.classList.remove('link-active');
+
+                raiseEvent(this.$element, 's3uploads:clear-upload');
             }
 
             // if there's an error, let's display it
@@ -49,10 +53,14 @@ const View = function(element, store) {
             if (uploadProgress && uploadProgress < 100) {
                 this.$element.classList.add('progress-active');
                 this.$bar.style.width = uploadProgress + '%';
+
+                raiseEvent(this.$element, 's3uploads:progress-updated', {uploadProgress});
             }
             else {
                 this.$element.classList.remove('progress-active');
                 this.$bar.style.width = '0';
+
+                raiseEvent(this.$element, 's3uploads:progress-updated', {uploadProgress: 0});
             }
         },
 

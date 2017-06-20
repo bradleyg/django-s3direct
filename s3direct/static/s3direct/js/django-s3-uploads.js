@@ -48,7 +48,7 @@ var getUploadURL = exports.getUploadURL = function getUploadURL(file, dest, url,
 
     var onError = function onError(status, json) {
         var data = (0, _utils.parseJson)(json);
-        console.log('onError', data);
+        console.error('Error uploading', data);
 
         store.dispatch(addError(_constants.i18n_strings.no_upload_url));
     };
@@ -93,12 +93,15 @@ var beginUploadToAWS = exports.beginUploadToAWS = function beginUploadToAWS(file
 
     var form = new FormData();
 
+    // we need to remove this key because otherwise S3 will trigger a 403
+    // when we send the payload along with the file.
     delete AWSPayload['form_action'];
 
     Object.keys(AWSPayload).forEach(function (key) {
         form.append(key, AWSPayload[key]);
     });
 
+    // the file has to be appended at the end, or else S3 will throw a wobbly
     form.append('file', file);
 
     var onLoad = function onLoad(status, xml) {
@@ -112,6 +115,7 @@ var beginUploadToAWS = exports.beginUploadToAWS = function beginUploadToAWS(file
                 break;
             default:
                 console.error('Error uploading', status, xml);
+                store.dispatch(didNotCompleteUploadToAWS());
 
                 if (xml.indexOf('<MinSizeAllowed>') > -1) {
                     store.dispatch(addError(_constants.i18n_strings.no_file_too_small));
@@ -127,6 +131,7 @@ var beginUploadToAWS = exports.beginUploadToAWS = function beginUploadToAWS(file
 
     var onError = function onError(status, xml) {
         console.error('Error uploading', status, xml);
+        store.dispatch(didNotCompleteUploadToAWS());
         store.dispatch(addError(_constants.i18n_strings.no_upload_failed));
     };
 
@@ -206,6 +211,8 @@ var View = function View(element, store) {
 
                 this.$element.classList.add('link-active');
                 this.$element.classList.remove('form-active');
+
+                (0, _utils.raiseEvent)(this.$element, 's3uploads:file-uploaded', { filename: filename, url: url });
             }
             // if not, let's empty the form and revert to default state
             else {
@@ -214,6 +221,8 @@ var View = function View(element, store) {
 
                     this.$element.classList.add('form-active');
                     this.$element.classList.remove('link-active');
+
+                    (0, _utils.raiseEvent)(this.$element, 's3uploads:clear-upload');
                 }
 
             // if there's an error, let's display it
@@ -237,9 +246,13 @@ var View = function View(element, store) {
             if (uploadProgress && uploadProgress < 100) {
                 this.$element.classList.add('progress-active');
                 this.$bar.style.width = uploadProgress + '%';
+
+                (0, _utils.raiseEvent)(this.$element, 's3uploads:progress-updated', { uploadProgress: uploadProgress });
             } else {
                 this.$element.classList.remove('progress-active');
                 this.$bar.style.width = '0';
+
+                (0, _utils.raiseEvent)(this.$element, 's3uploads:progress-updated', { uploadProgress: 0 });
             }
         },
 
@@ -542,7 +555,6 @@ var request = exports.request = function request(method, url, data, headers, onP
 
     if (onError) {
         request.onerror = request.onabort = function () {
-            // disableSubmit(false);
             onError(request.status, request.responseText);
         };
     }
@@ -580,9 +592,9 @@ var parseJson = exports.parseJson = function parseJson(json) {
     return data;
 };
 
-var raiseEvent = exports.raiseEvent = function raiseEvent(element, name, content) {
+var raiseEvent = exports.raiseEvent = function raiseEvent(element, name, detail) {
     if (window.CustomEvent) {
-        var event = new CustomEvent(name, content);
+        var event = new CustomEvent(name, { detail: detail });
         element.dispatchEvent(event);
     }
 };
@@ -598,19 +610,6 @@ var _components = require('./components');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// var addHandlers = function(el) {
-//     var url    = el.querySelector('.file-url'),
-//         input  = el.querySelector('.file-input'),
-//         remove = el.querySelector('.file-remove'),
-//         status = (url.value === '') ? 'form' : 'link'
-
-//     el.className = 's3direct ' + status + '-active'
-
-//     remove.addEventListener('click', removeUpload, false)
-//     input.addEventListener('change', getUploadURL, false)
-// }
-
-
 document.addEventListener('DOMContentLoaded', function (e) {
     var elements = document.querySelectorAll('.s3direct');
 
@@ -620,17 +619,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         var view = new _components.View(element, store);
         view.init();
     });
-}
-
-// document.addEventListener('DOMNodeInserted', function(e){
-//     if(e.target.tagName) {
-//         var el = e.target.querySelectorAll('.s3direct');
-//         [].forEach.call(el, function (element, index, array) {
-//     addHandlers(element);
-//     });
-//     }
-// })
-);
+});
 
 },{"./components":2,"./store":8}],11:[function(require,module,exports){
 var root = require('./_root');

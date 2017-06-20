@@ -36,7 +36,7 @@ export const getUploadURL = (file, dest, url, store) => {
 
     const onError = function(status, json) {
         const data = parseJson(json);
-        console.log('onError', data);
+        console.error('Error uploading', data);
 
         store.dispatch(addError(i18n_strings.no_upload_url));
     }
