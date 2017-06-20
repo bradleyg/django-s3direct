@@ -263,6 +263,8 @@ var View = function View(element, store) {
         },
 
         removeUpload: function removeUpload(event) {
+            event.preventDefault();
+
             store.dispatch((0, _actions.updateProgress)());
             store.dispatch((0, _actions.removeUpload)());
             (0, _utils.raiseEvent)(this.$element, 's3uploads:clear-upload');
@@ -312,22 +314,6 @@ var View = function View(element, store) {
             var uploadProgressObserver = (0, _utils.observeStore)(store, function (state) {
                 return state.appStatus.uploadProgress;
             }, this.renderUploadProgress.bind(this));
-
-            this.$element.addEventListener('s3uploads:progress-updated', function (event) {
-                console.log(event);
-            });
-
-            this.$element.addEventListener('s3uploads:file-uploaded', function (event) {
-                console.log(event);
-            });
-
-            this.$element.addEventListener('s3uploads:error', function (event) {
-                console.log(event);
-            });
-
-            this.$element.addEventListener('s3uploads:clear-upload', function (event) {
-                console.log(event);
-            });
         }
     };
 };

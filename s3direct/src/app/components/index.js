@@ -56,6 +56,8 @@ const View = function(element, store) {
         },
 
         removeUpload: function(event) {
+            event.preventDefault();
+
             store.dispatch(updateProgress());
             store.dispatch(removeUpload());
             raiseEvent(this.$element, 's3uploads:clear-upload');
