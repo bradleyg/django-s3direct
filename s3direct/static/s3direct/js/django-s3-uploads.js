@@ -12,6 +12,8 @@ var _constants2 = _interopRequireDefault(_constants);
 
 var _utils = require('../utils');
 
+var _store = require('../store');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var getUploadURL = exports.getUploadURL = function getUploadURL(file, dest, url, store) {
@@ -36,11 +38,13 @@ var getUploadURL = exports.getUploadURL = function getUploadURL(file, dest, url,
             case 400:
             case 403:
                 console.error('Error uploading', status, data.error);
+                (0, _utils.raiseEvent)((0, _store.getElement)(store), 's3uploads:error', { status: status, error: data });
                 store.dispatch(addError(data.error));
                 store.dispatch(didNotReceivAWSUploadParams());
                 break;
             default:
                 console.error('Error uploading', status, _constants.i18n_strings.no_upload_url);
+                (0, _utils.raiseEvent)((0, _store.getElement)(store), 's3uploads:error', { status: status, error: data });
                 store.dispatch(addError(_constants.i18n_strings.no_upload_url));
                 store.dispatch(didNotReceivAWSUploadParams());
         }
@@ -48,7 +52,9 @@ var getUploadURL = exports.getUploadURL = function getUploadURL(file, dest, url,
 
     var onError = function onError(status, json) {
         var data = (0, _utils.parseJson)(json);
-        console.log('onError', data);
+
+        console.error('Error uploading', data);
+        (0, _utils.raiseEvent)((0, _store.getElement)(store), 's3uploads:error', { status: status, error: data });
 
         store.dispatch(addError(_constants.i18n_strings.no_upload_url));
     };
@@ -87,18 +93,21 @@ var removeUpload = exports.removeUpload = function removeUpload() {
 };
 
 var beginUploadToAWS = exports.beginUploadToAWS = function beginUploadToAWS(file, store) {
-    var AWSPayload = store.getState().AWSUploadParams.AWSPayload,
+    var AWSPayload = (0, _store.getAWSPayload)(store),
         url = AWSPayload.form_action,
         headers = {};
 
     var form = new FormData();
 
+    // we need to remove this key because otherwise S3 will trigger a 403
+    // when we send the payload along with the file.
     delete AWSPayload['form_action'];
 
     Object.keys(AWSPayload).forEach(function (key) {
         form.append(key, AWSPayload[key]);
     });
 
+    // the file has to be appended at the end, or else S3 will throw a wobbly
     form.append('file', file);
 
     var onLoad = function onLoad(status, xml) {
@@ -107,11 +116,14 @@ var beginUploadToAWS = exports.beginUploadToAWS = function beginUploadToAWS(file
                 var _url = (0, _utils.parseURL)(xml),
                     filename = (0, _utils.parseNameFromUrl)(_url).split('/').pop();
 
-                store.dispatch(completeUploadToAWS(_url, filename));
-
+                store.dispatch(completeUploadToAWS(filename, _url));
+                (0, _utils.raiseEvent)((0, _store.getElement)(store), 's3uploads:file-uploaded', { filename: filename, url: _url });
                 break;
             default:
                 console.error('Error uploading', status, xml);
+                (0, _utils.raiseEvent)((0, _store.getElement)(store), 's3uploads:error', { status: status, error: xml });
+
+                store.dispatch(didNotCompleteUploadToAWS());
 
                 if (xml.indexOf('<MinSizeAllowed>') > -1) {
                     store.dispatch(addError(_constants.i18n_strings.no_file_too_small));
@@ -127,11 +139,21 @@ var beginUploadToAWS = exports.beginUploadToAWS = function beginUploadToAWS(file
 
     var onError = function onError(status, xml) {
         console.error('Error uploading', status, xml);
+        (0, _utils.raiseEvent)((0, _store.getElement)(store), 's3uploads:error', { status: status, xml: xml });
+
+        store.dispatch(didNotCompleteUploadToAWS());
         store.dispatch(addError(_constants.i18n_strings.no_upload_failed));
     };
 
     var onProgress = function onProgress(data) {
-        store.dispatch(updateProgress(data));
+        var progress = null;
+
+        if (data.lengthComputable) {
+            progress = Math.round(data.loaded * 100 / data.total);
+        }
+
+        store.dispatch(updateProgress(progress));
+        (0, _utils.raiseEvent)((0, _store.getElement)(store), 's3uploads:progress-updated', { progress: progress });
     };
 
     (0, _utils.request)('POST', url, form, headers, onProgress, onLoad, onError);
@@ -141,7 +163,7 @@ var beginUploadToAWS = exports.beginUploadToAWS = function beginUploadToAWS(file
     };
 };
 
-var completeUploadToAWS = exports.completeUploadToAWS = function completeUploadToAWS(url, filename) {
+var completeUploadToAWS = exports.completeUploadToAWS = function completeUploadToAWS(filename, url) {
     return {
         type: _constants2.default.COMPLETE_UPLOAD_TO_AWS,
         url: url,
@@ -169,15 +191,15 @@ var clearErrors = exports.clearErrors = function clearErrors() {
 };
 
 var updateProgress = exports.updateProgress = function updateProgress() {
-    var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    var progress = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
     return {
         type: _constants2.default.UPDATE_PROGRESS,
-        data: data
+        progress: progress
     };
 };
 
-},{"../constants":3,"../utils":9}],2:[function(require,module,exports){
+},{"../constants":3,"../store":8,"../utils":9}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -193,30 +215,28 @@ var _utils = require('../utils');
 
 var View = function View(element, store) {
     return {
-        render: function render() {
+        renderFilename: function renderFilename() {
             var filename = (0, _store.getFilename)(store),
-                url = (0, _store.getUrl)(store),
-                error = (0, _store.getError)(store),
-                uploadProgress = (0, _store.getUploadProgress)(store);
+                url = (0, _store.getUrl)(store);
 
-            // if there is a filename, we want to display it and a "remove" link
-            if (filename) {
+            if (filename && url) {
                 this.$link.innerHTML = filename;
                 this.$link.setAttribute('href', url);
 
                 this.$element.classList.add('link-active');
                 this.$element.classList.remove('form-active');
+            } else {
+                this.$element.querySelector('.file-url').value = '';
+                this.$element.querySelector('.file-input').value = '';
+
+                this.$element.classList.add('form-active');
+                this.$element.classList.remove('link-active');
             }
-            // if not, let's empty the form and revert to default state
-            else {
-                    this.$element.querySelector('.file-url').value = '';
-                    this.$element.querySelector('.file-input').value = '';
+        },
 
-                    this.$element.classList.add('form-active');
-                    this.$element.classList.remove('link-active');
-                }
+        renderError: function renderError() {
+            var error = (0, _store.getError)(store);
 
-            // if there's an error, let's display it
             if (error) {
                 this.$element.classList.add('has-error');
                 this.$element.classList.add('form-active');
@@ -224,15 +244,14 @@ var View = function View(element, store) {
 
                 this.$element.querySelector('.file-input').value = '';
                 this.$element.querySelector('.error').innerHTML = error;
-
-                // dispatch event on the element for external use
-                (0, _utils.raiseEvent)(this.$element, 's3uploads:error', { error: error });
+            } else {
+                this.$element.classList.remove('has-error');
+                this.$element.querySelector('.error').innerHTML = '';
             }
-            // if not, lets empty and hide the error div
-            else {
-                    this.$element.classList.remove('has-error');
-                    this.$element.querySelector('.error').innerHTML = '';
-                }
+        },
+
+        renderUploadProgress: function renderUploadProgress() {
+            var uploadProgress = (0, _store.getUploadProgress)(store);
 
             if (uploadProgress && uploadProgress < 100) {
                 this.$element.classList.add('progress-active');
@@ -244,8 +263,11 @@ var View = function View(element, store) {
         },
 
         removeUpload: function removeUpload(event) {
+            event.preventDefault();
+
             store.dispatch((0, _actions.updateProgress)());
             store.dispatch((0, _actions.removeUpload)());
+            (0, _utils.raiseEvent)(this.$element, 's3uploads:clear-upload');
         },
 
         getUploadURL: function getUploadURL(event) {
@@ -277,8 +299,21 @@ var View = function View(element, store) {
             this.$remove.addEventListener('click', this.removeUpload.bind(this));
             this.$input.addEventListener('change', this.getUploadURL.bind(this)
 
-            // subscribe to the store so that we can reactively render changes
-            );store.subscribe(this.render.bind(this));
+            // these three observers subscribe to the store, but only trigger their
+            // callbacks when the specific piece of state they observe changes.
+            // this allows for a less naive approach to rendering changes than a
+            // render method subscribed to the whole state.
+            );var filenameObserver = (0, _utils.observeStore)(store, function (state) {
+                return state.appStatus.filename;
+            }, this.renderFilename.bind(this));
+
+            var errorObserver = (0, _utils.observeStore)(store, function (state) {
+                return state.appStatus.error;
+            }, this.renderError.bind(this));
+
+            var uploadProgressObserver = (0, _utils.observeStore)(store, function (state) {
+                return state.appStatus.uploadProgress;
+            }, this.renderUploadProgress.bind(this));
         }
     };
 };
@@ -367,14 +402,8 @@ exports.default = function () {
                 error: null
             });
         case _constants2.default.UPDATE_PROGRESS:
-            var progress = null;
-
-            if (action.data.lengthComputable) {
-                progress = Math.round(action.data.loaded * 100 / action.data.total);
-            }
-
             return Object.assign({}, state, {
-                uploadProgress: progress
+                uploadProgress: action.progress
             });
         case _constants2.default.RECEIVE_SIGNED_URL:
             {
@@ -444,10 +473,17 @@ var _appStatus2 = _interopRequireDefault(_appStatus);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var element = function element() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var action = arguments[1];
+
+  return state; // reducer must return by default
+};
+
 exports.default = (0, _redux.combineReducers)({
   AWSUploadParams: _awsUploadsParams2.default,
-  appStatus: _appStatus2.default
-  // TODO - add more reducers
+  appStatus: _appStatus2.default,
+  element: element
 });
 
 },{"./appStatus":4,"./awsUploadsParams":5,"redux":27}],7:[function(require,module,exports){
@@ -460,6 +496,8 @@ exports.getFilename = getFilename;
 exports.getUrl = getUrl;
 exports.getError = getError;
 exports.getUploadProgress = getUploadProgress;
+exports.getElement = getElement;
+exports.getAWSPayload = getAWSPayload;
 function getFilename(store) {
     return store.getState().appStatus.filename;
 }
@@ -476,6 +514,14 @@ function getError(store) {
 
 function getUploadProgress(store) {
     return store.getState().appStatus.uploadProgress;
+}
+
+function getElement(store) {
+    return store.getState().element;
+}
+
+function getAWSPayload(store) {
+    return store.getState().AWSUploadParams.AWSPayload;
 }
 
 },{}],8:[function(require,module,exports){
@@ -518,7 +564,7 @@ function configureStore(initialState) {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.raiseEvent = exports.parseJson = exports.parseNameFromUrl = exports.parseURL = exports.request = exports.getCookie = undefined;
+exports.observeStore = exports.raiseEvent = exports.parseJson = exports.parseNameFromUrl = exports.parseURL = exports.request = exports.getCookie = undefined;
 
 var _constants = require('../constants');
 
@@ -542,7 +588,6 @@ var request = exports.request = function request(method, url, data, headers, onP
 
     if (onError) {
         request.onerror = request.onabort = function () {
-            // disableSubmit(false);
             onError(request.status, request.responseText);
         };
     }
@@ -580,11 +625,28 @@ var parseJson = exports.parseJson = function parseJson(json) {
     return data;
 };
 
-var raiseEvent = exports.raiseEvent = function raiseEvent(element, name, content) {
+var raiseEvent = exports.raiseEvent = function raiseEvent(element, name, detail) {
     if (window.CustomEvent) {
-        var event = new CustomEvent(name, content);
+        var event = new CustomEvent(name, { detail: detail });
         element.dispatchEvent(event);
     }
+};
+
+var observeStore = exports.observeStore = function observeStore(store, select, onChange) {
+    var currentState = void 0;
+
+    function handleChange() {
+        var nextState = select(store.getState());
+
+        if (nextState !== currentState) {
+            currentState = nextState;
+            onChange(currentState);
+        }
+    }
+
+    var unsubscribe = store.subscribe(handleChange);
+    handleChange();
+    return unsubscribe;
 };
 
 },{"../constants":3}],10:[function(require,module,exports){
@@ -598,39 +660,16 @@ var _components = require('./components');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// var addHandlers = function(el) {
-//     var url    = el.querySelector('.file-url'),
-//         input  = el.querySelector('.file-input'),
-//         remove = el.querySelector('.file-remove'),
-//         status = (url.value === '') ? 'form' : 'link'
-
-//     el.className = 's3direct ' + status + '-active'
-
-//     remove.addEventListener('click', removeUpload, false)
-//     input.addEventListener('change', getUploadURL, false)
-// }
-
-
 document.addEventListener('DOMContentLoaded', function (e) {
     var elements = document.querySelectorAll('.s3direct');
 
     elements.forEach(function (element) {
         // initialise instance for each element
-        var store = (0, _store2.default)();
+        var store = (0, _store2.default)({ element: element });
         var view = new _components.View(element, store);
         view.init();
     });
-}
-
-// document.addEventListener('DOMNodeInserted', function(e){
-//     if(e.target.tagName) {
-//         var el = e.target.querySelectorAll('.s3direct');
-//         [].forEach.call(el, function (element, index, array) {
-//     addHandlers(element);
-//     });
-//     }
-// })
-);
+});
 
 },{"./components":2,"./store":8}],11:[function(require,module,exports){
 var root = require('./_root');

@@ -20,7 +20,6 @@ export const request = function(method, url, data, headers, onProgress, onLoad, 
 
     if (onError) {
         request.onerror = request.onabort = function() {
-            // disableSubmit(false);
             onError(request.status, request.responseText);
         }
     }
@@ -50,18 +49,35 @@ export const parseJson = function(json) {
     var data;
 
     try {
-        data = JSON.parse(json)
+        data = JSON.parse(json);
     }
     catch(error) {
-        data = null
+        data = null;
     };
 
     return data;
 }
 
-export const raiseEvent = function(element, name, content) {
+export const raiseEvent = function(element, name, detail) {
     if (window.CustomEvent) {
-        var event = new CustomEvent(name, content);
+        var event = new CustomEvent(name, {detail});
         element.dispatchEvent(event);
     }
+}
+
+export const observeStore = function(store, select, onChange) {
+    let currentState;
+
+    function handleChange() {
+        let nextState = select(store.getState());
+
+        if (nextState !== currentState) {
+            currentState = nextState;
+            onChange(currentState);
+        }
+    }
+
+    let unsubscribe = store.subscribe(handleChange);
+    handleChange();
+    return unsubscribe;
 }

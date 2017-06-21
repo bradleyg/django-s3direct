@@ -1,25 +1,21 @@
 import {removeUpload, getUploadURL, clearErrors, updateProgress} from '../actions';
 import {getFilename, getUrl, getError, getUploadProgress} from '../store';
-import {raiseEvent} from '../utils';
+import {observeStore, raiseEvent} from '../utils';
 
 
 const View = function(element, store) {
     return {
-        render: function(){
+        renderFilename: function() {
             const filename = getFilename(store),
-                url = getUrl(store),
-                error = getError(store),
-                uploadProgress = getUploadProgress(store);
+                url = getUrl(store);
 
-            // if there is a filename, we want to display it and a "remove" link
-            if (filename) {
+            if (filename && url) {
                 this.$link.innerHTML = filename;
                 this.$link.setAttribute('href', url);
 
                 this.$element.classList.add('link-active');
                 this.$element.classList.remove('form-active');
             }
-            // if not, let's empty the form and revert to default state
             else {
                 this.$element.querySelector('.file-url').value = '';
                 this.$element.querySelector('.file-input').value = '';
@@ -27,8 +23,11 @@ const View = function(element, store) {
                 this.$element.classList.add('form-active');
                 this.$element.classList.remove('link-active');
             }
+        },
 
-            // if there's an error, let's display it
+        renderError: function() {
+            const error = getError(store);
+
             if (error) {
                 this.$element.classList.add('has-error');
                 this.$element.classList.add('form-active');
@@ -36,15 +35,15 @@ const View = function(element, store) {
 
                 this.$element.querySelector('.file-input').value = '';
                 this.$element.querySelector('.error').innerHTML = error;
-
-                // dispatch event on the element for external use
-                raiseEvent(this.$element, 's3uploads:error', {error});
             }
-            // if not, lets empty and hide the error div
             else {
                 this.$element.classList.remove('has-error');
                 this.$element.querySelector('.error').innerHTML = '';
             }
+        },
+
+        renderUploadProgress: function() {
+            const uploadProgress = getUploadProgress(store);
 
             if (uploadProgress && uploadProgress < 100) {
                 this.$element.classList.add('progress-active');
@@ -57,8 +56,11 @@ const View = function(element, store) {
         },
 
         removeUpload: function(event) {
+            event.preventDefault();
+
             store.dispatch(updateProgress());
             store.dispatch(removeUpload());
+            raiseEvent(this.$element, 's3uploads:clear-upload');
         },
 
         getUploadURL: function(event) {
@@ -90,8 +92,15 @@ const View = function(element, store) {
             this.$remove.addEventListener('click', this.removeUpload.bind(this))
             this.$input.addEventListener('change', this.getUploadURL.bind(this))
 
-            // subscribe to the store so that we can reactively render changes
-            store.subscribe(this.render.bind(this));
+            // these three observers subscribe to the store, but only trigger their
+            // callbacks when the specific piece of state they observe changes.
+            // this allows for a less naive approach to rendering changes than a
+            // render method subscribed to the whole state.
+            const filenameObserver = observeStore(store, state => state.appStatus.filename, this.renderFilename.bind(this));
+
+            const errorObserver = observeStore(store, state => state.appStatus.error, this.renderError.bind(this));
+
+            const uploadProgressObserver = observeStore(store, state => state.appStatus.uploadProgress, this.renderUploadProgress.bind(this));
         }
     }
 }
