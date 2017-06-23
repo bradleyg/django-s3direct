@@ -12,13 +12,14 @@ const View = function(element, store) {
             if (filename && url) {
                 this.$link.innerHTML = filename;
                 this.$link.setAttribute('href', url);
+                this.$url.value = url;
 
                 this.$element.classList.add('link-active');
                 this.$element.classList.remove('form-active');
             }
             else {
-                this.$element.querySelector('.file-url').value = '';
-                this.$element.querySelector('.file-input').value = '';
+                this.$url.value = '';
+                this.$input.value = '';
 
                 this.$element.classList.add('form-active');
                 this.$element.classList.remove('link-active');
