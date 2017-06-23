@@ -222,7 +222,7 @@ var View = function View(element, store) {
             if (filename && url) {
                 this.$link.innerHTML = filename;
                 this.$link.setAttribute('href', url);
-                this.$url.value = url;
+                this.$url.value = url.split("?")[0];
 
                 this.$element.classList.add('link-active');
                 this.$element.classList.remove('form-active');
