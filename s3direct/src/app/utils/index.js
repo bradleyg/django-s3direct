@@ -60,7 +60,7 @@ export const parseJson = function(json) {
 
 export const raiseEvent = function(element, name, detail) {
     if (window.CustomEvent) {
-        var event = new CustomEvent(name, {detail});
+        var event = new CustomEvent(name, {detail, bubbles: true});
         element.dispatchEvent(event);
     }
 }
