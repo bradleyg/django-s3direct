@@ -1,7 +1,3 @@
-.s3direct {
-
-}
-
 .s3direct .error {
   margin-top: 10px;
   color: red;
@@ -24,8 +20,6 @@
 .s3direct .error,
 .s3direct.form-active.progress-active .file-input {
   display: none;
-  // float: left;
-  // clear: left;
 }
 
 .s3direct.progress-active .progress,
