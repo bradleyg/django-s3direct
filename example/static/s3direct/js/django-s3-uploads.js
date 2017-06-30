@@ -254,7 +254,7 @@ var View = function View(element, store) {
         renderUploadProgress: function renderUploadProgress() {
             var uploadProgress = (0, _store.getUploadProgress)(store);
 
-            if (uploadProgress && uploadProgress < 100) {
+            if (uploadProgress > 0) {
                 this.$element.classList.add('progress-active');
                 this.$bar.style.width = uploadProgress + '%';
             } else {
@@ -382,6 +382,7 @@ exports.default = function () {
         case _constants2.default.COMPLETE_UPLOAD_TO_AWS:
             return Object.assign({}, state, {
                 isUploading: false,
+                uploadProgress: 0,
                 filename: action.filename,
                 url: action.url
             });

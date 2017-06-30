@@ -9,6 +9,7 @@ export default (state = {}, action) => {
         case constants.COMPLETE_UPLOAD_TO_AWS:
             return Object.assign({}, state, {
                 isUploading: false,
+                uploadProgress: 0,
                 filename: action.filename,
                 url: action.url
             });

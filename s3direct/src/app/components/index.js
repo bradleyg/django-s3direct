@@ -46,7 +46,7 @@ const View = function(element, store) {
         renderUploadProgress: function() {
             const uploadProgress = getUploadProgress(store);
 
-            if (uploadProgress && uploadProgress < 100) {
+            if (uploadProgress > 0) {
                 this.$element.classList.add('progress-active');
                 this.$bar.style.width = uploadProgress + '%';
             }
