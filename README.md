@@ -226,7 +226,3 @@ $ python manage.py runserver 0.0.0.0:5000
 Visit ```http://localhost:5000/admin``` to view the admin widget and ```http://localhost:5000/form``` to view the custom form widget.
 
 [botocore]: https://github.com/boto/botocore
-
-## TODO
-
-Get rid of static folder in example
