@@ -87,7 +87,7 @@ const View = function(element, store) {
 
             // set initial DOM state
             const status = (this.$url.value === '') ? 'form' : 'link';
-            this.$element.className = 's3direct ' + status + '-active'
+            this.$element.classList.add(status + '-active');
 
             // add event listeners
             this.$remove.addEventListener('click', this.removeUpload.bind(this))
