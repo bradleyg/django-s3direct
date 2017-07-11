@@ -99,7 +99,7 @@ def get_upload_params(request):
         )
         
         url = c.generate_url(
-            expires_in=long(5*60),  # 5 mins
+            expires_in=int(5*60),  # 5 mins
             method='GET',
             bucket=bucket or settings.AWS_STORAGE_BUCKET_NAME,
             key=key.replace("${filename}", filename),
