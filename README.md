@@ -213,10 +213,10 @@ $ python setup.py install
 $ cd example
 
 # Add your AWS keys to your environment
-export AWS_ACCESS_KEY_ID='…'
-export AWS_SECRET_ACCESS_KEY='…'
-export AWS_STORAGE_BUCKET_NAME='…'
-export S3DIRECT_REGION='…'    # e.g. 'eu-west-1'
+export AWS_ACCESS_KEY_ID='...'
+export AWS_SECRET_ACCESS_KEY='...'
+export AWS_STORAGE_BUCKET_NAME='...'
+export S3DIRECT_REGION='...'    # e.g. 'eu-west-1'
 
 $ python manage.py migrate
 $ python manage.py createsuperuser
