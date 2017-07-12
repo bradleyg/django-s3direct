@@ -14,11 +14,10 @@ export const getUploadURL = (file, dest, url, store) => {
 
     const onLoad = function(status, json) {
         const data = parseJson(json);
-        const signedURL = data.private_access_url;
 
         switch(status) {
             case 200:
-                store.dispatch(receiveSignedURL(signedURL));
+                store.dispatch(receiveSignedURL(data.private_access_url));
                 store.dispatch(receiveAWSUploadParams(data.aws_payload));
                 store.dispatch(beginUploadToAWS(file, store));
                 break;
@@ -40,7 +39,7 @@ export const getUploadURL = (file, dest, url, store) => {
     const onError = function(status, json) {
         const data = parseJson(json);
 
-        console.error('Error uploading', data);
+        console.error('Error uploading', status, i18n_strings.no_upload_url);
         raiseEvent(getElement(store), 's3uploads:error', {status, error: data});
 
         store.dispatch(addError(i18n_strings.no_upload_url));
