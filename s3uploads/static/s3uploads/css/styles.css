@@ -1,0 +1,31 @@
+.s3uploads .s3uploads__error {
+  margin-top: 10px;
+  color: red;
+}
+
+.s3uploads .s3uploads__progress {
+  background: #333;
+  width: 200px;
+}
+
+.s3uploads .s3uploads__file-remove {
+  margin-top: 10px;
+  text-transform: uppercase;
+}
+
+.s3uploads .s3uploads__progress,
+.s3uploads .s3uploads__file-link,
+.s3uploads .s3uploads__file-remove,
+.s3uploads .s3uploads__file-input,
+.s3uploads .s3uploads__error,
+.s3uploads.form-active.progress-active .s3uploads__file-input {
+  display: none;
+}
+
+.s3uploads.progress-active .s3uploads__progress,
+.s3uploads.link-active .s3uploads__file-link,
+.s3uploads.link-active .s3uploads__file-remove,
+.s3uploads.form-active .s3uploads__file-input,
+.s3uploads.has-error .s3uploads__error {
+  display: block;
+}

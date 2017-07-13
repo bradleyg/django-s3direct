@@ -5,6 +5,6 @@ services:
    command: sh setup.sh
    volumes:
      - ./example/:/code/example
-     - ./s3direct/:/code/s3direct
+     - ./s3uploads/:/code/s3uploads
    ports:
      - "8000:8000"

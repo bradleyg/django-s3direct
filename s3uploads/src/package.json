@@ -5,12 +5,12 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "transpile": "browserify app/ -t babelify --outfile ../static/s3direct/js/django-s3-uploads.js",
-    "uglify": "uglifyjs ../static/s3direct/js/django-s3-uploads.js -m -c -o ../static/s3direct/js/django-s3-uploads.min.js",
+    "transpile": "browserify app/ -t babelify --outfile ../static/s3uploads/js/django-s3-uploads.js",
+    "uglify": "uglifyjs ../static/s3uploads/js/django-s3-uploads.js -m -c -o ../static/s3uploads/js/django-s3-uploads.min.js",
     "build": "npm run transpile && npm run uglify"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Ross Miller & Al Scott",
+  "license": "MIT",
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-preset-env": "^1.5.2",

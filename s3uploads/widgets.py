@@ -8,22 +8,22 @@ from django.template.loader import render_to_string
 from django.utils.http import urlunquote_plus
 
 
-class S3DirectWidget(widgets.TextInput):
+class S3UploadsWidget(widgets.TextInput):
 
     class Media:
         js = (
-            's3direct/js/django-s3-uploads.min.js',
+            's3uploads/js/django-s3-uploads.min.js',
         )
         css = {
             'all': (
-                's3direct/css/bootstrap-progress.min.css',
-                's3direct/css/styles.css',
+                's3uploads/css/bootstrap-progress.min.css',
+                's3uploads/css/styles.css',
             )
         }
 
     def __init__(self, *args, **kwargs):
         self.dest = kwargs.pop('dest', None)
-        super(S3DirectWidget, self).__init__(*args, **kwargs)
+        super(S3UploadsWidget, self).__init__(*args, **kwargs)
 
     def render(self, name, value, attrs=None, **kwargs):
         if value:
@@ -31,9 +31,9 @@ class S3DirectWidget(widgets.TextInput):
         else:
             file_name = ''
 
-        tpl = os.path.join('s3direct', 's3direct-widget.tpl')
+        tpl = os.path.join('s3uploads', 's3uploads-widget.tpl')
         output = render_to_string(tpl, {
-            'policy_url': reverse('s3direct'),
+            'policy_url': reverse('s3uploads'),
             'element_id': self.build_attrs(attrs).get('id', '') if attrs else '',
             'file_name': file_name,
             'dest': self.dest,

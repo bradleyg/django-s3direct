@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import django.db.models.deletion
-import s3direct.fields
+import s3uploads.fields
 
 
 class Migration(migrations.Migration):
@@ -19,16 +19,16 @@ class Migration(migrations.Migration):
             name='Cat',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('custom_filename', s3direct.fields.S3DirectField(blank=True)),
+                ('custom_filename', s3uploads.fields.S3UploadsField(blank=True)),
             ],
         ),
         migrations.CreateModel(
             name='Kitten',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('video', s3direct.fields.S3DirectField(blank=True)),
-                ('image', s3direct.fields.S3DirectField(blank=True)),
-                ('pdf', s3direct.fields.S3DirectField(blank=True)),
+                ('video', s3uploads.fields.S3UploadsField(blank=True)),
+                ('image', s3uploads.fields.S3UploadsField(blank=True)),
+                ('pdf', s3uploads.fields.S3UploadsField(blank=True)),
                 ('mother', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='cat.Cat')),
             ],
         ),

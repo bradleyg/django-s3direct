@@ -34,12 +34,12 @@ const View = function(element, store) {
                 this.$element.classList.add('form-active');
                 this.$element.classList.remove('link-active');
 
-                this.$element.querySelector('.file-input').value = '';
-                this.$element.querySelector('.error').innerHTML = error;
+                this.$element.querySelector('.s3uploads__file-input').value = '';
+                this.$element.querySelector('.s3uploads__error').innerHTML = error;
             }
             else {
                 this.$element.classList.remove('has-error');
-                this.$element.querySelector('.error').innerHTML = '';
+                this.$element.querySelector('.s3uploads__error').innerHTML = '';
             }
         },
 
@@ -77,15 +77,15 @@ const View = function(element, store) {
             // cache all the query selectors
             // $variables represent DOM elements
             this.$element = element;
-            this.$url     = element.querySelector('.file-url');
-            this.$input   = element.querySelector('.file-input');
-            this.$remove  = element.querySelector('.file-remove');
-            this.$dest    = element.querySelector('.file-dest');
-            this.$link    = element.querySelector('.file-link');
-            this.$error   = element.querySelector('.error');
-            this.$bar     = element.querySelector('.bar');
+            this.$url     = element.querySelector('.s3uploads__file-url');
+            this.$input   = element.querySelector('.s3uploads__file-input');
+            this.$remove  = element.querySelector('.s3uploads__file-remove');
+            this.$dest    = element.querySelector('.s3uploads__file-dest');
+            this.$link    = element.querySelector('.s3uploads__file-link');
+            this.$error   = element.querySelector('.s3uploads__error');
+            this.$bar     = element.querySelector('.s3uploads__bar');
 
-            // set initial DOM state
+            // set initial DOM states3uploads__
             const status = (this.$url.value === '') ? 'form' : 'link';
             this.$element.classList.add(status + '-active');
 

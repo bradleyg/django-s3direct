@@ -1,14 +1,14 @@
 from django import forms
 
-from s3direct.widgets import S3DirectWidget
+from s3uploads.widgets import S3UploadsWidget
 
 
-class S3DirectUploadForm(forms.Form):
-    misc = forms.URLField(widget=S3DirectWidget(dest='misc'))
+class S3UploadsUploadForm(forms.Form):
+    misc = forms.URLField(widget=S3UploadsWidget(dest='misc'))
 
 
-class S3DirectUploadMultiForm(forms.Form):
-    misc = forms.URLField(widget=S3DirectWidget(dest='misc'))
-    pdfs = forms.URLField(widget=S3DirectWidget(dest='pdfs'))
-    images = forms.URLField(widget=S3DirectWidget(dest='images'))
-    videos = forms.URLField(widget=S3DirectWidget(dest='videos'))
+class S3UploadsUploadMultiForm(forms.Form):
+    misc = forms.URLField(widget=S3UploadsWidget(dest='misc'))
+    pdfs = forms.URLField(widget=S3UploadsWidget(dest='pdfs'))
+    images = forms.URLField(widget=S3UploadsWidget(dest='images'))
+    videos = forms.URLField(widget=S3UploadsWidget(dest='videos'))
