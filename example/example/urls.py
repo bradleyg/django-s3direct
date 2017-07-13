@@ -7,6 +7,6 @@ admin.autodiscover()
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^s3uploads/', include('s3uploads.urls')),
+    url(r'^s3upload/', include('s3upload.urls')),
     url(r'^form/', include('cat.urls')),
 ]

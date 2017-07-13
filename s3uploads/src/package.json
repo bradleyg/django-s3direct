@@ -5,8 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "transpile": "browserify app/ -t babelify --outfile ../static/s3uploads/js/django-s3-uploads.js",
-    "uglify": "uglifyjs ../static/s3uploads/js/django-s3-uploads.js -m -c -o ../static/s3uploads/js/django-s3-uploads.min.js",
+    "transpile": "browserify app/ -t babelify --outfile ../static/s3upload/js/django-s3-uploads.js",
+    "uglify": "uglifyjs ../static/s3upload/js/django-s3-uploads.js -m -c -o ../static/s3upload/js/django-s3-uploads.min.js",
     "build": "npm run transpile && npm run uglify"
   },
   "author": "Ross Miller & Al Scott",

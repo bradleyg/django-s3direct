@@ -10,7 +10,7 @@ from django.conf import settings
 
 from .utils import (
     create_upload_data,
-    get_s3uploads_destinations,
+    get_s3upload_destinations,
 )
 
 
@@ -19,7 +19,7 @@ def get_upload_params(request):
     content_type = request.POST['type']
     filename = request.POST['name']
 
-    dest = get_s3uploads_destinations().get(request.POST['dest'])
+    dest = get_s3upload_destinations().get(request.POST['dest'])
 
     if not dest:
         data = json.dumps({'error': 'File destination does not exist.'})

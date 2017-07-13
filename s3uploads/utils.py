@@ -17,9 +17,9 @@ def get_at(index, t):
 
 # NOTE: Don't use constant as it will break ability to change at runtime
 # (E.g. tests)
-def get_s3uploads_destinations():
-    """Returns s3uploads destinations, converting old format if necessary."""
-    destinations = getattr(settings, 'S3UPLOADS_DESTINATIONS', None)
+def get_s3upload_destinations():
+    """Returns s3upload destinations, converting old format if necessary."""
+    destinations = getattr(settings, 'S3UPLOAD_DESTINATIONS', None)
     if destinations is None:
         return None
 
@@ -52,7 +52,7 @@ def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
                        server_side_encryption=None, access_key=None, secret_access_key=None, token=None):
 
     bucket = bucket or settings.AWS_STORAGE_BUCKET_NAME
-    region = getattr(settings, 'S3UPLOADS_REGION', None)
+    region = getattr(settings, 'S3UPLOAD_REGION', None)
     if not region or region == 'us-east-1':
         endpoint = 's3.amazonaws.com'
     else:
@@ -125,7 +125,7 @@ def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
     signature = hmac.new(signing_key, msg=policy,
                          digestmod=hashlib.sha256).hexdigest()
 
-    structure = getattr(settings, 'S3UPLOADS_URL_STRUCTURE', 'https://{0}/{1}')
+    structure = getattr(settings, 'S3UPLOAD_URL_STRUCTURE', 'https://{0}/{1}')
     bucket_url = structure.format(endpoint, bucket)
 
     return_dict = {

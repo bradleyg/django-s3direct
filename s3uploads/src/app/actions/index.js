@@ -24,13 +24,13 @@ export const getUploadURL = (file, dest, url, store) => {
             case 400:
             case 403:
                 console.error('Error uploading', status, data.error);
-                raiseEvent(getElement(store), 's3uploads:error', {status, error: data});
+                raiseEvent(getElement(store), 's3upload:error', {status, error: data});
                 store.dispatch(addError(data.error));
                 store.dispatch(didNotReceivAWSUploadParams());
                 break;
             default:
                 console.error('Error uploading', status, i18n_strings.no_upload_url);
-                raiseEvent(getElement(store), 's3uploads:error', {status, error: data});
+                raiseEvent(getElement(store), 's3upload:error', {status, error: data});
                 store.dispatch(addError(i18n_strings.no_upload_url));
                 store.dispatch(didNotReceivAWSUploadParams());
         }
@@ -40,7 +40,7 @@ export const getUploadURL = (file, dest, url, store) => {
         const data = parseJson(json);
 
         console.error('Error uploading', status, i18n_strings.no_upload_url);
-        raiseEvent(getElement(store), 's3uploads:error', {status, error: data});
+        raiseEvent(getElement(store), 's3upload:error', {status, error: data});
 
         store.dispatch(addError(i18n_strings.no_upload_url));
     }
@@ -103,11 +103,11 @@ export const beginUploadToAWS = (file, store) => {
                     filename = parseNameFromUrl(url).split('/').pop();
 
                 store.dispatch(completeUploadToAWS(filename, url));
-                raiseEvent(getElement(store), 's3uploads:file-uploaded', {filename, url});
+                raiseEvent(getElement(store), 's3upload:file-uploaded', {filename, url});
                 break;
             default:
                 console.error('Error uploading', status, xml);
-                raiseEvent(getElement(store), 's3uploads:error', {status, error: xml});
+                raiseEvent(getElement(store), 's3upload:error', {status, error: xml});
 
                 store.dispatch(didNotCompleteUploadToAWS());
 
@@ -127,7 +127,7 @@ export const beginUploadToAWS = (file, store) => {
 
     const onError = function(status, xml) {
         console.error('Error uploading', status, xml);
-        raiseEvent(getElement(store), 's3uploads:error', {status, xml});
+        raiseEvent(getElement(store), 's3upload:error', {status, xml});
 
         store.dispatch(didNotCompleteUploadToAWS());
         store.dispatch(addError(i18n_strings.no_upload_failed));
@@ -141,7 +141,7 @@ export const beginUploadToAWS = (file, store) => {
         }
 
         store.dispatch(updateProgress(progress));
-        raiseEvent(getElement(store), 's3uploads:progress-updated', {progress});
+        raiseEvent(getElement(store), 's3upload:progress-updated', {progress});
     }
 
     request('POST', url, form, headers, onProgress, onLoad, onError);
