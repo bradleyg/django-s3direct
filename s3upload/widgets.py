@@ -12,7 +12,7 @@ class S3UploadWidget(widgets.TextInput):
 
     class Media:
         js = (
-            's3upload/js/django-s3-upload.min.js',
+            's3upload/js/django-s3-uploads.min.js',
         )
         css = {
             'all': (
