@@ -34,12 +34,12 @@ const View = function(element, store) {
                 this.$element.classList.add('form-active');
                 this.$element.classList.remove('link-active');
 
-                this.$element.querySelector('.s3uploads__file-input').value = '';
-                this.$element.querySelector('.s3uploads__error').innerHTML = error;
+                this.$element.querySelector('.s3upload__file-input').value = '';
+                this.$element.querySelector('.s3upload__error').innerHTML = error;
             }
             else {
                 this.$element.classList.remove('has-error');
-                this.$element.querySelector('.s3uploads__error').innerHTML = '';
+                this.$element.querySelector('.s3upload__error').innerHTML = '';
             }
         },
 
@@ -61,7 +61,7 @@ const View = function(element, store) {
 
             store.dispatch(updateProgress());
             store.dispatch(removeUpload());
-            raiseEvent(this.$element, 's3uploads:clear-upload');
+            raiseEvent(this.$element, 's3upload:clear-upload');
         },
 
         getUploadURL: function(event) {
@@ -77,15 +77,15 @@ const View = function(element, store) {
             // cache all the query selectors
             // $variables represent DOM elements
             this.$element = element;
-            this.$url     = element.querySelector('.s3uploads__file-url');
-            this.$input   = element.querySelector('.s3uploads__file-input');
-            this.$remove  = element.querySelector('.s3uploads__file-remove');
-            this.$dest    = element.querySelector('.s3uploads__file-dest');
-            this.$link    = element.querySelector('.s3uploads__file-link');
-            this.$error   = element.querySelector('.s3uploads__error');
-            this.$bar     = element.querySelector('.s3uploads__bar');
+            this.$url     = element.querySelector('.s3upload__file-url');
+            this.$input   = element.querySelector('.s3upload__file-input');
+            this.$remove  = element.querySelector('.s3upload__file-remove');
+            this.$dest    = element.querySelector('.s3upload__file-dest');
+            this.$link    = element.querySelector('.s3upload__file-link');
+            this.$error   = element.querySelector('.s3upload__error');
+            this.$bar     = element.querySelector('.s3upload__bar');
 
-            // set initial DOM states3uploads__
+            // set initial DOM states3upload__
             const status = (this.$url.value === '') ? 'form' : 'link';
             this.$element.classList.add(status + '-active');
 

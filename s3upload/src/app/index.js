@@ -2,7 +2,7 @@ import configureStore from './store';
 import {View} from './components';
 
 document.addEventListener('DOMContentLoaded', function(e) {
-    const elements = document.querySelectorAll('.s3uploads');
+    const elements = document.querySelectorAll('.s3upload');
 
     elements.forEach(function(element) {
         // initialise instance for each element

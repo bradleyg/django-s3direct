@@ -7,11 +7,11 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse, resolve
 from django.test import TestCase
 
-from s3uploads import widgets
+from s3upload import widgets
 
 
 HTML_OUTPUT = (
-    '<div class="s3uploads" data-policy-url="/get_upload_params/">\n'
+    '<div class="s3upload" data-policy-url="/get_upload_params/">\n'
     '  <a class="file-link" target="_blank" href=""></a>\n'
     '  <a class="file-remove" href="#remove">Remove</a>\n'
     '  <input class="file-url" type="hidden" value="" id="" name="filename" />'
@@ -48,52 +48,52 @@ class WidgetTestCase(TestCase):
         admin.save()
 
     def check_urls(self):
-        reversed_url = reverse('s3uploads')
+        reversed_url = reverse('s3upload')
         resolved_url = resolve('/get_upload_params/')
         self.assertEqual(reversed_url, '/get_upload_params/')
-        self.assertEqual(resolved_url.view_name, 's3uploads')
+        self.assertEqual(resolved_url.view_name, 's3upload')
 
     def check_widget_html(self):
-        widget = widgets.S3UploadsWidget(dest='foo')
+        widget = widgets.S3UploadWidget(dest='foo')
         self.assertEqual(widget.render('filename', None), HTML_OUTPUT)
 
     def check_signing_logged_in(self):
         self.client.login(username='admin', password='admin')
         data = {'dest': 'files', 'name': 'image.jpg', 'type': 'image/jpeg'}
-        response = self.client.post(reverse('s3uploads'), data)
+        response = self.client.post(reverse('s3upload'), data)
         self.assertEqual(response.status_code, 200)
 
     def check_signing_logged_out(self):
         data = {'dest': 'files', 'name': 'image.jpg', 'type': 'image/jpeg'}
-        response = self.client.post(reverse('s3uploads'), data)
+        response = self.client.post(reverse('s3upload'), data)
         self.assertEqual(response.status_code, 403)
 
     def check_allowed_type(self):
         data = {'dest': 'imgs', 'name': 'image.jpg', 'type': 'image/jpeg'}
-        response = self.client.post(reverse('s3uploads'), data)
+        response = self.client.post(reverse('s3upload'), data)
         self.assertEqual(response.status_code, 200)
 
     def check_disallowed_type(self):
         data = {'dest': 'imgs', 'name': 'image.mp4', 'type': 'video/mp4'}
-        response = self.client.post(reverse('s3uploads'), data)
+        response = self.client.post(reverse('s3upload'), data)
         self.assertEqual(response.status_code, 400)
 
     def check_allowed_type_logged_in(self):
         self.client.login(username='admin', password='admin')
         data = {'dest': 'vids', 'name': 'video.mp4', 'type': 'video/mp4'}
-        response = self.client.post(reverse('s3uploads'), data)
+        response = self.client.post(reverse('s3upload'), data)
         self.assertEqual(response.status_code, 200)
 
     def check_disallowed_type_logged_out(self):
         data = {u'dest': u'vids', u'name': u'video.mp4', u'type': u'video/mp4'}
-        response = self.client.post(reverse('s3uploads'), data)
+        response = self.client.post(reverse('s3upload'), data)
         self.assertEqual(response.status_code, 403)
 
     def check_signing_fields(self):
         self.client.login(username='admin', password='admin')
         data = {u'dest': u'imgs', u'name': u'image.jpg',
                 u'type': u'image/jpeg'}
-        response = self.client.post(reverse('s3uploads'), data)
+        response = self.client.post(reverse('s3upload'), data)
         response_dict = json.loads(response.content.decode())
         aws_payload = response_dict["aws_payload"]
         self.assertTrue(u'x-amz-signature' in aws_payload)
@@ -104,7 +104,7 @@ class WidgetTestCase(TestCase):
     def check_signing_fields_unique_filename(self):
         data = {u'dest': u'misc', u'name': u'image.jpg',
                 u'type': u'image/jpeg'}
-        response = self.client.post(reverse('s3uploads'), data)
+        response = self.client.post(reverse('s3upload'), data)
         response_dict = json.loads(response.content.decode())
         aws_payload = response_dict["aws_payload"]
         self.assertTrue(u'x-amz-signature' in aws_payload)
@@ -118,7 +118,7 @@ class WidgetTestCase(TestCase):
         self.client.login(username='admin', password='admin')
         data = {u'dest': u'cached', u'name': u'video.mp4',
                 u'type': u'video/mp4'}
-        response = self.client.post(reverse('s3uploads'), data)
+        response = self.client.post(reverse('s3upload'), data)
         self.assertEqual(response.status_code, 200)
         response_dict = json.loads(response.content.decode())
         aws_payload = response_dict["aws_payload"]
@@ -138,7 +138,7 @@ class WidgetTestCase(TestCase):
         self.assertEqual(
                 conditions_dict[10]['x-amz-server-side-encryption'], u'AES256')
 
-    @override_settings(S3UPLOADS_DESTINATIONS={
+    @override_settings(S3UPLOAD_DESTINATIONS={
         'misc': {
             'key': '/',
             'auth': lambda u: True,
@@ -151,7 +151,7 @@ class WidgetTestCase(TestCase):
             u'name': u'image.jpg',
             u'type': u'image/jpeg'
         }
-        response = self.client.post(reverse('s3uploads'), data)
+        response = self.client.post(reverse('s3upload'), data)
         response_dict = json.loads(response.content.decode())
         private_access_url = response_dict["private_access_url"]
 
@@ -160,7 +160,7 @@ class WidgetTestCase(TestCase):
         )
 
 
-@override_settings(S3UPLOADS_DESTINATIONS={
+@override_settings(S3UPLOAD_DESTINATIONS={
     'misc': (lambda original_filename: 'images/unique.jpg',),
     'files': ('uploads/files', lambda u: u.is_staff,),
     'imgs': ('uploads/imgs', lambda u: True, ['image/jpeg', 'image/png'],),
@@ -261,7 +261,7 @@ class WidgetTest(WidgetTestCase):
         # Content_length_range setting is always sent as part of policy.
         # Initial request data doesn't affect it.
         data = {'dest': 'imgs', 'name': 'image.jpg', 'type': 'image/jpeg'}
-        response = self.client.post(reverse('s3uploads'), data)
+        response = self.client.post(reverse('s3upload'), data)
         self.assertEqual(response.status_code, 200)
 
         response_dict = json.loads(response.content.decode())

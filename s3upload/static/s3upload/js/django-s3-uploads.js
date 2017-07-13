@@ -37,13 +37,13 @@ var getUploadURL = exports.getUploadURL = function getUploadURL(file, dest, url,
             case 400:
             case 403:
                 console.error('Error uploading', status, data.error);
-                (0, _utils.raiseEvent)((0, _store.getElement)(store), 's3uploads:error', { status: status, error: data });
+                (0, _utils.raiseEvent)((0, _store.getElement)(store), 's3upload:error', { status: status, error: data });
                 store.dispatch(addError(data.error));
                 store.dispatch(didNotReceivAWSUploadParams());
                 break;
             default:
                 console.error('Error uploading', status, _constants.i18n_strings.no_upload_url);
-                (0, _utils.raiseEvent)((0, _store.getElement)(store), 's3uploads:error', { status: status, error: data });
+                (0, _utils.raiseEvent)((0, _store.getElement)(store), 's3upload:error', { status: status, error: data });
                 store.dispatch(addError(_constants.i18n_strings.no_upload_url));
                 store.dispatch(didNotReceivAWSUploadParams());
         }
@@ -53,7 +53,7 @@ var getUploadURL = exports.getUploadURL = function getUploadURL(file, dest, url,
         var data = (0, _utils.parseJson)(json);
 
         console.error('Error uploading', status, _constants.i18n_strings.no_upload_url);
-        (0, _utils.raiseEvent)((0, _store.getElement)(store), 's3uploads:error', { status: status, error: data });
+        (0, _utils.raiseEvent)((0, _store.getElement)(store), 's3upload:error', { status: status, error: data });
 
         store.dispatch(addError(_constants.i18n_strings.no_upload_url));
     };
@@ -116,11 +116,11 @@ var beginUploadToAWS = exports.beginUploadToAWS = function beginUploadToAWS(file
                     filename = (0, _utils.parseNameFromUrl)(_url).split('/').pop();
 
                 store.dispatch(completeUploadToAWS(filename, _url));
-                (0, _utils.raiseEvent)((0, _store.getElement)(store), 's3uploads:file-uploaded', { filename: filename, url: _url });
+                (0, _utils.raiseEvent)((0, _store.getElement)(store), 's3upload:file-uploaded', { filename: filename, url: _url });
                 break;
             default:
                 console.error('Error uploading', status, xml);
-                (0, _utils.raiseEvent)((0, _store.getElement)(store), 's3uploads:error', { status: status, error: xml });
+                (0, _utils.raiseEvent)((0, _store.getElement)(store), 's3upload:error', { status: status, error: xml });
 
                 store.dispatch(didNotCompleteUploadToAWS());
 
@@ -138,7 +138,7 @@ var beginUploadToAWS = exports.beginUploadToAWS = function beginUploadToAWS(file
 
     var onError = function onError(status, xml) {
         console.error('Error uploading', status, xml);
-        (0, _utils.raiseEvent)((0, _store.getElement)(store), 's3uploads:error', { status: status, xml: xml });
+        (0, _utils.raiseEvent)((0, _store.getElement)(store), 's3upload:error', { status: status, xml: xml });
 
         store.dispatch(didNotCompleteUploadToAWS());
         store.dispatch(addError(_constants.i18n_strings.no_upload_failed));
@@ -152,7 +152,7 @@ var beginUploadToAWS = exports.beginUploadToAWS = function beginUploadToAWS(file
         }
 
         store.dispatch(updateProgress(progress));
-        (0, _utils.raiseEvent)((0, _store.getElement)(store), 's3uploads:progress-updated', { progress: progress });
+        (0, _utils.raiseEvent)((0, _store.getElement)(store), 's3upload:progress-updated', { progress: progress });
     };
 
     (0, _utils.request)('POST', url, form, headers, onProgress, onLoad, onError);
@@ -242,11 +242,11 @@ var View = function View(element, store) {
                 this.$element.classList.add('form-active');
                 this.$element.classList.remove('link-active');
 
-                this.$element.querySelector('.s3uploads__file-input').value = '';
-                this.$element.querySelector('.s3uploads__error').innerHTML = error;
+                this.$element.querySelector('.s3upload__file-input').value = '';
+                this.$element.querySelector('.s3upload__error').innerHTML = error;
             } else {
                 this.$element.classList.remove('has-error');
-                this.$element.querySelector('.s3uploads__error').innerHTML = '';
+                this.$element.querySelector('.s3upload__error').innerHTML = '';
             }
         },
 
@@ -267,7 +267,7 @@ var View = function View(element, store) {
 
             store.dispatch((0, _actions.updateProgress)());
             store.dispatch((0, _actions.removeUpload)());
-            (0, _utils.raiseEvent)(this.$element, 's3uploads:clear-upload');
+            (0, _utils.raiseEvent)(this.$element, 's3upload:clear-upload');
         },
 
         getUploadURL: function getUploadURL(event) {
@@ -283,15 +283,15 @@ var View = function View(element, store) {
             // cache all the query selectors
             // $variables represent DOM elements
             this.$element = element;
-            this.$url = element.querySelector('.s3uploads__file-url');
-            this.$input = element.querySelector('.s3uploads__file-input');
-            this.$remove = element.querySelector('.s3uploads__file-remove');
-            this.$dest = element.querySelector('.s3uploads__file-dest');
-            this.$link = element.querySelector('.s3uploads__file-link');
-            this.$error = element.querySelector('.s3uploads__error');
-            this.$bar = element.querySelector('.s3uploads__bar');
+            this.$url = element.querySelector('.s3upload__file-url');
+            this.$input = element.querySelector('.s3upload__file-input');
+            this.$remove = element.querySelector('.s3upload__file-remove');
+            this.$dest = element.querySelector('.s3upload__file-dest');
+            this.$link = element.querySelector('.s3upload__file-link');
+            this.$error = element.querySelector('.s3upload__error');
+            this.$bar = element.querySelector('.s3upload__bar');
 
-            // set initial DOM states3uploads__
+            // set initial DOM states3upload__
             var status = this.$url.value === '' ? 'form' : 'link';
             this.$element.classList.add(status + '-active');
 
@@ -662,7 +662,7 @@ var _components = require('./components');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 document.addEventListener('DOMContentLoaded', function (e) {
-    var elements = document.querySelectorAll('.s3uploads');
+    var elements = document.querySelectorAll('.s3upload');
 
     elements.forEach(function (element) {
         // initialise instance for each element
