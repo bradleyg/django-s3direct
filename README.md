@@ -1,5 +1,5 @@
-django-s3direct
-===============
+django-s3-upload
+================
 
 Upload files directly to S3 from Django
 -------------------------------------

@@ -12,12 +12,12 @@ class S3UploadsWidget(widgets.TextInput):
 
     class Media:
         js = (
-            's3uploads/js/django-s3-uploads.min.js',
+            's3upload/js/django-s3-upload.min.js',
         )
         css = {
             'all': (
-                's3uploads/css/bootstrap-progress.min.css',
-                's3uploads/css/styles.css',
+                's3upload/css/bootstrap-progress.min.css',
+                's3upload/css/styles.css',
             )
         }
 
