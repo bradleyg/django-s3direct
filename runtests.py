@@ -13,13 +13,13 @@ settings.configure(
             'ENGINE': 'django.db.backends.sqlite3',
         }
     },
-    ROOT_URLCONF='s3direct.urls',
+    ROOT_URLCONF='s3upload.urls',
     INSTALLED_APPS=(
         'django.contrib.auth',
         'django.contrib.contenttypes',
         'django.contrib.sessions',
         'django.contrib.admin',
-        's3direct',
+        's3upload',
     ),
     MIDDLEWARE_CLASSES=(
         'django.contrib.sessions.middleware.SessionMiddleware',
@@ -83,7 +83,7 @@ else:
     from django.test.runner import DiscoverRunner
     test_runner = DiscoverRunner(verbosity=1)
 
-failures = test_runner.run_tests(['s3direct', ])
+failures = test_runner.run_tests(['s3upload', ])
 
 if failures:
     sys.exit(failures)
