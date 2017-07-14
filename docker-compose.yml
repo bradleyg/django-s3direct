@@ -8,3 +8,8 @@ services:
      - ./s3upload/:/code/s3upload
    ports:
      - "8000:8000"
+   environment:
+     - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-XXX}
+     - S3UPLOAD_REGION=${AWS_S3_REGION:-eu-west-1}
+     - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-XXX}
+     - AWS_STORAGE_BUCKET_NAME=${AWS_STORAGE_BUCKET_NAME:-XXX}
