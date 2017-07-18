@@ -142,11 +142,14 @@ def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
         "form_action": bucket_url,
         "key": key,
         "acl": acl,
-        "content-type": content_type
+        "content-type": content_type,
     }
 
     if token:
         return_dict['x-amz-security-token'] = token
+
+    if server_side_encryption:
+        return_dict['x-amz-server-side-encryption'] = server_side_encryption
 
     if cache_control:
         return_dict['Cache-Control'] = cache_control
