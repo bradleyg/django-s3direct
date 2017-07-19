@@ -169,7 +169,7 @@ def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
     return return_dict
 
 
-def get_key_from_url(url, bucket_name=settings.AWS_STORAGE_BUCKET_NAM E):
+def get_key_from_url(url, bucket_name=settings.AWS_STORAGE_BUCKET_NAME):
     conn = boto.connect_s3()
     bucket = conn.get_bucket(bucket_name)
     path = urlparse(url).path
