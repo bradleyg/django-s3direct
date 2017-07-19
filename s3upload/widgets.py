@@ -6,6 +6,9 @@ from django.utils.safestring import mark_safe
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 from django.utils.http import urlunquote_plus
+from django.conf import settings
+
+from s3upload.utils import get_signed_download_url
 
 
 class S3UploadWidget(widgets.TextInput):
@@ -30,6 +33,10 @@ class S3UploadWidget(widgets.TextInput):
             file_name = os.path.basename(urlunquote_plus(value))
         else:
             file_name = ''
+
+        if 'acl' in settings.S3UPLOAD_DESTINATIONS[self.dest]:
+            if settings.S3UPLOAD_DESTINATIONS[self.dest]['acl'] == 'private':
+                value = get_signed_download_url(value)
 
         tpl = os.path.join('s3upload', 's3upload-widget.tpl')
         output = render_to_string(tpl, {
