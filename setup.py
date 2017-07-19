@@ -11,8 +11,8 @@ setup(
     description=('Add direct uploads to S3 functionality with a progress bar'
                  ' to file input fields.'),
     long_description=readme,
-    author="Bradley Griffiths",
-    author_email='bradley.griffiths@gmail.com',
+    author="YunoJuno",
+    author_email='code@yunojuno.com',
     url='https://github.com/yunojuno/django-s3-upload',
     packages=['s3upload'],
     include_package_data=True,
