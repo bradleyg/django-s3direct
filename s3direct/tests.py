@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse, resolve
 from django.test import TestCase
 
-from s3direct import widgets
+from . import widgets
 
 
 HTML_OUTPUT = (

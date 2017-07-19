@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import os
+
 from django.forms import widgets
 from django.utils.safestring import mark_safe
 from django.core.urlresolvers import reverse
