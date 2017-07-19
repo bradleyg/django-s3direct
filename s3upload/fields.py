@@ -1,16 +1,13 @@
-
-
-from django.db.models import Field
 from django.conf import settings
+from django.db.models import Field
 
-from s3upload.widgets import S3UploadWidget
-from s3upload.utils import remove_signature
+from .widgets import S3UploadWidget
+from .utils import remove_signature
 
 
 class S3UploadField(Field):
     def __init__(self, *args, **kwargs):
-        dest = kwargs.pop('dest', None)
-        self.widget = S3UploadWidget(dest=dest)
+        self.widget = S3UploadWidget(kwargs.pop('dest'))
         super(S3UploadField, self).__init__(*args, **kwargs)
 
     def get_internal_type(self):

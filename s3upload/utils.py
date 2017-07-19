@@ -3,6 +3,7 @@ import hmac
 import json
 from datetime import datetime, timedelta
 from base64 import b64encode
+
 import boto
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
@@ -48,8 +49,7 @@ def get_s3upload_destinations():
             if type(dest_value) is tuple or type(dest_value) is list:
                 converted_destinations[dest] = {}
                 for index, key_name in key_mapping.items():
-                    converted_destinations[dest][key_name] = get_at(
-                            index, dest_value)
+                    converted_destinations[dest][key_name] = get_at(index, dest_value)
             else:
                 converted_destinations[dest] = dest_value
 
@@ -58,7 +58,8 @@ def get_s3upload_destinations():
 
 def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
                        content_disposition=None, content_length_range=None,
-                       server_side_encryption=None, access_key=None, secret_access_key=None, token=None):
+                       server_side_encryption=None, access_key=None,
+                       secret_access_key=None, token=None):
 
     bucket = bucket or settings.AWS_STORAGE_BUCKET_NAME
     region = getattr(settings, 'S3UPLOAD_REGION', None)
@@ -66,27 +67,27 @@ def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
         endpoint = 's3.amazonaws.com'
     else:
         endpoint = 's3-%s.amazonaws.com' % region
-    expires_in = datetime.utcnow() + timedelta(seconds=60*5)
+    expires_in = datetime.utcnow() + timedelta(seconds=60 * 5)
     expires = expires_in.strftime('%Y-%m-%dT%H:%M:%S.000Z')
     now_date = datetime.utcnow().strftime('%Y%m%dT%H%M%S000Z')
     raw_date = datetime.utcnow().strftime('%Y%m%d')
 
     policy_dict = {
-            "expiration": expires,
-            "conditions": [
-                {"bucket": bucket},
-                {"acl": acl},
-                ["starts-with", "$key", ''],
-                {"success_action_status": '201'},
-                {"x-amz-credential": '%s/%s/%s/s3/aws4_request' % (
-                    access_key,
-                    raw_date, region
-                )},
-                {"x-amz-algorithm": "AWS4-HMAC-SHA256"},
-                {"x-amz-date": now_date},
-                {"content-type": content_type},
-            ]
-        }
+        "expiration": expires,
+        "conditions": [
+            {"bucket": bucket},
+            {"acl": acl},
+            ["starts-with", "$key", ''],
+            {"success_action_status": '201'},
+            {"x-amz-credential": '%s/%s/%s/s3/aws4_request' % (
+                access_key,
+                raw_date, region
+            )},
+            {"x-amz-algorithm": "AWS4-HMAC-SHA256"},
+            {"x-amz-date": now_date},
+            {"content-type": content_type},
+        ]
+    }
 
     if token:
         policy_dict["conditions"].append({"x-amz-security-token": token})

@@ -1,17 +1,12 @@
 import json
+
 from boto.s3.connection import S3Connection
 
-from django.http import (
-    HttpResponse,
-    HttpResponseRedirect
-)
-from django.views.decorators.http import require_POST
 from django.conf import settings
+from django.http import HttpResponse
+from django.views.decorators.http import require_POST
 
-from .utils import (
-    create_upload_data,
-    get_s3upload_destinations,
-)
+from .utils import create_upload_data, get_s3upload_destinations
 
 
 @require_POST
