@@ -3,8 +3,16 @@ import hmac
 import json
 from datetime import datetime, timedelta
 from base64 import b64encode
+import boto
+from boto.s3.connection import S3Connection
+from boto.s3.key import Key
+from six.moves.urllib.parse import urlparse, unquote
 
 from django.conf import settings
+
+
+class KeyNotFoundException(Exception):
+    pass
 
 
 def get_at(index, t):
@@ -46,6 +54,7 @@ def get_s3upload_destinations():
                 converted_destinations[dest] = dest_value
 
     return converted_destinations
+
 
 def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
                        content_disposition=None, content_length_range=None,
@@ -158,3 +167,42 @@ def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
         return_dict['Content-Disposition'] = content_disposition
 
     return return_dict
+
+
+def get_key_from_url(url, bucket_name=settings.AWS_STORAGE_BUCKET_NAM E):
+    conn = boto.connect_s3()
+    bucket = conn.get_bucket(bucket_name)
+    path = urlparse(url).path
+    # The bucket name might be part of the path,
+    # so get the path that comes after the bucket name
+    path = path.split(bucket_name)[-1]
+    return bucket.get_key(path)
+
+
+def get_signed_download_url(
+    source_url,
+    bucket_name=settings.AWS_STORAGE_BUCKET_NAME,
+    ttl=60,  # 60 seconds should be plenty for a redirected URL to load
+):
+    conn = S3Connection(
+        settings.AWS_ACCESS_KEY_ID,
+        settings.AWS_SECRET_ACCESS_KEY,
+    )
+
+    bucket = conn.get_bucket(bucket_name)
+    k = Key(bucket)
+
+    key_obj = get_key_from_url(unquote(source_url), bucket_name)
+
+    try:
+        k.key = key_obj.name
+    except AttributeError:
+        # key has no 'name' because it's not present in the bucket
+        raise KeyNotFoundException
+
+    download_url = k.generate_url(
+        expires_in=ttl,
+        query_auth=True
+    )
+
+    return download_url
