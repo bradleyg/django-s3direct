@@ -22,7 +22,7 @@ class S3UploadField(Field):
 
     def pre_save(self, model_instance, add):
         file_url = getattr(model_instance, self.attname)
-        
+
         if file_url:
             setattr(model_instance, self.attname, file_url)
             return remove_signature(file_url)

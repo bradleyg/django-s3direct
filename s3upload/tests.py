@@ -8,18 +8,19 @@ from django.core.urlresolvers import reverse, resolve
 from django.test import TestCase
 
 from s3upload import widgets
+from s3upload.utils import remove_signature
 
 
 HTML_OUTPUT = (
     '<div class="s3upload" data-policy-url="/get_upload_params/">\n'
-    '  <a class="file-link" target="_blank" href=""></a>\n'
-    '  <a class="file-remove" href="#remove">Remove</a>\n'
-    '  <input class="file-url" type="hidden" value="" id="" name="filename" />'
-    '\n'
-    '  <input class="file-dest" type="hidden" value="foo">\n'
-    '  <input class="file-input" type="file"  style=""/>\n'
-    '  <div class="progress progress-striped active">\n'
-    '    <div class="bar"></div>\n'
+    '  <a class="s3upload__file-link" target="_blank" href=""></a>\n'
+    '  <a class="s3upload__file-remove" href="#remove">Remove</a>\n'
+    '  <input class="s3upload__file-url" type="hidden" value="" id="" name="filename" />\n'
+    '  <input class="s3upload__file-dest" type="hidden" value="foo">\n'
+    '  <input class="s3upload__file-input" type="file"  style=""/>\n'
+    '  <div class="s3upload__error"></div>\n'
+    '  <div class="s3upload__progress active">\n'
+    '    <div class="s3upload__bar"></div>\n'
     '  </div>\n'
     '</div>\n'
 )
@@ -143,6 +144,7 @@ class WidgetTestCase(TestCase):
             'key': '/',
             'auth': lambda u: True,
             'acl': 'private',
+            'bucket': 'test-bucket',
         }
     })
     def check_signed_url(self):
@@ -274,3 +276,20 @@ class WidgetTest(WidgetTestCase):
         conditions_dict = policy_dict['conditions']
         self.assertEqual(
                 conditions_dict[-1], ['content-length-range', 5000, 20000000])
+
+
+class UtilsTest(TestCase):
+    def test_remove_signature(self):
+        test_url = "http://test-bucket.s3.amazonaws.com/image.jpg"
+
+        test_1 = remove_signature(test_url)
+        self.assertEqual(test_1, test_url)
+
+        test_2 = remove_signature("{0}?t=1&s=2".format(test_url))
+        self.assertEqual(test_2, "{0}?t=1&s=2".format(test_url))
+
+        test_3 = remove_signature("{0}?Signature=1&Expires=2&AWSAccessKeyId=3".format(test_url))
+        self.assertEqual(test_3, test_url)
+
+        test_4 = remove_signature("{0}?Signature=1&Expires=2&AWSAccessKeyId=3&t=1&s=2".format(test_url))
+        self.assertEqual(test_4, "{0}?s=2&t=1".format(test_url))
