@@ -34,7 +34,7 @@ class S3UploadWidget(widgets.TextInput):
         else:
             file_name = ''
 
-        if 'acl' in settings.S3UPLOAD_DESTINATIONS[self.dest]:
+        if value and 'acl' in settings.S3UPLOAD_DESTINATIONS[self.dest]:
             if settings.S3UPLOAD_DESTINATIONS[self.dest]['acl'] == 'private':
                 value = get_signed_download_url(value)
 

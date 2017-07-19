@@ -6,7 +6,7 @@ from base64 import b64encode
 import boto
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
-from six.moves.urllib.parse import urlparse, unquote
+from six.moves.urllib.parse import urlparse, unquote, parse_qs, urlencode
 
 from django.conf import settings
 
@@ -206,3 +206,26 @@ def get_signed_download_url(
     )
 
     return download_url
+
+
+def remove_signature(url):
+    parsed_url = urlparse(url)
+    query_vars = parse_qs(parsed_url.query)
+
+    try:
+        del query_vars["Signature"]
+        del query_vars["Expires"]
+        del query_vars["AWSAccessKeyId"]
+    except KeyError:
+        # Not a signed URL - return original string
+        return url
+
+    address_only = url.split("?")[0]
+
+    if len(query_vars) > 0:
+        return "{0}?{1}".format(
+            address_only,
+            urlencode(query_vars, doseq=True)
+        )
+
+    return address_only
