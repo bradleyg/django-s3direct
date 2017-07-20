@@ -6,9 +6,16 @@ from .utils import remove_signature
 
 
 class S3UploadField(Field):
-    def __init__(self, *args, **kwargs):
-        self.widget = S3UploadWidget(kwargs.pop('dest'))
+    def __init__(self, dest=None, *args, **kwargs):
+        assert dest, "S3UploadField must be initialised with a destination"
+        self.dest = dest
+        self.widget = S3UploadWidget(self.dest)
         super(S3UploadField, self).__init__(*args, **kwargs)
+
+    def deconstruct(self):
+        name, path, args, kwargs = super(S3UploadField, self).deconstruct()
+        kwargs['dest'] = self.dest
+        return name, path, args, kwargs
 
     def get_internal_type(self):
         return 'TextField'
