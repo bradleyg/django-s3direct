@@ -16,7 +16,7 @@ setup(
     url='https://github.com/yunojuno/django-s3-upload',
     packages=['s3upload'],
     include_package_data=True,
-    install_requires=['django>=1.8'],
+    install_requires=['django>=1.8', 'boto'],
     zip_safe=False,
     classifiers=[
         'Development Status :: 4 - Beta',
