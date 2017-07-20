@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "transpile": "browserify app/ -t babelify --outfile ../static/s3upload/js/django-s3-uploads.js",
     "uglify": "uglifyjs ../static/s3upload/js/django-s3-uploads.js -m -c -o ../static/s3upload/js/django-s3-uploads.min.js",
-    "build": "npm run transpile && npm run uglify"
+    "build": "NODE_ENV=production npm run transpile && npm run uglify"
   },
   "author": "YunoJuno",
   "email": "code@yunojuno.com",
