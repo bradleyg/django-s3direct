@@ -7,7 +7,7 @@ from base64 import b64encode
 import boto
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
-from six.moves.urllib.parse import urlparse, unquote, parse_qs, urlencode
+from urllib.parse import urlparse, unquote, parse_qs, urlencode
 
 from django.conf import settings
 
