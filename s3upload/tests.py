@@ -189,4 +189,4 @@ class UtilsTest(TestCase):
         self.assertEqual(test_3, test_url)
 
         test_4 = remove_signature("{0}?Signature=1&Expires=2&AWSAccessKeyId=3&t=1&s=2".format(test_url))  # noqa
-        self.assertEqual(test_4, "{0}?s=2&t=1".format(test_url))
+        self.assertEqual(test_4, "{0}?t=1&s=2".format(test_url))
