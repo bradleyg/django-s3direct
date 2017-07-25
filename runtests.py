@@ -1,4 +1,4 @@
-"""Tests for s3direct package."""
+"""Tests for s3upload package."""
 
 from os import environ
 import sys
@@ -13,13 +13,13 @@ settings.configure(
             'ENGINE': 'django.db.backends.sqlite3',
         }
     },
-    ROOT_URLCONF='s3direct.urls',
+    ROOT_URLCONF='s3upload.urls',
     INSTALLED_APPS=(
         'django.contrib.auth',
         'django.contrib.contenttypes',
         'django.contrib.sessions',
         'django.contrib.admin',
-        's3direct',
+        's3upload',
     ),
     MIDDLEWARE_CLASSES=(
         'django.contrib.sessions.middleware.SessionMiddleware',
@@ -40,8 +40,8 @@ settings.configure(
     AWS_SECRET_ACCESS_KEY=environ.get('AWS_SECRET_ACCESS_KEY', ''),
     AWS_STORAGE_BUCKET_NAME=environ.get(
         'AWS_STORAGE_BUCKET_NAME', 'test-bucket'),
-    S3DIRECT_REGION='us-east-1',
-    S3DIRECT_DESTINATIONS={
+    S3UPLOAD_REGION='us-east-1',
+    S3UPLOAD_DESTINATIONS={
         'misc': {
             'key': lambda original_filename: 'images/unique.jpg',
         },
@@ -83,7 +83,7 @@ else:
     from django.test.runner import DiscoverRunner
     test_runner = DiscoverRunner(verbosity=1)
 
-failures = test_runner.run_tests(['s3direct', ])
+failures = test_runner.run_tests(['s3upload', ])
 
 if failures:
     sys.exit(failures)

@@ -8,3 +8,6 @@ example/db.sqlite3
 example/example/settings-test.py
 /build
 .idea
+
+s3upload/src/node_modules/
+example/static/

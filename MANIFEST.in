@@ -1,2 +1,2 @@
 include README.md
-recursive-include s3direct *
+recursive-include s3upload *

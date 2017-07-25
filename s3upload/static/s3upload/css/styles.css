@@ -1,0 +1,31 @@
+.s3upload .s3upload__error {
+  margin-top: 10px;
+  color: red;
+}
+
+.s3upload .s3upload__progress {
+  background: #333;
+  width: 200px;
+}
+
+.s3upload .s3upload__file-remove {
+  margin-top: 10px;
+  text-transform: uppercase;
+}
+
+.s3upload .s3upload__progress,
+.s3upload .s3upload__file-link,
+.s3upload .s3upload__file-remove,
+.s3upload .s3upload__file-input,
+.s3upload .s3upload__error,
+.s3upload.form-active.progress-active .s3upload__file-input {
+  display: none;
+}
+
+.s3upload.progress-active .s3upload__progress,
+.s3upload.link-active .s3upload__file-link,
+.s3upload.link-active .s3upload__file-remove,
+.s3upload.form-active .s3upload__file-input,
+.s3upload.has-error .s3upload__error {
+  display: block;
+}

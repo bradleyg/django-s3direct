@@ -1,11 +1,12 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>s3direct</title>
+    <title>s3upload</title>
     {{ form.media }}
 </head>
 <body>
-    <form action="" method="post">{% csrf_token %}
+    <form action="" method="post">
+        {% csrf_token %}
         {{ form.as_p }}
     </form>
 </body>
