@@ -144,8 +144,7 @@ def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
         "acl": acl,
         "content-type": content_type
     }
-    if server_side_encryption:
-        return_dict['x-amz-server-side-encryption'] = server_side_encryption
+
     if token:
         return_dict['x-amz-security-token'] = token
 
