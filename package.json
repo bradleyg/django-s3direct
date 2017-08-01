@@ -1,0 +1,39 @@
+{
+  "name": "django-s3direct",
+  "version": "0.4.10",
+  "description": "Add direct uploads to S3 functionality with a progress bar to file input fields.",
+  "directories": {
+    "example": "example"
+  },
+  "dependencies": {
+    "js-cookie": "^2.1.4",
+    "evaporate": "^2.1.1",
+    "sha.js": "^2.4.8",
+    "spark-md5": "^3.0.0"
+  },
+  "devDependencies": {
+    "browserify": "^14.3.0",
+    "watchify": "^3.9.0"
+  },
+  "scripts": {
+    "test": "python runtests.py",
+    "build": "browserify s3direct/static/s3direct/js/scripts.js -o s3direct/static/s3direct/js/bundled.js",
+    "watch": "watchify s3direct/static/s3direct/js/scripts.js -o s3direct/static/s3direct/js/bundled.js --debug --verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bradleyg/django-s3direct.git"
+  },
+  "keywords": [
+    "django",
+    "S3",
+    "file",
+    "upload"
+  ],
+  "author": "Bradley Griffiths",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bradleyg/django-s3direct/issues"
+  },
+  "homepage": "https://github.com/bradleyg/django-s3direct#readme"
+}

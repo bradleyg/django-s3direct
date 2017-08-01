@@ -1,4 +1,4 @@
-<div class="s3direct" data-policy-url="{{ policy_url }}">
+<div class="s3direct" data-policy-url="{{ policy_url }}" data-signing-url="{{ signing_url }}">
   <a class="file-link" target="_blank" href="{{ file_url }}">{{ file_name }}</a>
   <a class="file-remove" href="#remove">Remove</a>
   <input class="file-url" type="hidden" value="{{ file_url }}" id="{{ element_id }}" name="{{ name }}" />
