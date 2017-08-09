@@ -16,6 +16,23 @@ Install with Pip:
 
 ```pip install django-s3direct```
 
+### Backwards-Compatiblity
+
+With 1.0.0 supporting multipart-upload, most of the internals have been
+changed, a new endpoint has been added, and support has been dropped for
+old style positional settings. There are also new requirements to allow
+`GET` and `HEAD` cross-origin requests to S3, as well as
+the `ETAG` header. Django compatibility has been raised to `>=1.8`.
+
+If you used any of these features or relied on the previous behaviour,
+it's recommended that you pin `django-s3direct` to `<1.0` until you
+can test the new version in your project:
+
+```sh
+pip install 'django-s3direct <1.0'
+```
+
+
 ## AWS Setup
 
 ### Access Credentials
@@ -32,7 +49,13 @@ in effect that grants permission to upload to S3:
 "Statement": [
   {
     "Effect": "Allow",
-    "Action": ["s3:PutObject", "s3:PutObjectAcl"],
+    "Action": [
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:PutObjectAcl",
+      "s3:ListMultipartUploadParts",
+      "s3:AbortMultipartUpload"
+    ],
     "Resource": "arn:aws:s3:::your-bucket-name/*"
   }
 ]
@@ -66,9 +89,12 @@ Setup a CORS policy on your S3 bucket.
 <CORSConfiguration>
     <CORSRule>
         <AllowedOrigin>http://yourdomain.com:8080</AllowedOrigin>
-        <AllowedMethod>POST</AllowedMethod>
+        <AllowedMethod>GET</AllowedMethod>
+        <AllowedMethod>HEAD</AllowedMethod>
         <AllowedMethod>PUT</AllowedMethod>
+        <AllowedMethod>POST</AllowedMethod>
         <MaxAgeSeconds>3000</MaxAgeSeconds>
+        <ExposeHeader>ETag</ExposeHeader>
         <AllowedHeader>*</AllowedHeader>
     </CORSRule>
 </CORSConfiguration>
