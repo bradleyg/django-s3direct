@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db.models import Field
 
 from .widgets import S3UploadWidget
-from .utils import remove_signature
+from .utils import remove_signature, get_key_from_url
 
 
 class S3UploadField(Field):
@@ -29,7 +29,9 @@ class S3UploadField(Field):
 
         if file_url:
             setattr(model_instance, self.attname, file_url)
-            return remove_signature(file_url)
+            no_signature_url = remove_signature(file_url)
+            key = get_key_from_url(no_signature_url)
+            return key
 
         return file_url
 
