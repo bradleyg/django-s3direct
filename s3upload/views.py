@@ -99,7 +99,7 @@ def get_upload_params(request):
             bucket=bucket or settings.AWS_STORAGE_BUCKET_NAME,
             key=key.replace("${filename}", filename),
             query_auth=True,
-            force_http=True
+            force_http=False,
         )
 
     response = {

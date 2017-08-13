@@ -155,7 +155,7 @@ class WidgetTest(TestCase):
         private_access_url = response_dict["private_access_url"]
 
         self.assertTrue(
-            "http://test-bucket.s3.amazonaws.com/image.jpg?Signature=" in private_access_url
+            "https://test-bucket.s3.amazonaws.com:443/image.jpg?Signature=" in private_access_url
         )
 
     def test_content_length_range(self):
@@ -177,7 +177,7 @@ class WidgetTest(TestCase):
 
 class UtilsTest(TestCase):
     def test_remove_signature(self):
-        test_url = "http://test-bucket.s3.amazonaws.com/image.jpg"
+        test_url = "https://test-bucket.s3.amazonaws.com/image.jpg"
 
         test_1 = remove_signature(test_url)
         self.assertEqual(test_1, test_url)
