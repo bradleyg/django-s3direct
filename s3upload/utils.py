@@ -180,6 +180,14 @@ def get_key_from_url(url, bucket_name=settings.AWS_STORAGE_BUCKET_NAME):
     return bucket.get_key(path)
 
 
+def get_path_from_url(url, bucket_name=settings.AWS_STORAGE_BUCKET_NAME):
+    path = urlparse(url).path
+    # The bucket name might be part of the path,
+    # so get the path that comes after the bucket name
+    path = path.split(bucket_name)[-1]
+    return path
+
+
 def get_signed_download_url(
     source_url,
     bucket_name=settings.AWS_STORAGE_BUCKET_NAME,
