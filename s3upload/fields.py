@@ -30,7 +30,10 @@ class S3UploadField(Field):
         if file_url:
             setattr(model_instance, self.attname, file_url)
             no_signature_url = remove_signature(file_url)
-            key = get_key_from_url(no_signature_url)
+            bucket_name = settings.S3UPLOAD_DESTINATIONS[self.dest].get(
+                'bucket', settings.AWS_STORAGE_BUCKET_NAME
+            )
+            key = get_key_from_url(no_signature_url, bucket_name=bucket_name)
             return key
 
         return file_url

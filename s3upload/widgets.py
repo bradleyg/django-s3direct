@@ -40,7 +40,13 @@ class S3UploadWidget(widgets.TextInput):
 
     def get_file_url(self, value):
         if value:
-            return get_signed_download_url(value) if self.acl == 'private' else value
+            bucket_name = settings.S3UPLOAD_DESTINATIONS[self.dest].get(
+                'bucket', settings.AWS_STORAGE_BUCKET_NAME
+            )
+            return get_signed_download_url(
+                value,
+                bucket_name,
+            ) if self.acl == 'private' else value
         else:
             return ''
 
