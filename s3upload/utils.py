@@ -170,16 +170,6 @@ def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
     return return_dict
 
 
-def get_key_from_url(url, bucket_name=settings.AWS_STORAGE_BUCKET_NAME):
-    conn = boto.connect_s3()
-    bucket = conn.get_bucket(bucket_name)
-    path = urlparse(url).path
-    # The bucket name might be part of the path,
-    # so get the path that comes after the bucket name
-    path = path.split(bucket_name)[-1]
-    return bucket.get_key(path)
-
-
 def get_path_from_url(url, bucket_name=settings.AWS_STORAGE_BUCKET_NAME):
     path = urlparse(url).path
     # The bucket name might be part of the path,
@@ -188,8 +178,15 @@ def get_path_from_url(url, bucket_name=settings.AWS_STORAGE_BUCKET_NAME):
     return path
 
 
+def get_key_from_url(url, bucket_name=settings.AWS_STORAGE_BUCKET_NAME):
+    conn = boto.connect_s3()
+    bucket = conn.get_bucket(bucket_name)
+    path = get_path_from_url(url)
+    return bucket.get_key(path)
+
+
 def get_signed_download_url(
-    source_url,
+    key,
     bucket_name=settings.AWS_STORAGE_BUCKET_NAME,
     ttl=60,  # 60 seconds should be plenty for a redirected URL to load
 ):
@@ -201,10 +198,8 @@ def get_signed_download_url(
     bucket = conn.get_bucket(bucket_name)
     k = Key(bucket)
 
-    key_obj = get_key_from_url(unquote(source_url), bucket_name)
-
     try:
-        k.key = key_obj.name
+        k.key = key
     except AttributeError:
         # key has no 'name' because it's not present in the bucket
         raise KeyNotFoundException
