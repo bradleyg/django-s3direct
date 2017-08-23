@@ -12,10 +12,6 @@ from urllib.parse import urlparse, unquote, parse_qs, urlencode
 from django.conf import settings
 
 
-class KeyNotFoundException(Exception):
-    pass
-
-
 def get_at(index, t):
     try:
         value = t[index]
@@ -197,12 +193,7 @@ def get_signed_download_url(
 
     bucket = conn.get_bucket(bucket_name)
     k = Key(bucket)
-
-    try:
-        k.key = key
-    except AttributeError:
-        # key has no 'name' because it's not present in the bucket
-        raise KeyNotFoundException
+    k.key = key
 
     download_url = k.generate_url(
         expires_in=ttl,
