@@ -4,7 +4,6 @@ import json
 from datetime import datetime, timedelta
 from base64 import b64encode
 
-import boto
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from urllib.parse import urlparse, unquote, parse_qs, urlencode
@@ -56,7 +55,6 @@ def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
                        content_disposition=None, content_length_range=None,
                        server_side_encryption=None, access_key=None,
                        secret_access_key=None, token=None):
-
     bucket = bucket or settings.AWS_STORAGE_BUCKET_NAME
     region = getattr(settings, 'S3UPLOAD_REGION', None)
     if not region or region == 'us-east-1':
@@ -166,19 +164,11 @@ def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
     return return_dict
 
 
-def get_path_from_url(url, bucket_name=settings.AWS_STORAGE_BUCKET_NAME):
+def get_s3_path_from_url(url, bucket_name=settings.AWS_STORAGE_BUCKET_NAME):
     path = urlparse(url).path
     # The bucket name might be part of the path,
     # so get the path that comes after the bucket name
-    path = path.split(bucket_name)[-1]
-    return path
-
-
-def get_key_from_url(url, bucket_name=settings.AWS_STORAGE_BUCKET_NAME):
-    conn = boto.connect_s3()
-    bucket = conn.get_bucket(bucket_name)
-    path = get_path_from_url(url)
-    return bucket.get_key(path)
+    return path.split(bucket_name)[-1]
 
 
 def get_signed_download_url(
@@ -201,26 +191,3 @@ def get_signed_download_url(
     )
 
     return download_url
-
-
-def remove_signature(url):
-    parsed_url = urlparse(url)
-    query_vars = parse_qs(parsed_url.query)
-
-    try:
-        del query_vars["Signature"]
-        del query_vars["Expires"]
-        del query_vars["AWSAccessKeyId"]
-    except KeyError:
-        # Not a signed URL - return original string
-        return url
-
-    address_only = url.split("?")[0]
-
-    if len(query_vars) > 0:
-        return "{0}?{1}".format(
-            address_only,
-            urlencode(query_vars, doseq=True)
-        )
-
-    return address_only

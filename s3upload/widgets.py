@@ -43,10 +43,14 @@ class S3UploadWidget(widgets.TextInput):
             bucket_name = settings.S3UPLOAD_DESTINATIONS[self.dest].get(
                 'bucket', settings.AWS_STORAGE_BUCKET_NAME
             )
-            return get_signed_download_url(
-                value,
-                bucket_name,
-            ) if self.acl == 'private' else value
+            if self.acl == 'private':
+                return get_signed_download_url(
+                    value,
+                    bucket_name,
+                )
+            else:
+                # Default to virtual-hosted–style URL
+                return "https://{0}.s3.amazonaws.com{1}".format(bucket_name, value)
         else:
             return ''
 

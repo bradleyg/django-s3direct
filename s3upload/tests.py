@@ -9,8 +9,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 from . import widgets
-from .utils import remove_signature
-
+from .utils import get_s3_path_from_url
 
 HTML_OUTPUT = (
     '<div class="s3upload" data-policy-url="/get_upload_params/">\n'
@@ -37,7 +36,6 @@ FOO_RESPONSE = {
 
 
 class WidgetTest(TestCase):
-
     def setUp(self):
         admin = User.objects.create_superuser('admin', 'u@email.com', 'admin')
         admin.save()
@@ -176,17 +174,33 @@ class WidgetTest(TestCase):
 
 
 class UtilsTest(TestCase):
-    def test_remove_signature(self):
-        test_url = "https://test-bucket.s3.amazonaws.com/image.jpg"
+    def test_get_s3_path_from_url(self):
+        path = '/folder1/folder2/file1.json'
+        test_s3_url_1 = 's3://{0}/folder1/folder2/file1.json'.format(settings.AWS_STORAGE_BUCKET_NAME)
+        test_s3_url_2 = 'https://{0}.s3-aws-region.amazonaws.com/folder1/folder2/file1.json?test=1&test1=2'.format(
+            settings.AWS_STORAGE_BUCKET_NAME
+        )
+        test_s3_url_3 = 'https://{0}.s3.amazonaws.com:443/folder1/folder2/file1.json'.format(
+            settings.AWS_STORAGE_BUCKET_NAME
+        )
+        test_s3_url_4 = 'https://s3-aws-region.amazonaws.com/{0}/folder1/folder2/file1.json'.format(
+            settings.AWS_STORAGE_BUCKET_NAME
+        )
+        test_s3_url_5 = 'https://s3-aws-region.amazonaws.com:443/{0}/folder1/folder2/file1.json'.format(
+            settings.AWS_STORAGE_BUCKET_NAME
+        )
 
-        test_1 = remove_signature(test_url)
-        self.assertEqual(test_1, test_url)
+        test_1 = get_s3_path_from_url(test_s3_url_1)
+        self.assertEqual(test_1, path)
 
-        test_2 = remove_signature("{0}?t=1&s=2".format(test_url))
-        self.assertEqual(test_2, "{0}?t=1&s=2".format(test_url))
+        test_2 = get_s3_path_from_url(test_s3_url_2)
+        self.assertEqual(test_2, path)
 
-        test_3 = remove_signature("{0}?Signature=1&Expires=2&AWSAccessKeyId=3".format(test_url))
-        self.assertEqual(test_3, test_url)
+        test_3 = get_s3_path_from_url(test_s3_url_3)
+        self.assertEqual(test_3, path)
 
-        test_4 = remove_signature("{0}?Signature=1&Expires=2&AWSAccessKeyId=3&t=1&s=2".format(test_url))  # noqa
-        self.assertEqual(test_4, "{0}?t=1&s=2".format(test_url))
+        test_4 = get_s3_path_from_url(test_s3_url_4)
+        self.assertEqual(test_4, path)
+
+        test_5 = get_s3_path_from_url(test_s3_url_5)
+        self.assertEqual(test_5, path)
