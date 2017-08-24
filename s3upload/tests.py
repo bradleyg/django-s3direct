@@ -31,7 +31,7 @@ FOO_RESPONSE = {
     u'form_action': u'https://s3.amazonaws.com/{}'.format(settings.AWS_STORAGE_BUCKET_NAME),
     u'success_action_status': 201,
     u'acl': u'public-read',
-    u'key': u'uploads/imgs/${filename}',
+    u'key': u'uploads/imgs/image.jpg',
     u'content-type': u'image/jpeg'
 }
 

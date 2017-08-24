@@ -5,6 +5,7 @@ from boto.s3.connection import S3Connection
 from django.conf import settings
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
+from django.utils.text import get_valid_filename
 
 from .utils import create_upload_data, get_s3upload_destinations
 
@@ -12,8 +13,7 @@ from .utils import create_upload_data, get_s3upload_destinations
 @require_POST
 def get_upload_params(request):
     content_type = request.POST['type']
-    filename = request.POST['name']
-
+    filename = get_valid_filename(request.POST['name'])
     dest = get_s3upload_destinations().get(request.POST['dest'])
 
     if not dest:
@@ -48,11 +48,9 @@ def get_upload_params(request):
     if hasattr(key, '__call__'):
         key = key(filename)
     elif key == '/':
-        key = '${filename}'
+        key = filename
     else:
-        # The literal string '${filename}' is an S3 field variable for key.
-        # https://aws.amazon.com/articles/1434#aws-table
-        key = '%s/${filename}' % key
+        key = '{0}/{1}'.format(key, filename)
 
     access_key = getattr(settings, 'AWS_ACCESS_KEY_ID', None)
     secret_access_key = getattr(settings, 'AWS_SECRET_ACCESS_KEY', None)

@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.db.models import Field
-from django.utils.text import get_valid_filename
 
 from .widgets import S3UploadWidget
 from .utils import remove_signature, get_path_from_url
@@ -35,7 +34,7 @@ class S3UploadField(Field):
                 'bucket', settings.AWS_STORAGE_BUCKET_NAME
             )
             path = get_path_from_url(no_signature_url, bucket_name=bucket_name)
-            return get_valid_filename(path)
+            return path
 
         return file_url
 
