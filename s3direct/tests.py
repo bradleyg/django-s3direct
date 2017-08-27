@@ -15,6 +15,7 @@ HTML_OUTPUT = (
     '<div class="s3direct" data-policy-url="/get_upload_params/" data-signing-url="/get_aws_v4_signature/">\n'
     '  <a class="file-link" target="_blank" href=""></a>\n'
     '  <a class="file-remove" href="#remove">Remove</a>\n'
+    '  <input class="csrf-cookie-name" type="hidden" value="csrftoken">\n'
     '  <input class="file-url" type="hidden" value="" id="" name="filename" />'
     '\n'
     '  <input class="file-dest" type="hidden" value="foo">\n'
