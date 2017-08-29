@@ -189,6 +189,9 @@ class UtilsTest(TestCase):
         test_s3_url_5 = 'https://s3-aws-region.amazonaws.com:443/{0}/folder1/folder2/file1.json'.format(
             settings.AWS_STORAGE_BUCKET_NAME
         )
+        test_s3_url_6 = 'https%3a%2f%2fs3-aws-region.amazonaws.com%3a443%2f{0}%2ffolder1%2ffolder2%2ffile1.json'.format(
+            settings.AWS_STORAGE_BUCKET_NAME
+        )
 
         test_1 = get_s3_path_from_url(test_s3_url_1)
         self.assertEqual(test_1, path)
@@ -204,3 +207,6 @@ class UtilsTest(TestCase):
 
         test_5 = get_s3_path_from_url(test_s3_url_5)
         self.assertEqual(test_5, path)
+
+        test_6 = get_s3_path_from_url(test_s3_url_6)
+        self.assertEqual(test_6, path)

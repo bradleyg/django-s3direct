@@ -165,7 +165,8 @@ def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
 
 
 def get_s3_path_from_url(url, bucket_name=settings.AWS_STORAGE_BUCKET_NAME):
-    path = urlparse(url).path
+    decoded = unquote(url)
+    path = urlparse(decoded).path
     # The bucket name might be part of the path,
     # so get the path that comes after the bucket name
     return path.split(bucket_name)[-1]
