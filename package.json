@@ -19,7 +19,7 @@
     "test": "python runtests.py",
     "build": "browserify s3direct/static/s3direct/js/scripts.js -o s3direct/static/s3direct/js/bundled.js",
     "watch": "watchify s3direct/static/s3direct/js/scripts.js -o s3direct/static/s3direct/js/bundled.js --debug --verbose",
-    "pypi": "python setup.py sdist upload"
+    "pypi": "python setup.py sdist && twine upload dist/*"
   },
   "repository": {
     "type": "git",
