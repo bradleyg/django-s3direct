@@ -99,10 +99,11 @@ const SparkMD5 = require('spark-md5');
         // Enclosed so we can propagate errors to the correct `element` in case of failure.
         const getAwsV4Signature = function (signParams, signHeaders, stringToSign, signatureDateTime, canonicalRequest) {
             return new Promise(function (resolve, reject) {
-                const form = new FormData();
+                const form          = new FormData(),
+                      csrfTokenName = element.querySelector('.csrf-cookie-name').value;
                 form.append('to_sign', stringToSign);
                 form.append('datetime', signatureDateTime);
-                const headers = {'X-CSRFToken': Cookies.get('csrftoken')};
+                const headers = {'X-CSRFToken': Cookies.get(csrfTokenName)};
                 request('POST', signingUrl, form, headers, element, function (status, response) {
                     switch (status) {
                         case 200:
