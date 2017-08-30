@@ -10,7 +10,7 @@ from django.template.loader import render_to_string
 from django.utils.http import urlunquote_plus
 from django.utils.safestring import mark_safe
 
-from .utils import get_signed_download_url
+from .utils import get_signed_download_url, get_s3_path_from_url
 
 
 class S3UploadWidget(widgets.TextInput):
@@ -50,7 +50,7 @@ class S3UploadWidget(widgets.TextInput):
                 )
             else:
                 # Default to virtual-hosted–style URL
-                return "https://{0}.s3.amazonaws.com{1}".format(bucket_name, value)
+                return "https://{0}.s3.amazonaws.com{1}/".format(bucket_name, value)
         else:
             return ''
 
@@ -58,14 +58,15 @@ class S3UploadWidget(widgets.TextInput):
         return self.build_attrs(attrs).get(key, default) if attrs else default
 
     def render(self, name, value, attrs=None, **kwargs):
-        file_name = os.path.basename(urlunquote_plus(value)) if value else ''
+        path = get_s3_path_from_url(value) if value else ''
+        file_name = os.path.basename(urlunquote_plus(path))
         tpl = os.path.join('s3upload', 's3upload-widget.tpl')
         output = render_to_string(tpl, {
             'policy_url': reverse('s3upload'),
             'element_id': self.get_attr(attrs, 'id'),
             'file_name': file_name,
             'dest': self.dest,
-            'file_url': self.get_file_url(value),
+            'file_url': self.get_file_url(path),
             'name': name,
             'element_id': self.get_attr(attrs, 'style'),
         })

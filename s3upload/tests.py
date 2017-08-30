@@ -175,7 +175,7 @@ class WidgetTest(TestCase):
 
 class UtilsTest(TestCase):
     def test_get_s3_path_from_url(self):
-        path = '/folder1/folder2/file1.json'
+        path = 'folder1/folder2/file1.json'
         test_s3_url_1 = 's3://{0}/folder1/folder2/file1.json'.format(settings.AWS_STORAGE_BUCKET_NAME)
         test_s3_url_2 = 'https://{0}.s3-aws-region.amazonaws.com/folder1/folder2/file1.json?test=1&test1=2'.format(
             settings.AWS_STORAGE_BUCKET_NAME
