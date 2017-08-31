@@ -664,12 +664,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 document.addEventListener('DOMContentLoaded', function (e) {
     var elements = document.querySelectorAll('.s3upload');
 
-    elements.forEach(function (element) {
+    // safari doesn't like forEach on nodeList objects
+    for (var i = 0; i < elements.length; i++) {
         // initialise instance for each element
+        var element = elements[i];
         var store = (0, _store2.default)({ element: element });
         var view = new _components.View(element, store);
         view.init();
-    });
+    }
 });
 
 },{"./components":2,"./store":8}],11:[function(require,module,exports){
