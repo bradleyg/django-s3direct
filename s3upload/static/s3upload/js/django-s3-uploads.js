@@ -661,8 +661,16 @@ var _components = require('./components');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-document.addEventListener('DOMContentLoaded', function (e) {
-    var elements = document.querySelectorAll('.s3upload');
+// by default initHandler inits on '.s3upload', but if passed a custom
+// selector in the event data, it will init on that instead.
+function initHandler(event) {
+    var selector = '.s3upload';
+
+    if (event.detail && event.detail.selector) {
+        selector = event.detail.selector;
+    }
+
+    var elements = document.querySelectorAll(selector);
 
     // safari doesn't like forEach on nodeList objects
     for (var i = 0; i < elements.length; i++) {
@@ -672,7 +680,13 @@ document.addEventListener('DOMContentLoaded', function (e) {
         var view = new _components.View(element, store);
         view.init();
     }
-});
+}
+
+// default global init on document ready
+document.addEventListener('DOMContentLoaded', initHandler);
+
+// custom event listener for use in async init
+document.addEventListener('s3upload:init', initHandler);
 
 },{"./components":2,"./store":8}],11:[function(require,module,exports){
 var root = require('./_root');

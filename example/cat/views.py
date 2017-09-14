@@ -11,3 +11,8 @@ class MyView(FormView):
 class MultiForm(FormView):
     template_name = 'form.html'
     form_class = S3UploadMultiForm
+
+
+class AsyncForm(FormView):
+    template_name = 'async_form.html'
+    form_class = S3UploadForm

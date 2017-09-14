@@ -1,0 +1,45 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>s3upload</title>
+        {{ form.media }}
+    </head>
+
+    <body>
+        <form action="" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+        </form>
+
+        <button class="add-field-button">Add field</button>
+    </body>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            var button = document.querySelector('.add-field-button');
+            var form = document.querySelector('form');
+            var s3upload = document.querySelector('.s3upload');
+            var newS3upload = s3upload.cloneNode(true);
+
+            button.addEventListener('click', function(event) {
+                event.preventDefault();
+
+                button.remove();
+
+                newS3upload.classList.add('s3upload--async');
+
+                form.appendChild(newS3upload);
+
+                var addedFieldEvent = new CustomEvent('s3upload:init', {
+                    detail: {
+                        selector:'.s3upload--async'
+                    },
+                    bubbles: true
+                });
+
+                document.dispatchEvent(addedFieldEvent);
+            });
+        });
+    </script>
+</html>
