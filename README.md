@@ -8,13 +8,13 @@ Upload files directly to S3 from Django
 
 Add direct uploads to AWS S3 functionality with a progress bar to file input fields.
 
-<img src="https://raw.githubusercontent.com/bradleyg/django-s3direct/master/screenshot.png" width="381"/>
+<img src="https://raw.githubusercontent.com/bradleyg/django-s3-upload/master/screenshot.png" width="381"/>
 
 ## Installation
 
 Install with Pip:
 
-```pip install django-s3direct```
+```pip install django-s3-upload```
 
 ## AWS Setup
 
@@ -53,7 +53,7 @@ Trust Relationship configuration applied:
 ]
 ```
 
-Note that in order to use the EC2 instance profile, django-s3direct needs
+Note that in order to use the EC2 instance profile, django-s3-upload needs
 to query the EC2 instance metadata using utility functions from the
 [botocore] [] package. You already have `botocore` installed if `boto3`
 is a dependency of your project.
@@ -81,7 +81,7 @@ Setup a CORS policy on your S3 bucket.
 ```python
 INSTALLED_APPS = [
     ...
-    's3direct',
+    's3upload',
     ...
 ]
 
@@ -119,7 +119,7 @@ S3DIRECT_REGION = 'us-east-1'
 # bucket [optional] Specify a different bucket for this particular object.
 # server_side_encryption [optional] Encryption headers for buckets that require it.
 
-S3DIRECT_DESTINATIONS = {
+S3UPLOAD_DESTINATIONS = {
     'example_destination': {
         # REQUIRED
         'key': 'uploads/images',
@@ -141,7 +141,7 @@ S3DIRECT_DESTINATIONS = {
 
 ```python
 urlpatterns = [
-    url(r'^s3direct/', include('s3direct.urls')),
+    url(r'^s3upload/', include('s3upload.urls')),
 ]
 ```
 
@@ -153,10 +153,10 @@ Run ```python manage.py collectstatic``` if required.
 
 ```python
 from django.db import models
-from s3direct.fields import S3DirectField
+from s3upload.fields import S3UploadField
 
 class Example(models.Model):
-    video = S3DirectField(dest='example_destination')
+    video = S3UploadField(dest='example_destination')
 ```
 
 ## Use the widget in a custom form
@@ -165,10 +165,10 @@ class Example(models.Model):
 
 ```python
 from django import forms
-from s3direct.widgets import S3DirectWidget
+from s3upload.widgets import S3UploadWidget
 
-class S3DirectUploadForm(forms.Form):
-    images = forms.URLField(widget=S3DirectWidget(dest='example_destination'))
+class S3UploadForm(forms.Form):
+    images = forms.URLField(widget=S3UploadWidget(dest='example_destination'))
 ```
 
 __*Optional.__ You can modify the HTML of the widget by overiding template __s3direct/templates/s3direct-widget.tpl__
@@ -177,11 +177,11 @@ __*Optional.__ You can modify the HTML of the widget by overiding template __s3d
 
 ```python
 from django.views.generic import FormView
-from .forms import S3DirectUploadForm
+from .forms import S3UploadForm
 
 class MyView(FormView):
     template_name = 'form.html'
-    form_class = S3DirectUploadForm
+    form_class = S3UploadForm
 ```
 
 ### templates/form.html
@@ -205,12 +205,9 @@ class MyView(FormView):
 ## Examples
 
 Examples of both approaches can be found in the examples folder. To run them:
-
 ```shell
-$ git clone git@github.com:bradleyg/django-s3direct.git
-$ cd django-s3direct
-$ python setup.py install
-$ cd example
+$ git clone git@github.com:yunojuno/django-s3-upload.git
+$ cd django-s3-upload
 
 # Add your AWS keys to your environment
 export AWS_ACCESS_KEY_ID='...'
@@ -218,11 +215,9 @@ export AWS_SECRET_ACCESS_KEY='...'
 export AWS_STORAGE_BUCKET_NAME='...'
 export S3DIRECT_REGION='...'    # e.g. 'eu-west-1'
 
-$ python manage.py migrate
-$ python manage.py createsuperuser
-$ python manage.py runserver 0.0.0.0:5000
+$ docker-compose up
 ```
 
-Visit ```http://localhost:5000/admin``` to view the admin widget and ```http://localhost:5000/form``` to view the custom form widget.
+Visit ```http://localhost:8000/admin``` to view the admin widget and ```http://localhost:8000/form``` to view the custom form widget.
 
 [botocore]: https://github.com/boto/botocore
