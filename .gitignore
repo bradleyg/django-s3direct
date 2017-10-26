@@ -8,3 +8,5 @@ example/db.sqlite3
 example/example/settings-test.py
 /build
 .idea
+node_modules
+npm-debug.log
