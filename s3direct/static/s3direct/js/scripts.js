@@ -170,11 +170,11 @@ const SparkMD5 = require('spark-md5');
               csrfInput           = document.querySelector('input[name=csrfmiddlewaretoken]')
               file                = element.querySelector('.file-input').files[0],
               dest                = element.querySelector('.file-dest').value,
-              csrfTokenCookieName = element.querySelector('.csrf-cookie-name'),
+              csrfCookieNameInput = element.querySelector('.csrf-cookie-name'),
               destinationCheckUrl = element.getAttribute('data-policy-url'),
               signerUrl           = element.getAttribute('data-signing-url'),
               form                = new FormData(),
-              csrfToken           = csrfInput ? csrfInput.value : Cookies.get(csrfTokenCookieName.value),
+              csrfToken           = csrfInput ? csrfInput.value : Cookies.get(csrfCookieNameInput.value),
               headers             = {'X-CSRFToken': csrfToken };
 
         form.append('dest', dest)
