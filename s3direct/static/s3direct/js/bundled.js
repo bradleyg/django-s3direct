@@ -5913,16 +5913,18 @@ const SparkMD5 = require('spark-md5');
             return new Promise(function (resolve, reject) {
                 const form          = new FormData(),
                       csrfTokenName = element.querySelector('.csrf-cookie-name').value;
+                console.log('toekn name---', csrfTokenName)
                 form.append('to_sign', stringToSign);
                 form.append('datetime', signatureDateTime);
-                const headers = {'X-CSRFToken': Cookies.get(csrfTokenName)};
+                const headers = {'X-CSRFToken': document.querySelector('input[name=csrfmiddlewaretoken]').value};
                 request('POST', signingUrl, form, headers, element, function (status, response) {
                     switch (status) {
                         case 200:
                             resolve(response);
                             break;
                         default:
-                            error(element, 'Could not generate AWS v4 signature.')
+                            error(element, 'Could not generate AWS v4 signature ----.')
+                            console.log('RESPONSE---', response)                                  
                             reject();
                             break;
                     }
@@ -5985,7 +5987,7 @@ const SparkMD5 = require('spark-md5');
               destinationCheckUrl = element.getAttribute('data-policy-url'),
               signerUrl           = element.getAttribute('data-signing-url'),
               form                = new FormData(),
-              headers             = {'X-CSRFToken': Cookies.get(csrfTokenName)};
+              headers             = {'X-CSRFToken': document.querySelector('input[name=csrfmiddlewaretoken]').value};
 
         form.append('dest', dest)
         form.append('name', file.name)
