@@ -5912,11 +5912,12 @@ const SparkMD5 = require('spark-md5');
         const getAwsV4Signature = function (signParams, signHeaders, stringToSign, signatureDateTime, canonicalRequest) {
             return new Promise(function (resolve, reject) {
                 const form          = new FormData(),
-                      csrfTokenName = element.querySelector('.csrf-cookie-name').value;
-                console.log('toekn name---', csrfTokenName)
+                      csrfTokenName = element.querySelector('.csrf-cookie-name').value,
+                      csrfInput = document.querySelector('input[name=csrfmiddlewaretoken]'),
+                      csrfToken = csrfInput ? csrfInput.value : getCookie('csrfTokenName'); 
                 form.append('to_sign', stringToSign);
                 form.append('datetime', signatureDateTime);
-                const headers = {'X-CSRFToken': document.querySelector('input[name=csrfmiddlewaretoken]').value};
+                const headers = {'X-CSRFToken': csrfToken};
                 request('POST', signingUrl, form, headers, element, function (status, response) {
                     switch (status) {
                         case 200:
@@ -5924,7 +5925,6 @@ const SparkMD5 = require('spark-md5');
                             break;
                         default:
                             error(element, 'Could not generate AWS v4 signature ----.')
-                            console.log('RESPONSE---', response)                                  
                             reject();
                             break;
                     }
