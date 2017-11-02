@@ -5912,10 +5912,12 @@ const SparkMD5 = require('spark-md5');
         const getAwsV4Signature = function (signParams, signHeaders, stringToSign, signatureDateTime, canonicalRequest) {
             return new Promise(function (resolve, reject) {
                 const form          = new FormData(),
-                      csrfTokenName = element.querySelector('.csrf-cookie-name').value;
+                      csrfTokenName = element.querySelector('.csrf-cookie-name').value,
+                      csrfInput = document.querySelector('input[name=csrfmiddlewaretoken]'),
+                      csrfToken = csrfInput ? csrfInput.value : getCookie('csrfTokenName'); 
                 form.append('to_sign', stringToSign);
                 form.append('datetime', signatureDateTime);
-                const headers = {'X-CSRFToken': Cookies.get(csrfTokenName)};
+                const headers = {'X-CSRFToken': csrfToken};
                 request('POST', signingUrl, form, headers, element, function (status, response) {
                     switch (status) {
                         case 200:
@@ -5982,10 +5984,12 @@ const SparkMD5 = require('spark-md5');
               file                = element.querySelector('.file-input').files[0],
               dest                = element.querySelector('.file-dest').value,
               csrfTokenName       = element.querySelector('.csrf-cookie-name').value,
+              csrfInput           = document.querySelector('input[name=csrfmiddlewaretoken]'),
+              csrfToken           = csrfInput ? csrfInput.value : getCookie('csrfTokenName'), 
               destinationCheckUrl = element.getAttribute('data-policy-url'),
               signerUrl           = element.getAttribute('data-signing-url'),
               form                = new FormData(),
-              headers             = {'X-CSRFToken': Cookies.get(csrfTokenName)};
+              headers             = {'X-CSRFToken': csrfToken};
 
         form.append('dest', dest)
         form.append('name', file.name)
