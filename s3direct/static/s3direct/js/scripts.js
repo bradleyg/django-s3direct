@@ -100,10 +100,12 @@ const SparkMD5 = require('spark-md5');
         const getAwsV4Signature = function (signParams, signHeaders, stringToSign, signatureDateTime, canonicalRequest) {
             return new Promise(function (resolve, reject) {
                 const form          = new FormData(),
-                      csrfTokenName = element.querySelector('.csrf-cookie-name').value;
+                      csrfTokenName = element.querySelector('.csrf-cookie-name').value,
+                      csrfInput     = document.querySelector('input[name=csrfmiddlewaretoken]'),
+                      csrfToken     = csrfInput ? csrfInput.value : Cookies.get(csrfCookieNameInput.value),
+                      headers       = {'X-CSRFToken': csrfToken};
                 form.append('to_sign', stringToSign);
                 form.append('datetime', signatureDateTime);
-                const headers = {'X-CSRFToken': Cookies.get(csrfTokenName)};
                 request('POST', signingUrl, form, headers, element, function (status, response) {
                     switch (status) {
                         case 200:
