@@ -33,12 +33,10 @@ def get_upload_params(request):
     key = dest.get('key')
     content_length_range = dest.get('content_length_range')
     timestamp = dest.get('timestamp')
-    print('TIMESTAMP', timestamp)
 
     # Add a pseudo unique number to avoid file overwrites (last 8 digits of epoch in ms) 
     if timestamp:
         file_name += '_' + str(int(time()*1000))[-8:]
-        print('FILENAME---->', file_name)            
 
     if auth and not auth(request.user):
         return HttpResponseForbidden(json.dumps({'error': 'Permission denied.'}), content_type='application/json')
