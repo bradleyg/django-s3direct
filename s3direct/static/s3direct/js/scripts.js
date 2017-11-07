@@ -80,7 +80,7 @@ const SparkMD5 = require('spark-md5');
         const url = element.querySelector('.file-url');
         url.value = awsBucketUrl + '/' + objectKey;
         link.setAttribute('href', url.value);
-        link.innerHTML = parseNameFromUrl(url.value).split('/').pop();
+        link.innerHTML = parseNameFromUrl(url.value).split('/').pop().replace(/_\d+$/g, '');
 
         element.className = 's3direct link-active';
         element.querySelector('.bar').style.width = '0%';
