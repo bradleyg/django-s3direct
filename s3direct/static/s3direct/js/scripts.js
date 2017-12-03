@@ -169,7 +169,7 @@ const SparkMD5 = require('spark-md5');
     const checkFileAndInitiateUpload = function(event) {
         console.log('Checking file and initiating upload…')
         const element             = event.target.parentElement,
-              csrfInput           = document.querySelector('input[name=csrfmiddlewaretoken]')
+              csrfInput           = document.querySelector('input[name=csrfmiddlewaretoken]'),
               file                = element.querySelector('.file-input').files[0],
               dest                = element.querySelector('.file-dest').value,
               csrfCookieNameInput = element.querySelector('.csrf-cookie-name'),
