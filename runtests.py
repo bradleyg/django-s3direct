@@ -21,7 +21,7 @@ settings.configure(
         'django.contrib.admin',
         's3direct',
     ),
-    MIDDLEWARE_CLASSES=(
+    MIDDLEWARE=(
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
     ),

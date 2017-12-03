@@ -118,7 +118,7 @@ function fromByteArray (uint8) {
 /*!
  * The buffer module from node.js, for the browser.
  *
- * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * @author   Feross Aboukhadijeh <https://feross.org>
  * @license  MIT
  */
 /* eslint-disable no-proto */
@@ -221,7 +221,7 @@ function from (value, encodingOrOffset, length) {
     throw new TypeError('"value" argument must not be a number')
   }
 
-  if (value instanceof ArrayBuffer) {
+  if (isArrayBuffer(value)) {
     return fromArrayBuffer(value, encodingOrOffset, length)
   }
 
@@ -481,7 +481,7 @@ function byteLength (string, encoding) {
   if (Buffer.isBuffer(string)) {
     return string.length
   }
-  if (isArrayBufferView(string) || string instanceof ArrayBuffer) {
+  if (isArrayBufferView(string) || isArrayBuffer(string)) {
     return string.byteLength
   }
   if (typeof string !== 'string') {
@@ -1813,6 +1813,14 @@ function blitBuffer (src, dst, offset, length) {
   return i
 }
 
+// ArrayBuffers from another context (i.e. an iframe) do not pass the `instanceof` check
+// but they should be treated as valid. See: https://github.com/feross/buffer/issues/166
+function isArrayBuffer (obj) {
+  return obj instanceof ArrayBuffer ||
+    (obj != null && obj.constructor != null && obj.constructor.name === 'ArrayBuffer' &&
+      typeof obj.byteLength === 'number')
+}
+
 // Node 0.10 supports `ArrayBuffer` but lacks `ArrayBuffer.isView`
 function isArrayBufferView (obj) {
   return (typeof ArrayBuffer.isView === 'function') && ArrayBuffer.isView(obj)
@@ -1839,7 +1847,7 @@ function numberIsNaN (obj) {
 
 /***************************************************************************************************
  *                                                                                                 *
- *  version 2.1.2                                                                                  *
+ *  version 2.1.4                                                                                  *
  *                                                                                                 *
  ***************************************************************************************************/
 
@@ -1872,7 +1880,8 @@ function numberIsNaN (obj) {
         33: "%21", // !
         39: "%27", // '
         40: "%28", // (
-        41: "%29" // )
+        41: "%29", // )
+        42: "%2A"  // *
       },
       l;
 
@@ -2842,7 +2851,12 @@ function numberIsNaN (obj) {
     this.awsUrl = awsUrl(this.con);
     this.awsHost = uri(this.awsUrl).hostname;
 
-    this.updateRequest(request);
+    var r = extend({}, request);
+    if (fileUpload.contentType) {
+      r.contentType = fileUpload.contentType;
+    }
+
+    this.updateRequest(r);
   }
   SignedS3AWSRequest.prototype.fileUpload = undefined;
   SignedS3AWSRequest.prototype.con = undefined;
@@ -3061,10 +3075,6 @@ function numberIsNaN (obj) {
       not_signed_headers: fileUpload.notSignedHeadersAtInitiate,
       response_match: '<UploadId>(.+)<\/UploadId>'
     };
-
-    if (fileUpload.contentType) {
-      request.contentType = fileUpload.contentType;
-    }
 
     CancelableS3AWSRequest.call(this, fileUpload, request);
     this.awsKey = awsKey;
@@ -4085,7 +4095,7 @@ if (typeof Object.create === 'function') {
 
 },{}],6:[function(require,module,exports){
 /*!
- * JavaScript Cookie v2.1.4
+ * JavaScript Cookie v2.2.0
  * https://github.com/js-cookie/js-cookie
  *
  * Copyright 2006, 2015 Klaus Hartl & Fagner Brack
@@ -4195,7 +4205,7 @@ if (typeof Object.create === 'function') {
 				var parts = cookies[i].split('=');
 				var cookie = parts.slice(1).join('=');
 
-				if (cookie.charAt(0) === '"') {
+				if (!this.json && cookie.charAt(0) === '"') {
 					cookie = cookie.slice(1, -1);
 				}
 
@@ -4251,67 +4261,142 @@ if (typeof Object.create === 'function') {
 }));
 
 },{}],7:[function(require,module,exports){
-(function (Buffer){
+/* eslint-disable node/no-deprecated-api */
+var buffer = require('buffer')
+var Buffer = buffer.Buffer
+
+// alternative to using Object.keys for old browsers
+function copyProps (src, dst) {
+  for (var key in src) {
+    dst[key] = src[key]
+  }
+}
+if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
+  module.exports = buffer
+} else {
+  // Copy properties from require('buffer')
+  copyProps(buffer, exports)
+  exports.Buffer = SafeBuffer
+}
+
+function SafeBuffer (arg, encodingOrOffset, length) {
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+// Copy static methods from Buffer
+copyProps(Buffer, SafeBuffer)
+
+SafeBuffer.from = function (arg, encodingOrOffset, length) {
+  if (typeof arg === 'number') {
+    throw new TypeError('Argument must not be a number')
+  }
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+SafeBuffer.alloc = function (size, fill, encoding) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  var buf = Buffer(size)
+  if (fill !== undefined) {
+    if (typeof encoding === 'string') {
+      buf.fill(fill, encoding)
+    } else {
+      buf.fill(fill)
+    }
+  } else {
+    buf.fill(0)
+  }
+  return buf
+}
+
+SafeBuffer.allocUnsafe = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return Buffer(size)
+}
+
+SafeBuffer.allocUnsafeSlow = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return buffer.SlowBuffer(size)
+}
+
+},{"buffer":2}],8:[function(require,module,exports){
+var Buffer = require('safe-buffer').Buffer
+
 // prototype class for hash functions
 function Hash (blockSize, finalSize) {
-  this._block = new Buffer(blockSize)
+  this._block = Buffer.alloc(blockSize)
   this._finalSize = finalSize
   this._blockSize = blockSize
   this._len = 0
-  this._s = 0
 }
 
 Hash.prototype.update = function (data, enc) {
   if (typeof data === 'string') {
     enc = enc || 'utf8'
-    data = new Buffer(data, enc)
+    data = Buffer.from(data, enc)
   }
 
-  var l = this._len += data.length
-  var s = this._s || 0
-  var f = 0
-  var buffer = this._block
+  var block = this._block
+  var blockSize = this._blockSize
+  var length = data.length
+  var accum = this._len
 
-  while (s < l) {
-    var t = Math.min(data.length, f + this._blockSize - (s % this._blockSize))
-    var ch = (t - f)
+  for (var offset = 0; offset < length;) {
+    var assigned = accum % blockSize
+    var remainder = Math.min(length - offset, blockSize - assigned)
 
-    for (var i = 0; i < ch; i++) {
-      buffer[(s % this._blockSize) + i] = data[i + f]
+    for (var i = 0; i < remainder; i++) {
+      block[assigned + i] = data[offset + i]
     }
 
-    s += ch
-    f += ch
+    accum += remainder
+    offset += remainder
 
-    if ((s % this._blockSize) === 0) {
-      this._update(buffer)
+    if ((accum % blockSize) === 0) {
+      this._update(block)
     }
   }
-  this._s = s
 
+  this._len += length
   return this
 }
 
 Hash.prototype.digest = function (enc) {
-  // Suppose the length of the message M, in bits, is l
-  var l = this._len * 8
+  var rem = this._len % this._blockSize
 
-  // Append the bit 1 to the end of the message
-  this._block[this._len % this._blockSize] = 0x80
+  this._block[rem] = 0x80
 
-  // and then k zero bits, where k is the smallest non-negative solution to the equation (l + 1 + k) === finalSize mod blockSize
-  this._block.fill(0, this._len % this._blockSize + 1)
+  // zero (rem + 1) trailing bits, where (rem + 1) is the smallest
+  // non-negative solution to the equation (length + 1 + (rem + 1)) === finalSize mod blockSize
+  this._block.fill(0, rem + 1)
 
-  if (l % (this._blockSize * 8) >= this._finalSize * 8) {
+  if (rem >= this._finalSize) {
     this._update(this._block)
     this._block.fill(0)
   }
 
-  // to this append the block which is equal to the number l written in binary
-  // TODO: handle case where l is > Math.pow(2, 29)
-  this._block.writeInt32BE(l, this._blockSize - 4)
+  var bits = this._len * 8
 
-  var hash = this._update(this._block) || this._hash()
+  // uint32
+  if (bits <= 0xffffffff) {
+    this._block.writeUInt32BE(bits, this._blockSize - 4)
+
+  // uint64
+  } else {
+    var lowBits = bits & 0xffffffff
+    var highBits = (bits - lowBits) / 0x100000000
+
+    this._block.writeUInt32BE(highBits, this._blockSize - 8)
+    this._block.writeUInt32BE(lowBits, this._blockSize - 4)
+  }
+
+  this._update(this._block)
+  var hash = this._hash()
 
   return enc ? hash.toString(enc) : hash
 }
@@ -4322,8 +4407,7 @@ Hash.prototype._update = function () {
 
 module.exports = Hash
 
-}).call(this,require("buffer").Buffer)
-},{"buffer":2}],8:[function(require,module,exports){
+},{"safe-buffer":7}],9:[function(require,module,exports){
 var exports = module.exports = function SHA (algorithm) {
   algorithm = algorithm.toLowerCase()
 
@@ -4340,8 +4424,7 @@ exports.sha256 = require('./sha256')
 exports.sha384 = require('./sha384')
 exports.sha512 = require('./sha512')
 
-},{"./sha":9,"./sha1":10,"./sha224":11,"./sha256":12,"./sha384":13,"./sha512":14}],9:[function(require,module,exports){
-(function (Buffer){
+},{"./sha":10,"./sha1":11,"./sha224":12,"./sha256":13,"./sha384":14,"./sha512":15}],10:[function(require,module,exports){
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-0, as defined
  * in FIPS PUB 180-1
@@ -4352,6 +4435,7 @@ exports.sha512 = require('./sha512')
 
 var inherits = require('inherits')
 var Hash = require('./hash')
+var Buffer = require('safe-buffer').Buffer
 
 var K = [
   0x5a827999, 0x6ed9eba1, 0x8f1bbcdc | 0, 0xca62c1d6 | 0
@@ -4423,7 +4507,7 @@ Sha.prototype._update = function (M) {
 }
 
 Sha.prototype._hash = function () {
-  var H = new Buffer(20)
+  var H = Buffer.allocUnsafe(20)
 
   H.writeInt32BE(this._a | 0, 0)
   H.writeInt32BE(this._b | 0, 4)
@@ -4436,9 +4520,7 @@ Sha.prototype._hash = function () {
 
 module.exports = Sha
 
-}).call(this,require("buffer").Buffer)
-},{"./hash":7,"buffer":2,"inherits":5}],10:[function(require,module,exports){
-(function (Buffer){
+},{"./hash":8,"inherits":5,"safe-buffer":7}],11:[function(require,module,exports){
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
  * in FIPS PUB 180-1
@@ -4450,6 +4532,7 @@ module.exports = Sha
 
 var inherits = require('inherits')
 var Hash = require('./hash')
+var Buffer = require('safe-buffer').Buffer
 
 var K = [
   0x5a827999, 0x6ed9eba1, 0x8f1bbcdc | 0, 0xca62c1d6 | 0
@@ -4525,7 +4608,7 @@ Sha1.prototype._update = function (M) {
 }
 
 Sha1.prototype._hash = function () {
-  var H = new Buffer(20)
+  var H = Buffer.allocUnsafe(20)
 
   H.writeInt32BE(this._a | 0, 0)
   H.writeInt32BE(this._b | 0, 4)
@@ -4538,9 +4621,7 @@ Sha1.prototype._hash = function () {
 
 module.exports = Sha1
 
-}).call(this,require("buffer").Buffer)
-},{"./hash":7,"buffer":2,"inherits":5}],11:[function(require,module,exports){
-(function (Buffer){
+},{"./hash":8,"inherits":5,"safe-buffer":7}],12:[function(require,module,exports){
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
  * in FIPS 180-2
@@ -4552,6 +4633,7 @@ module.exports = Sha1
 var inherits = require('inherits')
 var Sha256 = require('./sha256')
 var Hash = require('./hash')
+var Buffer = require('safe-buffer').Buffer
 
 var W = new Array(64)
 
@@ -4579,7 +4661,7 @@ Sha224.prototype.init = function () {
 }
 
 Sha224.prototype._hash = function () {
-  var H = new Buffer(28)
+  var H = Buffer.allocUnsafe(28)
 
   H.writeInt32BE(this._a, 0)
   H.writeInt32BE(this._b, 4)
@@ -4594,9 +4676,7 @@ Sha224.prototype._hash = function () {
 
 module.exports = Sha224
 
-}).call(this,require("buffer").Buffer)
-},{"./hash":7,"./sha256":12,"buffer":2,"inherits":5}],12:[function(require,module,exports){
-(function (Buffer){
+},{"./hash":8,"./sha256":13,"inherits":5,"safe-buffer":7}],13:[function(require,module,exports){
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
  * in FIPS 180-2
@@ -4607,6 +4687,7 @@ module.exports = Sha224
 
 var inherits = require('inherits')
 var Hash = require('./hash')
+var Buffer = require('safe-buffer').Buffer
 
 var K = [
   0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5,
@@ -4716,7 +4797,7 @@ Sha256.prototype._update = function (M) {
 }
 
 Sha256.prototype._hash = function () {
-  var H = new Buffer(32)
+  var H = Buffer.allocUnsafe(32)
 
   H.writeInt32BE(this._a, 0)
   H.writeInt32BE(this._b, 4)
@@ -4732,12 +4813,11 @@ Sha256.prototype._hash = function () {
 
 module.exports = Sha256
 
-}).call(this,require("buffer").Buffer)
-},{"./hash":7,"buffer":2,"inherits":5}],13:[function(require,module,exports){
-(function (Buffer){
+},{"./hash":8,"inherits":5,"safe-buffer":7}],14:[function(require,module,exports){
 var inherits = require('inherits')
 var SHA512 = require('./sha512')
 var Hash = require('./hash')
+var Buffer = require('safe-buffer').Buffer
 
 var W = new Array(160)
 
@@ -4773,7 +4853,7 @@ Sha384.prototype.init = function () {
 }
 
 Sha384.prototype._hash = function () {
-  var H = new Buffer(48)
+  var H = Buffer.allocUnsafe(48)
 
   function writeInt64BE (h, l, offset) {
     H.writeInt32BE(h, offset)
@@ -4792,11 +4872,10 @@ Sha384.prototype._hash = function () {
 
 module.exports = Sha384
 
-}).call(this,require("buffer").Buffer)
-},{"./hash":7,"./sha512":14,"buffer":2,"inherits":5}],14:[function(require,module,exports){
-(function (Buffer){
+},{"./hash":8,"./sha512":15,"inherits":5,"safe-buffer":7}],15:[function(require,module,exports){
 var inherits = require('inherits')
 var Hash = require('./hash')
+var Buffer = require('safe-buffer').Buffer
 
 var K = [
   0x428a2f98, 0xd728ae22, 0x71374491, 0x23ef65cd,
@@ -5034,7 +5113,7 @@ Sha512.prototype._update = function (M) {
 }
 
 Sha512.prototype._hash = function () {
-  var H = new Buffer(64)
+  var H = Buffer.allocUnsafe(64)
 
   function writeInt64BE (h, l, offset) {
     H.writeInt32BE(h, offset)
@@ -5055,8 +5134,7 @@ Sha512.prototype._hash = function () {
 
 module.exports = Sha512
 
-}).call(this,require("buffer").Buffer)
-},{"./hash":7,"buffer":2,"inherits":5}],15:[function(require,module,exports){
+},{"./hash":8,"inherits":5,"safe-buffer":7}],16:[function(require,module,exports){
 (function (factory) {
     if (typeof exports === 'object') {
         // Node/CommonJS
@@ -5809,7 +5887,7 @@ module.exports = Sha512
     return SparkMD5;
 }));
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 const Cookies = require('js-cookie');
 const createHash = require('sha.js')
 const Evaporate = require('evaporate');
@@ -5981,7 +6059,7 @@ const SparkMD5 = require('spark-md5');
     const checkFileAndInitiateUpload = function(event) {
         console.log('Checking file and initiating upload…')
         const element             = event.target.parentElement,
-              csrfInput           = document.querySelector('input[name=csrfmiddlewaretoken]')
+              csrfInput           = document.querySelector('input[name=csrfmiddlewaretoken]'),
               file                = element.querySelector('.file-input').files[0],
               dest                = element.querySelector('.file-dest').value,
               csrfCookieNameInput = element.querySelector('.csrf-cookie-name'),
@@ -6062,4 +6140,4 @@ const SparkMD5 = require('spark-md5');
 
 })()
 
-},{"evaporate":3,"js-cookie":6,"sha.js":8,"spark-md5":15}]},{},[16]);
+},{"evaporate":3,"js-cookie":6,"sha.js":9,"spark-md5":16}]},{},[17]);

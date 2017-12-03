@@ -4,7 +4,7 @@ from datetime import datetime
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.urlresolvers import resolve, reverse
+from django.urls import resolve, reverse
 from django.test import TestCase
 from django.test.utils import override_settings
 
@@ -44,8 +44,8 @@ TEST_DESTINATIONS = {
     'files': {'key': '/', 'auth': lambda u: u.is_staff},
     'imgs': {'key': 'uploads/imgs', 'allowed': ['image/jpeg', 'image/png']},
     'thumbs': {'key': 'uploads/thumbs', 'allowed': ['image/jpeg'], 'content_length_range': (1000, 50000)},
-    'vids': {'key': 'uploads/vids', 'auth': lambda u: u.is_authenticated(), 'allowed': ['video/mp4']},
-    'cached': {'key': 'uploads/vids', 'auth': lambda u: u.is_authenticated(), 'allowed': '*',
+    'vids': {'key': 'uploads/vids', 'auth': lambda u: u.is_authenticated, 'allowed': ['video/mp4']},
+    'cached': {'key': 'uploads/vids', 'auth': lambda u: u.is_authenticated, 'allowed': '*',
                'acl': 'authenticated-read', 'bucket': 'astoragebucketname', 'cache_control': 'max-age=2592000',
                'content_disposition': 'attachment', 'server_side_encryption': 'AES256'},
     'accidental-leading-slash': {'key': '/directory/leading'},
