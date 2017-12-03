@@ -25,6 +25,10 @@ settings.configure(
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
     ),
+    MIDDLEWARE_CLASSES=(
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+    ),
     TEMPLATES=[
         {
             'BACKEND': 'django.template.backends.django.DjangoTemplates',

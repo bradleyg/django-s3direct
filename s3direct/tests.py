@@ -4,9 +4,12 @@ from datetime import datetime
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.urls import resolve, reverse
 from django.test import TestCase
 from django.test.utils import override_settings
+try:
+    from django.urls import resolve, reverse
+except ImportError:
+    from django.core.urlresolvers import resolve, reverse
 
 from s3direct import widgets
 
@@ -39,13 +42,18 @@ POLICY_RESPONSE = {
     u'server_side_encryption': None,
 }
 
+def is_authenticated(user):
+    if callable(user.is_authenticated): # Django =< 1.9
+        return user.is_authenticated()
+    return user.is_authenticated
+
 TEST_DESTINATIONS = {
     'misc': {'key': lambda original_filename: 'images/unique.jpg'},
     'files': {'key': '/', 'auth': lambda u: u.is_staff},
     'imgs': {'key': 'uploads/imgs', 'allowed': ['image/jpeg', 'image/png']},
     'thumbs': {'key': 'uploads/thumbs', 'allowed': ['image/jpeg'], 'content_length_range': (1000, 50000)},
-    'vids': {'key': 'uploads/vids', 'auth': lambda u: u.is_authenticated, 'allowed': ['video/mp4']},
-    'cached': {'key': 'uploads/vids', 'auth': lambda u: u.is_authenticated, 'allowed': '*',
+    'vids': {'key': 'uploads/vids', 'auth': is_authenticated, 'allowed': ['video/mp4']},
+    'cached': {'key': 'uploads/vids', 'auth': is_authenticated, 'allowed': '*',
                'acl': 'authenticated-read', 'bucket': 'astoragebucketname', 'cache_control': 'max-age=2592000',
                'content_disposition': 'attachment', 'server_side_encryption': 'AES256'},
     'accidental-leading-slash': {'key': '/directory/leading'},
