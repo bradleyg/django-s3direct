@@ -137,6 +137,7 @@ S3DIRECT_REGION = 'us-east-1'
 #     1. '/' = Upload to root with the original filename.
 #     2. 'some/path' = Upload to some/path with the original filename.
 #     3. functionName = Pass a function and create your own path/filename.
+# key_args [optional] Arguments to be passed to 'key' if it's a function.
 # auth [optional] An ACL function to whether the current Django user can perform this action.
 # allowed [optional] List of allowed MIME types.
 # acl [optional] Give the object another ACL rather than 'public-read'.
@@ -159,6 +160,10 @@ S3DIRECT_DESTINATIONS = {
         'content_disposition': 'attachment',  # Default no content disposition
         'content_length_range': (5000, 20000000), # Default allow any size
         'server_side_encryption': 'AES256', # Default no encryption
+    },
+    'example_other': {
+        'key': lambda filename, args: args + '/' filename,
+    	'key_args': 'uploads/images',  # Only if 'key' is a function
     }
 }
 ```

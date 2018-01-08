@@ -11,7 +11,7 @@ from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbid
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 
-from .utils import get_aws_v4_signature, get_aws_v4_signing_key, get_s3direct_destinations
+from .utils import get_aws_v4_signature, get_aws_v4_signing_key, get_s3direct_destinations, get_key
 
 
 @csrf_protect
@@ -48,12 +48,8 @@ def get_upload_params(request):
     if not key:
         return HttpResponseServerError(json.dumps({'error': 'Missing destination path.'}),
                                        content_type='application/json')
-    elif hasattr(key, '__call__'):
-        object_key = key(file_name)
-    elif key == '/':
-        object_key = file_name
     else:
-        object_key = '%s/%s' % (key.strip('/'), file_name)
+        object_key = get_key(key, file_name, dest)
 
     bucket = dest.get('bucket') or settings.AWS_STORAGE_BUCKET_NAME
     region = dest.get('region') or getattr(settings, 'S3DIRECT_REGION', None) or 'us-east-1'

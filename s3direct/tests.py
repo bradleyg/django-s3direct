@@ -58,6 +58,7 @@ TEST_DESTINATIONS = {
                'content_disposition': 'attachment', 'server_side_encryption': 'AES256'},
     'accidental-leading-slash': {'key': '/directory/leading'},
     'accidental-trailing-slash': {'key': 'directory/trailing/'},
+    'key_args': {'key': lambda original_filename, args: args + '/' +'background.jpg', 'key_args': 'assets/backgrounds'},
 }
 
 
@@ -161,6 +162,14 @@ class WidgetTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         policy_dict = json.loads(response.content.decode())
         self.assertNotEqual(policy_dict['object_key'], data['name'])
+
+    def test_function_object_key_with_args(self):
+        data = {'dest': 'key_args', 'name': 'background.jpg', 'type': 'image/jpeg', 'size': 1000}
+        self.client.login(username='admin', password='admin')
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 200)
+        policy_dict = json.loads(response.content.decode())
+        self.assertEqual(policy_dict['object_key'], TEST_DESTINATIONS['key_args']['key_args'] + '/' + data['name'])
 
     def test_policy_conditions(self):
         self.client.login(username='admin', password='admin')
