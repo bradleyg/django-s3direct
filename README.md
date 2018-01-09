@@ -162,7 +162,7 @@ S3DIRECT_DESTINATIONS = {
         'server_side_encryption': 'AES256', # Default no encryption
     },
     'example_other': {
-        'key': lambda filename, args: args + '/' filename,
+        'key': lambda filename, args: args + '/' + filename,
     	'key_args': 'uploads/images',  # Only if 'key' is a function
     }
 }
