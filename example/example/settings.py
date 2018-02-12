@@ -131,7 +131,7 @@ S3UPLOAD_DESTINATIONS = {
         'auth': lambda u: u.is_staff
     },
 
-    # Allow anybody to upload jpeg's and png's. Limit sizes to 5kb - 20mb
+    # Allow anybody to upload jpeg's and png's, forbid jfif's. Limit sizes to 5kb - 20mb
     'images': {
         'key': 'uploads/images',
         'auth': lambda u: True,
@@ -140,6 +140,7 @@ S3UPLOAD_DESTINATIONS = {
             'image/png'
         ],
         'content_length_range': (5000, 20000000),
+        'forbidden_extensions': ('.jfif',)
     },
 
     # Allow authenticated users to upload mp4's

@@ -132,6 +132,7 @@ S3UPLOAD_DESTINATIONS = {
         'cache_control': 'max-age=2592000', # Default no cache-control
         'content_disposition': 'attachment',  # Default no content disposition
         'content_length_range': (5000, 20000000), # Default allow any size
+        'forbidden_extensions': ('.jfif',), # Defaults to no forbidden extensions
         'server_side_encryption': 'AES256', # Default no encryption
     }
 }

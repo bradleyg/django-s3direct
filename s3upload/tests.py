@@ -75,6 +75,11 @@ class WidgetTest(TestCase):
         response = self.client.post(reverse('s3upload'), data)
         self.assertEqual(response.status_code, 200)
 
+    def test_check_forbidden_extensions(self):
+        data = {'dest': 'imgs', 'name': 'image.jfif', 'type': 'image/jpeg'}
+        response = self.client.post(reverse('s3upload'), data)
+        self.assertEqual(response.status_code, 400)
+
     def test_check_disallowed_type(self):
         data = {'dest': 'imgs', 'name': 'image.mp4', 'type': 'video/mp4'}
         response = self.client.post(reverse('s3upload'), data)
