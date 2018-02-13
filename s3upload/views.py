@@ -50,7 +50,7 @@ def get_upload_params(request):
     extension = splitext(filename)[1]
     if extension in forbidden_extensions:
         data = json.dumps({'error': 'Forbidden file extension (%s).' % extension})
-        return HttpResponse(data, content_type="application/json", status=400)
+        return HttpResponse(data, content_type="application/json", status=415)
 
     if hasattr(key, '__call__'):
         key = key(filename)
