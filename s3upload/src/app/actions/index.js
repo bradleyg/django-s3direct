@@ -23,6 +23,7 @@ export const getUploadURL = (file, dest, url, store) => {
                 break;
             case 400:
             case 403:
+            case 415:
                 console.error('Error uploading', status, data.error);
                 raiseEvent(getElement(store), 's3upload:error', {status, error: data});
                 store.dispatch(addError(data.error));
