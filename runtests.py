@@ -52,19 +52,19 @@ settings.configure(
         'imgs': {
             'key': 'uploads/imgs',
             'auth': lambda u: True,
-            'allowed': ['image/jpeg', 'image/png'],
+            'allowed_types': ['image/jpeg', 'image/png'],
             'content_length_range': (5000, 20000000),  # 5kb - 20mb
-            'forbidden_extensions': ('.jfif',),
+            'allowed_extensions': ('.jpg', '.jpeg', '.png'),
         },
         'vids': {
             'key': 'uploads/vids',
             'auth': lambda u: u.is_authenticated(),
-            'allowed': ['video/mp4'],
+            'allowed_types': ['video/mp4'],
         },
         'cached': {
             'key': 'uploads/vids',
             'auth': lambda u: True,
-            'allowed': '*',
+            'allowed_types': '*',
             'acl': 'authenticated-read',
             'bucket': 'astoragebucketname',
             'cache_control': 'max-age=2592000',

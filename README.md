@@ -126,13 +126,13 @@ S3UPLOAD_DESTINATIONS = {
 
         # OPTIONAL
         'auth': lambda u: u.is_staff, # Default allow anybody to upload
-        'allowed': ['image/jpeg', 'image/png', 'video/mp4'],  # Default allow all mime types
+        'allowed_types': ['image/jpeg', 'image/png', 'video/mp4'],  # Default allow all mime types
+        'allowed_extensions': ('.jpg', '.jpeg', '.png'), # Defaults to all extensions
         'bucket': 'pdf-bucket', # Default is 'AWS_STORAGE_BUCKET_NAME'
         'acl': 'private', # Defaults to 'public-read'
         'cache_control': 'max-age=2592000', # Default no cache-control
         'content_disposition': 'attachment',  # Default no content disposition
         'content_length_range': (5000, 20000000), # Default allow any size
-        'forbidden_extensions': ('.jfif',), # Defaults to no forbidden extensions
         'server_side_encryption': 'AES256', # Default no encryption
     }
 }
