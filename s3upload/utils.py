@@ -32,7 +32,7 @@ def get_s3upload_destinations():
     key_mapping = {
         0: 'key',
         1: 'auth',
-        2: 'allowed',
+        2: 'allowed_types',
         3: 'acl',
         4: 'bucket',
         5: 'cache_control',
