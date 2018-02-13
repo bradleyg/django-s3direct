@@ -1,4 +1,5 @@
 import json
+from os.path import splitext
 
 from boto.s3.connection import S3Connection
 
@@ -28,6 +29,7 @@ def get_upload_params(request):
     cache_control = dest.get('cache_control')
     content_disposition = dest.get('content_disposition')
     content_length_range = dest.get('content_length_range')
+    forbidden_extensions = dest.get('forbidden_extensions', ())
     server_side_encryption = dest.get('server_side_encryption')
 
     if not acl:
@@ -44,6 +46,11 @@ def get_upload_params(request):
     if (allowed and content_type not in allowed) and allowed != '*':
         data = json.dumps({'error': 'Invalid file type (%s).' % content_type})
         return HttpResponse(data, content_type="application/json", status=400)
+
+    extension = splitext(filename)[1]
+    if extension in forbidden_extensions:
+        data = json.dumps({'error': 'Forbidden file extension (%s).' % extension})
+        return HttpResponse(data, content_type="application/json", status=415)
 
     if hasattr(key, '__call__'):
         key = key(filename)

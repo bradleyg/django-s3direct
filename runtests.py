@@ -54,6 +54,7 @@ settings.configure(
             'auth': lambda u: True,
             'allowed': ['image/jpeg', 'image/png'],
             'content_length_range': (5000, 20000000),  # 5kb - 20mb
+            'forbidden_extensions': ('.jfif',),
         },
         'vids': {
             'key': 'uploads/vids',
