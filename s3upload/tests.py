@@ -75,11 +75,6 @@ class WidgetTest(TestCase):
         response = self.client.post(reverse('s3upload'), data)
         self.assertEqual(response.status_code, 200)
 
-    def test_check_forbidden_extensions(self):
-        data = {'dest': 'imgs', 'name': 'image.jfif', 'type': 'image/jpeg'}
-        response = self.client.post(reverse('s3upload'), data)
-        self.assertEqual(response.status_code, 415)
-
     def test_check_disallowed_type(self):
         data = {'dest': 'imgs', 'name': 'image.mp4', 'type': 'video/mp4'}
         response = self.client.post(reverse('s3upload'), data)
@@ -95,6 +90,16 @@ class WidgetTest(TestCase):
         data = {u'dest': u'vids', u'name': u'video.mp4', u'type': u'video/mp4'}
         response = self.client.post(reverse('s3upload'), data)
         self.assertEqual(response.status_code, 403)
+
+    def test_check_disallowed_extensions(self):
+        data = {'dest': 'imgs', 'name': 'image.jfif', 'type': 'image/jpeg'}
+        response = self.client.post(reverse('s3upload'), data)
+        self.assertEqual(response.status_code, 415)
+
+    def test_check_allowed_extensions(self):
+        data = {'dest': 'imgs', 'name': 'image.jpg', 'type': 'image/jpeg'}
+        response = self.client.post(reverse('s3upload'), data)
+        self.assertEqual(response.status_code, 200)
 
     def test_check_signing_fields(self):
         self.client.login(username='admin', password='admin')

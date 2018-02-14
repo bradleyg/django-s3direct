@@ -131,23 +131,27 @@ S3UPLOAD_DESTINATIONS = {
         'auth': lambda u: u.is_staff
     },
 
-    # Allow anybody to upload jpeg's and png's, forbid jfif's. Limit sizes to 5kb - 20mb
+    # Allow anybody to upload jpeg's and png's. Limit sizes to 5kb - 20mb
     'images': {
         'key': 'uploads/images',
         'auth': lambda u: True,
-        'allowed': [
+        'allowed_types': [
             'image/jpeg',
             'image/png'
         ],
+        'allowed_extensions': (
+            '.jpeg',
+            '.jpg',
+            '.png',
+        ),
         'content_length_range': (5000, 20000000),
-        'forbidden_extensions': ('.jfif',)
     },
 
     # Allow authenticated users to upload mp4's
     'videos': {
         'key': 'uploads/videos',
         'auth': lambda u: u.is_authenticated(),
-        'allowed': ['video/mp4']
+        'allowed_types': ['video/mp4']
     },
 
     # Allow anybody to upload any MIME type with a custom name function

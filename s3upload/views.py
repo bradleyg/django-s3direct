@@ -23,13 +23,13 @@ def get_upload_params(request):
 
     key = dest.get('key')
     auth = dest.get('auth')
-    allowed = dest.get('allowed')
+    allowed_types = dest.get('allowed_types')
     acl = dest.get('acl')
     bucket = dest.get('bucket')
     cache_control = dest.get('cache_control')
     content_disposition = dest.get('content_disposition')
     content_length_range = dest.get('content_length_range')
-    forbidden_extensions = dest.get('forbidden_extensions', ())
+    allowed_extensions = dest.get('allowed_extensions')
     server_side_encryption = dest.get('server_side_encryption')
 
     if not acl:
@@ -43,12 +43,12 @@ def get_upload_params(request):
         data = json.dumps({'error': 'Permission denied.'})
         return HttpResponse(data, content_type="application/json", status=403)
 
-    if (allowed and content_type not in allowed) and allowed != '*':
+    if (allowed_types and content_type not in allowed_types) and allowed_types != '*':
         data = json.dumps({'error': 'Invalid file type (%s).' % content_type})
         return HttpResponse(data, content_type="application/json", status=400)
 
     extension = splitext(filename)[1]
-    if extension in forbidden_extensions:
+    if (allowed_extensions and extension not in allowed_extensions) and allowed_extensions != '*':
         data = json.dumps({'error': 'Forbidden file extension (%s).' % extension})
         return HttpResponse(data, content_type="application/json", status=415)
 
