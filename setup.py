@@ -7,9 +7,8 @@ f.close()
 
 setup(
     name='django-s3-upload',
-    version='0.1.0',
-    description=('Add direct uploads to S3 functionality with a progress bar'
-                 ' to file input fields.'),
+    version='0.1.1',
+    description=('Add direct uploads to S3 to file input fields.'),
     long_description=readme,
     author="YunoJuno",
     author_email='code@yunojuno.com',
@@ -25,9 +24,6 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
     ],
 )
