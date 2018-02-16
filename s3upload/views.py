@@ -47,9 +47,10 @@ def get_upload_params(request):
         data = json.dumps({'error': 'Invalid file type (%s).' % content_type})
         return HttpResponse(data, content_type="application/json", status=400)
 
-    extension = splitext(filename)[1]
-    if (allowed_extensions and extension not in allowed_extensions) and allowed_extensions != '*':
-        data = json.dumps({'error': 'Forbidden file extension (%s).' % extension})
+    original_ext = splitext(filename)[1]
+    lowercased_ext = original_ext.lower()
+    if (allowed_extensions and lowercased_ext not in allowed_extensions) and allowed_extensions != '*':
+        data = json.dumps({'error': 'Forbidden file extension (%s).' % original_ext})
         return HttpResponse(data, content_type="application/json", status=415)
 
     if hasattr(key, '__call__'):

@@ -101,6 +101,16 @@ class WidgetTest(TestCase):
         response = self.client.post(reverse('s3upload'), data)
         self.assertEqual(response.status_code, 200)
 
+    def test_check_disallowed_extensions__uppercase(self):
+        data = {'dest': 'imgs', 'name': 'image.JFIF', 'type': 'image/jpeg'}
+        response = self.client.post(reverse('s3upload'), data)
+        self.assertEqual(response.status_code, 415)
+
+    def test_check_allowed_extensions__uppercase(self):
+        data = {'dest': 'imgs', 'name': 'image.JPG', 'type': 'image/jpeg'}
+        response = self.client.post(reverse('s3upload'), data)
+        self.assertEqual(response.status_code, 200)
+
     def test_check_signing_fields(self):
         self.client.login(username='admin', password='admin')
         data = {u'dest': u'imgs', u'name': u'image.jpg',

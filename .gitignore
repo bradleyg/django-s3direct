@@ -4,6 +4,7 @@ dist/*
 *.egg-info
 venv
 venv3
+/.eggs
 example/db.sqlite3
 example/example/settings-test.py
 /build
