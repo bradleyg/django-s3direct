@@ -6,9 +6,19 @@ Upload files directly to S3 from Django
 
 [![Build Status](https://travis-ci.org/yunojuno/django-s3upload.svg?branch=master)](https://travis-ci.org/yunojuno/django-s3upload)
 
-Add direct uploads to AWS S3 functionality with a progress bar to file input fields.
+This project allows direct uploading of a file from the browser to AWS S3 via a file input field rendered by Django. 
 
-<img src="https://raw.githubusercontent.com/bradleyg/django-s3-upload/master/screenshot.png" width="381"/>
+The uploaded file's URL is then saveable as the value of that field in the database. 
+
+This avoids the problem of uploads timing out when they go via a web server before being handed off to S3.
+
+Features include:
+
+* displaying a progress bar
+* support for ACLs (eg, private uploads)
+* support for encrypted-at-rest S3 buckets
+* mimetype and file extension whitelisting
+* specifying different bucket destinations on a per-field basis
 
 ## Installation
 
