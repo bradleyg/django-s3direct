@@ -21,7 +21,7 @@ settings.configure(
         'django.contrib.admin',
         's3upload',
     ),
-    MIDDLEWARE_CLASSES=(
+    MIDDLEWARE=(
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
     ),
@@ -58,7 +58,7 @@ settings.configure(
         },
         'vids': {
             'key': 'uploads/vids',
-            'auth': lambda u: u.is_authenticated(),
+            'auth': lambda u: u.is_authenticated,
             'allowed_types': ['video/mp4'],
         },
         'cached': {

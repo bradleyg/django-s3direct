@@ -7,7 +7,7 @@ f.close()
 
 setup(
     name='django-s3-upload',
-    version='0.1.2',
+    version='0.2',
     description=('Add direct uploads to S3 to file input fields.'),
     long_description=readme,
     author="YunoJuno",
@@ -15,12 +15,14 @@ setup(
     url='https://github.com/yunojuno/django-s3-upload',
     packages=['s3upload'],
     include_package_data=True,
-    install_requires=['django>=1.8', 'boto'],
+    install_requires=['django>=1.11', 'boto3'],
     zip_safe=False,
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
         'Framework :: Django',
+        'Framework :: Django :: 1.11',
+        'Framework :: Django :: 2.0',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',

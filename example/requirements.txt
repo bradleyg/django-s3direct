@@ -1,2 +1,2 @@
-django<2.0
-django-boto
+django
+boto3

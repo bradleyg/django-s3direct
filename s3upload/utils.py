@@ -1,13 +1,11 @@
 import hashlib
 import hmac
 import json
-from datetime import datetime, timedelta
 from base64 import b64encode
+from datetime import datetime, timedelta
+from urllib.parse import urlparse, unquote
 
-from boto.s3.connection import S3Connection
-from boto.s3.key import Key
-from urllib.parse import urlparse, unquote, parse_qs, urlencode
-
+import boto3
 from django.conf import settings
 
 
@@ -51,10 +49,19 @@ def get_s3upload_destinations():
     return converted_destinations
 
 
-def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
-                       content_disposition=None, content_length_range=None,
-                       server_side_encryption=None, access_key=None,
-                       secret_access_key=None, token=None):
+def create_upload_data(
+        content_type,
+        key,
+        acl,
+        bucket=None,
+        cache_control=None,
+        content_disposition=None,
+        content_length_range=None,
+        server_side_encryption=None,
+        access_key=None,
+        secret_access_key=None,
+        token=None
+    ):
     bucket = bucket or settings.AWS_STORAGE_BUCKET_NAME
     region = getattr(settings, 'S3UPLOAD_REGION', None)
     if not region or region == 'us-east-1':
@@ -180,19 +187,21 @@ def get_s3_path_from_url(url, bucket_name=settings.AWS_STORAGE_BUCKET_NAME):
 
 
 def get_signed_download_url(
-    key,
-    bucket_name=settings.AWS_STORAGE_BUCKET_NAME,
-    ttl=60,
-):
-    s3 = S3Connection(
-        settings.AWS_ACCESS_KEY_ID,
-        settings.AWS_SECRET_ACCESS_KEY,
+        key,
+        bucket_name=settings.AWS_STORAGE_BUCKET_NAME,
+        ttl=60,
+    ):
+    s3 = boto3.client(
+        's3',
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
     )
-    download_url = s3.generate_url(
-        bucket=bucket_name,
-        method='GET',
-        key=key,
-        query_auth=True,
-        expires_in=ttl
+    download_url = s3.generate_presigned_url(
+        'get_object',
+        Params={
+            'Bucket': bucket_name,
+            'Key': key,
+        },
+        ExpiresIn=ttl
     )
     return download_url

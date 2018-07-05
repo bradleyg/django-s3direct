@@ -1,18 +1,23 @@
 import json
 from os.path import splitext
 
-from boto.s3.connection import S3Connection
-
 from django.conf import settings
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
 from django.utils.text import get_valid_filename
 
-from .utils import create_upload_data, get_s3upload_destinations
+import boto3
+
+from .utils import (
+    create_upload_data,
+    get_s3upload_destinations,
+    get_signed_download_url
+)
 
 
 @require_POST
 def get_upload_params(request):
+
     content_type = request.POST['type']
     filename = get_valid_filename(request.POST['name'])
     dest = get_s3upload_destinations().get(request.POST['dest'])
@@ -94,18 +99,10 @@ def get_upload_params(request):
 
     # Generate signed URL for private document access
     if acl == "private":
-        c = S3Connection(
-            settings.AWS_ACCESS_KEY_ID,
-            settings.AWS_SECRET_ACCESS_KEY
-        )
-
-        url = c.generate_url(
-            expires_in=int(5*60),  # 5 mins
-            method='GET',
-            bucket=bucket or settings.AWS_STORAGE_BUCKET_NAME,
+        url = get_signed_download_url(
             key=key.replace("${filename}", filename),
-            query_auth=True,
-            force_http=False,
+            bucket_name=bucket or settings.AWS_STORAGE_BUCKET_NAME,
+            ttl=int(5*60),  # 5 mins
         )
 
     response = {

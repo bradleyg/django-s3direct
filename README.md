@@ -1,14 +1,19 @@
 django-s3-upload
 ================
 
+Compatibility
+-------------
+
+This library is now Python3 and Django1.11 and above only.
+
 Upload files directly to S3 from Django
 -------------------------------------
 
 [![Build Status](https://travis-ci.org/yunojuno/django-s3upload.svg?branch=master)](https://travis-ci.org/yunojuno/django-s3upload)
 
-This project allows direct uploading of a file from the browser to AWS S3 via a file input field rendered by Django. 
+This project allows direct uploading of a file from the browser to AWS S3 via a file input field rendered by Django.
 
-The uploaded file's URL is then saveable as the value of that field in the database. 
+The uploaded file's URL is then saveable as the value of that field in the database.
 
 This avoids the problem of uploads timing out when they go via a web server before being handed off to S3.
 

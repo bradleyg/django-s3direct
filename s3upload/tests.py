@@ -1,12 +1,13 @@
 import json
 from base64 import b64decode
+from urllib.parse import urlparse, parse_qs
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse, resolve
 from django.test import TestCase
 from django.test.utils import override_settings
+from django.urls import reverse, resolve
 
 from . import widgets
 from .utils import get_s3_path_from_url
@@ -170,11 +171,12 @@ class WidgetTest(TestCase):
         }
         response = self.client.post(reverse('s3upload'), data)
         response_dict = json.loads(response.content.decode())
-        private_access_url = response_dict["private_access_url"]
-
-        self.assertTrue(
-            "https://test-bucket.s3.amazonaws.com:443/image.jpg?Signature=" in private_access_url
-        )
+        parsed_url = urlparse(response_dict["private_access_url"])
+        parsed_qs = parse_qs(parsed_url.query)
+        self.assertEqual(parsed_url.scheme, 'https')
+        self.assertEqual(parsed_url.netloc, 'test-bucket.s3.amazonaws.com')
+        self.assertTrue('Signature' in parsed_qs)
+        self.assertTrue('Expires' in parsed_qs)
 
     def test_content_length_range(self):
         # Content_length_range setting is always sent as part of policy.

@@ -1,10 +1,8 @@
-from __future__ import unicode_literals
-
 import os
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.forms import widgets
 from django.template.loader import render_to_string
 from django.utils.http import urlunquote_plus

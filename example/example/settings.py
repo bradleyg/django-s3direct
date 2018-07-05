@@ -25,7 +25,7 @@ SECRET_KEY = ')nw@1z2xt-dy2f$1mfpzyuohxv-tmu4+5-q55)*(e6obam-p=4'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', 'app.yunojuno.local']
 
 
 # Application definition
@@ -37,18 +37,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     's3upload',
     'cat',
 ]
 
-MIDDLEWARE_CLASSES = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -111,7 +108,6 @@ AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', '')
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', 'test-bucket')
 S3UPLOAD_REGION = os.environ.get('S3UPLOAD_REGION', 'us-east-1')
 
-
 def create_filename(filename):
     import uuid
     ext = filename.split('.')[-1]
@@ -150,7 +146,7 @@ S3UPLOAD_DESTINATIONS = {
     # Allow authenticated users to upload mp4's
     'videos': {
         'key': 'uploads/videos',
-        'auth': lambda u: u.is_authenticated(),
+        'auth': lambda u: u.is_authenticated,
         'allowed_types': ['video/mp4']
     },
 
@@ -158,4 +154,31 @@ S3UPLOAD_DESTINATIONS = {
     'custom_filename': {
         'key': create_filename
     },
+}
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+    },
+    'loggers': {
+        'request_token': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        }
+    }
 }

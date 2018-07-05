@@ -7,7 +7,7 @@ class Cat(models.Model):
 
 
 class Kitten(models.Model):
-    mother = models.ForeignKey('Cat')
+    mother = models.ForeignKey('Cat', on_delete=models.CASCADE)
 
     video = S3UploadField(dest='videos', blank=True)
     image = S3UploadField(dest='images', blank=True)

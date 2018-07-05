@@ -1,11 +1,8 @@
-language: python
+language:
+  python
 python:
-  - 3.6
-env:
-  - DJANGO=1.10
-  - DJANGO=1.11
+  - "3.6"
 install:
-  - pip install -q Django~=$DJANGO.0
-  - pip install -q django-boto==0.3.12
+  pip install tox-travis
 script:
-  - python runtests.py
+  tox
