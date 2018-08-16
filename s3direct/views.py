@@ -70,6 +70,7 @@ def get_upload_params(request):
         'content_disposition': dest.get('content_disposition'),
         'acl': dest.get('acl') or 'public-read',
         'server_side_encryption': dest.get('server_side_encryption'),
+        'allow_existence_optimization': dest.get('allow_existence_optimization', True)
     }
     return HttpResponse(json.dumps(upload_data), content_type='application/json')
 

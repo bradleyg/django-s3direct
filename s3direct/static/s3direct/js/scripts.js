@@ -95,7 +95,7 @@ const SparkMD5 = require('spark-md5');
         return createHash('sha256').update(data, 'utf-8').digest('hex');
     };
 
-    const initiateMultipartUpload = function (element, signingUrl, objectKey, awsKey, awsRegion, awsBucket, awsBucketUrl, cacheControl, contentDisposition, acl, serverSideEncryption, file) {
+    const initiateMultipartUpload = function (element, signingUrl, objectKey, awsKey, awsRegion, awsBucket, awsBucketUrl, cacheControl, contentDisposition, acl, serverSideEncryption, file, allowExistenceOptimization) {
         // Enclosed so we can propagate errors to the correct `element` in case of failure.
         const getAwsV4Signature = function (signParams, signHeaders, stringToSign, signatureDateTime, canonicalRequest) {
             return new Promise(function (resolve, reject) {
@@ -141,8 +141,8 @@ const SparkMD5 = require('spark-md5');
                 partSize: 20 * 1024 * 1024,
                 logging: true,
                 debug: true,
-                allowS3ExistenceOptimization: true,
-                s3FileCacheHoursAgo: 12,
+                allowS3ExistenceOptimization: allowExistenceOptimization,
+                s3FileCacheHoursAgo: allowExistenceOptimization ? 12 : 0,
             }
         ).then(function (evaporate) {
             beginUpload(element);
@@ -199,7 +199,8 @@ const SparkMD5 = require('spark-md5');
                         uploadParameters.content_disposition,
                         uploadParameters.acl,
                         uploadParameters.server_side_encryption,
-                        file
+                        file,
+                        uploadParameters.allow_existence_optimization
                     );
                     break;
                 case 400:

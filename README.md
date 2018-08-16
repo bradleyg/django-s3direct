@@ -145,6 +145,9 @@ S3DIRECT_REGION = 'us-east-1'
 # content_disposition [optional] Useful for sending files as attachments.
 # bucket [optional] Specify a different bucket for this particular object.
 # server_side_encryption [optional] Encryption headers for buckets that require it.
+# allow_existence_optimization [optional] True is S3 existence optimization 
+#    should be enabled (see allowS3ExistenceOptimization configuration 
+#    parameter of https://github.com/TTLabs/EvaporateJS)
 
 S3DIRECT_DESTINATIONS = {
     'example_destination': {
