@@ -6,12 +6,33 @@ except ImportError:
     from urlparse import unquote
 
 from django.conf import settings
+from django.core.cache import cache
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotFound, \
     HttpResponseServerError
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 
 from .utils import get_aws_v4_signature, get_aws_v4_signing_key, get_s3direct_destinations, get_key
+try:
+    import boto3
+    HAS_BOTO_3 = True
+except ImportError:
+    HAS_BOTO_3 = False
+
+
+def aws_key(region):
+    aws_key_cache = cache.get('aws_key', None)
+    if not aws_key_cache:
+        access_key_id = getattr(settings, 'AWS_ACCESS_KEY_ID', None)
+        secret_access_key = getattr(settings, 'AWS_SECRET_ACCESS_KEY', None)
+        if not access_key_id and not secret_access_key and HAS_BOTO_3:
+            session = boto3.session.Session(region_name=region)
+            credentials = session.get_credentials()
+            access_key_id = credentials.access_key
+            secret_access_key = credentials.secret_key
+        aws_key_cache = {'AWS_ACCESS_KEY_ID': access_key_id, 'AWS_SECRET_ACCESS_KEY': secret_access_key}
+        cache.set('aws_key', aws_key_cache)
+    return aws_key_cache
 
 
 @csrf_protect
@@ -56,7 +77,7 @@ def get_upload_params(request):
     endpoint = 's3.amazonaws.com' if region == 'us-east-1' else ('s3-%s.amazonaws.com' % region)
 
     # AWS credentials are not required for publicly-writable buckets
-    access_key_id = getattr(settings, 'AWS_ACCESS_KEY_ID', None)
+    access_key_id = aws_key(region)['AWS_ACCESS_KEY_ID']
 
     bucket_url = 'https://{0}/{1}'.format(endpoint, bucket)
 
@@ -79,6 +100,6 @@ def get_upload_params(request):
 def generate_aws_v4_signature(request):
     message = unquote(request.POST['to_sign'])
     signing_date = datetime.strptime(request.POST['datetime'], '%Y%m%dT%H%M%SZ')
-    signing_key = get_aws_v4_signing_key(settings.AWS_SECRET_ACCESS_KEY, signing_date, settings.S3DIRECT_REGION, 's3')
+    signing_key = get_aws_v4_signing_key(aws_key(settings.S3DIRECT_REGION)['AWS_SECRET_ACCESS_KEY'], signing_date, settings.S3DIRECT_REGION, 's3')
     signature = get_aws_v4_signature(signing_key, message)
     return HttpResponse(signature)
