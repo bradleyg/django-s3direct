@@ -662,6 +662,16 @@ var _components = require('./components');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function addHandlers(elements) {
+    // safari doesn't like forEach on nodeList objects
+    for (var i = 0; i < elements.length; i++) {
+        // initialise instance for each element
+        var element = elements[i];
+        var store = (0, _store2.default)({ element: element });
+        var view = new _components.View(element, store);
+        view.init();
+    }
+}
 // by default initHandler inits on '.s3upload', but if passed a custom
 // selector in the event data, it will init on that instead.
 function initHandler(event) {
@@ -673,18 +683,19 @@ function initHandler(event) {
 
     var elements = document.querySelectorAll(selector);
 
-    // safari doesn't like forEach on nodeList objects
-    for (var i = 0; i < elements.length; i++) {
-        // initialise instance for each element
-        var element = elements[i];
-        var store = (0, _store2.default)({ element: element });
-        var view = new _components.View(element, store);
-        view.init();
-    }
+    addHandlers(elements);
 }
 
 // default global init on document ready
 document.addEventListener('DOMContentLoaded', initHandler);
+
+// Support inline
+document.addEventListener('DOMNodeInserted', function(event) {
+    if(event.target.tagName) {
+        var elements = event.target.querySelectorAll('.s3upload');
+        addHandlers(elements)
+    }
+});
 
 // custom event listener for use in async init
 document.addEventListener('s3upload:init', initHandler);
