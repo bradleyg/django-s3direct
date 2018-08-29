@@ -48,7 +48,7 @@ class S3UploadWidget(widgets.TextInput):
                 )
             else:
                 # Default to virtual-hosted–style URL
-                return "https://{0}.s3.amazonaws.com{1}/".format(bucket_name, value)
+                return "https://{0}.s3.amazonaws.com/{1}".format(bucket_name, value)
         else:
             return ''
 

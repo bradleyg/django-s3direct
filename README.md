@@ -118,7 +118,7 @@ AWS_STORAGE_BUCKET_NAME = ''
 
 # The region of your bucket, more info:
 # http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
-S3DIRECT_REGION = 'us-east-1'
+S3UPLOAD_REGION = 'us-east-1'
 
 # Destinations, with the following keys:
 #
