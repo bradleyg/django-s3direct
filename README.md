@@ -4,14 +4,12 @@ django-s3-upload
 Compatibility
 -------------
 
-This library is now Python3 and Django1.11 and above only.
+This library now supports Python3 and Django v1.11 and above only.
 
-Upload files directly to S3 from Django
--------------------------------------
 
 [![Build Status](https://travis-ci.org/yunojuno/django-s3upload.svg?branch=master)](https://travis-ci.org/yunojuno/django-s3upload)
 
-This project allows direct uploading of a file from the browser to AWS S3 via a file input field rendered by Django.
+**Allows direct uploading of a file from the browser to AWS S3 via a file input field rendered by Django.**
 
 The uploaded file's URL is then saveable as the value of that field in the database.
 
@@ -187,7 +185,7 @@ class S3UploadForm(forms.Form):
     images = forms.URLField(widget=S3UploadWidget(dest='example_destination'))
 ```
 
-__*Optional.__ You can modify the HTML of the widget by overiding template __s3direct/templates/s3direct-widget.tpl__
+__*Optional.__ You can modify the HTML of the widget by overiding template __s3upload/templates/s3upload-widget.tpl__
 
 ### views.py
 
@@ -206,7 +204,7 @@ class MyView(FormView):
 <html>
 <head>
     <meta charset="utf-8">
-    <title>s3direct</title>
+    <title>s3upload</title>
     {{ form.media }}
 </head>
 <body>
@@ -229,7 +227,7 @@ $ cd django-s3-upload
 export AWS_ACCESS_KEY_ID='...'
 export AWS_SECRET_ACCESS_KEY='...'
 export AWS_STORAGE_BUCKET_NAME='...'
-export S3DIRECT_REGION='...'    # e.g. 'eu-west-1'
+export S3UPLOAD_REGION='...'    # e.g. 'eu-west-1'
 
 $ docker-compose up
 ```

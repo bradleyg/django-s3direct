@@ -8,7 +8,7 @@ f.close()
 setup(
     name='django-s3-upload',
     version='0.2.1',
-    description=('Add direct uploads to S3 to file input fields.'),
+    description=('Integrates direct client-side uploading to s3 with Django'),
     long_description=readme,
     author="YunoJuno",
     author_email='code@yunojuno.com',
