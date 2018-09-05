@@ -128,6 +128,14 @@ const SparkMD5 = require('spark-md5');
             return headers;
         };
 
+        const generateUnsignedHeaders = function (cacheControl, contentDisposition) {
+            // Do not add Content-Disposition if it's not set
+            let headers = {};
+            headers['Cache-Control'] = cacheControl;
+            if (contentDisposition) headers['Content-Disposition'] = contentDisposition;
+            return headers;
+        };
+
         Evaporate.create(
             {
                 //signerUrl: signingUrl,
@@ -151,7 +159,7 @@ const SparkMD5 = require('spark-md5');
                 file: file,
                 contentType: file.type,
                 xAmzHeadersAtInitiate: generateAmazonHeaders(acl, serverSideEncryption),
-                notSignedHeadersAtInitiate: {'Cache-Control': cacheControl, 'Content-Disposition': contentDisposition},
+                notSignedHeadersAtInitiate: generateUnsignedHeaders(cacheControl, contentDisposition),
                 progress: function (progressRatio, stats) { updateProgressBar(element, progressRatio); },
             }).then(
                 function (awsS3ObjectKey) {
