@@ -1,15 +1,26 @@
 language: python
 python:
-  - 2.7
-  - 3.4
-  - 3.5
-  - 3.6
+- 2.7
+- 3.4
+- 3.5
+- 3.6
 env:
-  - DJANGO=1.8
-  - DJANGO=1.9
-  - DJANGO=1.10
-  - DJANGO=1.11
+- DJANGO=1.9
+- DJANGO=1.10
+- DJANGO=1.11
+- DJANGO=2.0
+matrix:
+  exclude:
+  - python: 2.7
+    env: DJANGO=2.0
 install:
-  - pip install -q Django~=$DJANGO.0
+- pip install -q Django~=$DJANGO.0
 script:
-  - python runtests.py
+- python runtests.py
+deploy:
+  provider: pypi
+  user: bradleyg
+  on:
+    tags: true
+  password:
+    secure: a+Xq1e2yuTNtjcJ5wJ5oQxsfx/lqwYD7dbFEqdoazpkflZ8UA9AErgL2quAbo0RIRKFDBXwRNUspRtQdQ6TClKxgzsaa4AQEPWxYxx353kYMdhPjXe0/ib1rWJ0eefs/RDu0mndpQu/slNjxzV351QXPoPKo9tHgnLHWoNzYAzs=

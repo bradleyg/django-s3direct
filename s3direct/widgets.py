@@ -3,9 +3,14 @@ from __future__ import unicode_literals
 import os
 from django.forms import widgets
 from django.utils.safestring import mark_safe
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except ImportError:
+    # Django <1.10 compliance
+    from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 from django.utils.http import urlunquote_plus
+from django.conf import settings
 
 
 class S3DirectWidget(widgets.TextInput):
@@ -41,6 +46,7 @@ class S3DirectWidget(widgets.TextInput):
             'file_url': value or '',
             'name': name,
             'style': self.build_attrs(attrs).get('style', '') if attrs else '',
+            'csrf_cookie_name': getattr(settings, 'CSRF_COOKIE_NAME', 'csrftoken'),
         })
 
         return mark_safe(output)

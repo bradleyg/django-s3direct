@@ -38,3 +38,17 @@ def get_aws_v4_signing_key(key, signing_date, region, service):
 
 def get_aws_v4_signature(key, message):
     return hmac.new(key, message.encode('utf-8'), hashlib.sha256).hexdigest()
+
+
+def get_key(key, file_name, dest, request):
+    if hasattr(key, '__call__'):
+        fn_args = [file_name, request]
+        args = dest.get('key_args')
+        if args:
+            fn_args.append(args)
+        object_key = key(*fn_args)
+    elif key == '/':
+        object_key = file_name
+    else:
+        object_key = '%s/%s' % (key.strip('/'), file_name)
+    return object_key

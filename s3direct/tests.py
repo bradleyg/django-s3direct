@@ -4,9 +4,12 @@ from datetime import datetime
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.urlresolvers import resolve, reverse
 from django.test import TestCase
 from django.test.utils import override_settings
+try:
+    from django.urls import resolve, reverse
+except ImportError:
+    from django.core.urlresolvers import resolve, reverse
 
 from s3direct import widgets
 
@@ -15,6 +18,7 @@ HTML_OUTPUT = (
     '<div class="s3direct" data-policy-url="/get_upload_params/" data-signing-url="/get_aws_v4_signature/">\n'
     '  <a class="file-link" target="_blank" href=""></a>\n'
     '  <a class="file-remove" href="#remove">Remove</a>\n'
+    '  <input class="csrf-cookie-name" type="hidden" value="csrftoken">\n'
     '  <input class="file-url" type="hidden" value="" id="" name="filename" />'
     '\n'
     '  <input class="file-dest" type="hidden" value="foo">\n'
@@ -38,17 +42,23 @@ POLICY_RESPONSE = {
     u'server_side_encryption': None,
 }
 
+def is_authenticated(user):
+    if callable(user.is_authenticated): # Django =< 1.9
+        return user.is_authenticated()
+    return user.is_authenticated
+
 TEST_DESTINATIONS = {
     'misc': {'key': lambda original_filename: 'images/unique.jpg'},
     'files': {'key': '/', 'auth': lambda u: u.is_staff},
     'imgs': {'key': 'uploads/imgs', 'allowed': ['image/jpeg', 'image/png']},
     'thumbs': {'key': 'uploads/thumbs', 'allowed': ['image/jpeg'], 'content_length_range': (1000, 50000)},
-    'vids': {'key': 'uploads/vids', 'auth': lambda u: u.is_authenticated(), 'allowed': ['video/mp4']},
-    'cached': {'key': 'uploads/vids', 'auth': lambda u: u.is_authenticated(), 'allowed': '*',
+    'vids': {'key': 'uploads/vids', 'auth': is_authenticated, 'allowed': ['video/mp4']},
+    'cached': {'key': 'uploads/vids', 'auth': is_authenticated, 'allowed': '*',
                'acl': 'authenticated-read', 'bucket': 'astoragebucketname', 'cache_control': 'max-age=2592000',
                'content_disposition': 'attachment', 'server_side_encryption': 'AES256'},
     'accidental-leading-slash': {'key': '/directory/leading'},
     'accidental-trailing-slash': {'key': 'directory/trailing/'},
+    'key_args': {'key': lambda original_filename, args: args + '/' +'background.jpg', 'key_args': 'assets/backgrounds'},
 }
 
 
@@ -152,6 +162,14 @@ class WidgetTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         policy_dict = json.loads(response.content.decode())
         self.assertNotEqual(policy_dict['object_key'], data['name'])
+
+    def test_function_object_key_with_args(self):
+        data = {'dest': 'key_args', 'name': 'background.jpg', 'type': 'image/jpeg', 'size': 1000}
+        self.client.login(username='admin', password='admin')
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 200)
+        policy_dict = json.loads(response.content.decode())
+        self.assertEqual(policy_dict['object_key'], TEST_DESTINATIONS['key_args']['key_args'] + '/' + data['name'])
 
     def test_policy_conditions(self):
         self.client.login(username='admin', password='admin')
