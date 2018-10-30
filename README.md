@@ -78,7 +78,7 @@ Trust Relationship configuration applied:
 
 Note that in order to use the EC2 instance profile, django-s3direct needs
 to query the EC2 instance metadata using utility functions from the
-[botocore] [] package. You already have `botocore` installed if `boto3`
+[botocore] package. You already have `botocore` installed if `boto3`
 is a dependency of your project.
 
 ### S3 CORS
