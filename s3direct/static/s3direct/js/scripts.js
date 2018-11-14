@@ -117,7 +117,7 @@ const SparkMD5 = require('spark-md5');
                             break;
                         default:
                             error(element, 'Could not generate AWS v4 signature.')
-                            reject();
+                            reject('Could not generate AWS v4 signature.');
                             break;
                     }
                 });
