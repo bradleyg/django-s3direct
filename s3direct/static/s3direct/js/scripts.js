@@ -95,7 +95,10 @@ const SparkMD5 = require('spark-md5');
         return createHash('sha256').update(data, 'utf-8').digest('hex');
     };
 
-    const initiateMultipartUpload = function (element, signingUrl, objectKey, awsKey, awsRegion, awsBucket, awsBucketUrl, cacheControl, contentDisposition, acl, serverSideEncryption, file) {
+    const initiateMultipartUpload = function (
+        element, signingUrl, dest, objectKey, awsKey, awsRegion, awsBucket, awsBucketUrl, cacheControl,
+        contentDisposition, acl, serverSideEncryption, file
+    ) {
         // Enclosed so we can propagate errors to the correct `element` in case of failure.
         const getAwsV4Signature = function (signParams, signHeaders, stringToSign, signatureDateTime, canonicalRequest) {
             return new Promise(function (resolve, reject) {
@@ -104,6 +107,7 @@ const SparkMD5 = require('spark-md5');
                       csrfInput     = document.querySelector('input[name=csrfmiddlewaretoken]'),
                       csrfToken     = csrfInput ? csrfInput.value : Cookies.get(csrfCookieNameInput.value),
                       headers       = {'X-CSRFToken': csrfToken};
+                form.append('dest', dest);
                 form.append('to_sign', stringToSign);
                 form.append('datetime', signatureDateTime);
                 request('POST', signingUrl, form, headers, element, function (status, response) {
@@ -190,6 +194,7 @@ const SparkMD5 = require('spark-md5');
                     initiateMultipartUpload(
                         element,
                         signerUrl,
+                        dest,
                         uploadParameters.object_key,
                         uploadParameters.access_key_id,
                         uploadParameters.region,
