@@ -77,6 +77,15 @@ def get_upload_params(request):
 @csrf_protect
 @require_POST
 def generate_aws_v4_signature(request):
+    dest = get_s3direct_destinations().get(request.POST['dest'])
+    if not dest:
+        return HttpResponseNotFound(json.dumps({'error': 'File destination does not exist.'}),
+                                    content_type='application/json')
+
+    auth = dest.get('auth')
+    if auth and not auth(request.user):
+        return HttpResponseForbidden(json.dumps({'error': 'Permission denied.'}), content_type='application/json')
+
     message = unquote(request.POST['to_sign'])
     signing_date = datetime.strptime(request.POST['datetime'], '%Y%m%dT%H%M%SZ')
     signing_key = get_aws_v4_signing_key(settings.AWS_SECRET_ACCESS_KEY, signing_date, settings.S3DIRECT_REGION, 's3')
