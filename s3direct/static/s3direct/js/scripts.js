@@ -48,10 +48,12 @@ const SparkMD5 = require('spark-md5');
         bar.style.width = Math.round(progressRatio * 100) + '%';
     };
 
-    const error = function(el, msg) {
+    const error = function(el, msg, doNotAlert) {
         el.className = 's3direct form-active'
         el.querySelector('.file-input').value = ''
-        alert(msg)
+        if (!doNotAlert) {
+            alert(msg);
+        }
     };
 
     let concurrentUploads = 0;
@@ -116,7 +118,8 @@ const SparkMD5 = require('spark-md5');
                             resolve(response);
                             break;
                         default:
-                            error(element, 'Could not generate AWS v4 signature.')
+                            const doNotAlert = true;  // reject will apparently alert
+                            error(element, 'Could not generate AWS v4 signature.', doNotAlert);
                             reject('Could not generate AWS v4 signature.');
                             break;
                     }
