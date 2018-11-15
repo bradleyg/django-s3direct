@@ -222,7 +222,10 @@ class SignatureViewTestCase(TestCase):
         self.client.login(username='admin', password='admin')
         response = self.client.post(
             reverse('s3direct-signing'),
-            data={'to_sign': string_to_sign, 'datetime': datetime.strftime(signing_date, '%Y%m%dT%H%M%SZ')},
+            data={
+                'to_sign': string_to_sign, 'datetime': datetime.strftime(signing_date, '%Y%m%dT%H%M%SZ'),
+                'dest': 'files',
+            },
             enforce_csrf_checks=True,
         )
         self.assertEqual(response.status_code, 200)
