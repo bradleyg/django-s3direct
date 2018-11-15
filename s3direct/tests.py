@@ -216,7 +216,7 @@ class SignatureViewTestCase(TestCase):
         )
         return string_to_sign, signing_date,
 
-    def test_signing(self):
+    def test_signing_success(self):
         """Check that the signature is as expected for a known signing request."""
         string_to_sign, signing_date = self.create_dummy_signing_request()
         self.client.login(username='admin', password='admin')
@@ -230,3 +230,21 @@ class SignatureViewTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, self.EXPECTED_SIGNATURE)
+
+    def test_signing_requires_auth(self):
+        """
+        Check that a request is not signed if the destination requires
+        authentication and no authentication or session is provided.
+        """
+        string_to_sign, signing_date = self.create_dummy_signing_request()
+        self.client.logout()
+        response = self.client.post(
+            reverse('s3direct-signing'),
+            data={
+                'to_sign': string_to_sign, 'datetime': datetime.strftime(signing_date, '%Y%m%dT%H%M%SZ'),
+                'dest': 'files',
+            },
+            enforce_csrf_checks=True,
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(json.loads(response.content), {'error': 'Permission denied.'})
