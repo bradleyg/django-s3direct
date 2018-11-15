@@ -81,6 +81,8 @@ to query the EC2 instance metadata using utility functions from the
 [botocore] [] package. You already have `botocore` installed if `boto3`
 is a dependency of your project.
 
+If your application is using other AWS services in addition to S3 direct uploads, it is *highly recommended* to use a separate IAM role with least possible privileges for S3 direct uploads. Due to limitations in client-side code, the contents of AWS signing requests cannot be validated server-side, and effectively a malicious user has a possiblity to sign any requests with s3direct's AWS credentials as long as he passes the authentication for any s3direct destination. Therefore, only give s3direct the privileges you would be comfortable giving to its end users. A separate access key for s3direct can be configured by using `S3DIRECT_AWS_ACCESS_KEY_ID` and `S3DIRECT_AWS_SECRET_ACCESS_KEY` in Django settings.
+
 ### S3 CORS
 
 Setup a CORS policy on your S3 bucket.
@@ -122,10 +124,10 @@ TEMPLATES = [{
 # If these are not defined, the EC2 instance profile and IAM role are used.
 # This requires you to add boto3 (or botocore, which is a dependency of boto3)
 # to your project dependencies.
-AWS_ACCESS_KEY_ID = ''
-AWS_SECRET_ACCESS_KEY = ''
-
 AWS_STORAGE_BUCKET_NAME = ''
+
+S3DIRECT_AWS_ACCESS_KEY_ID = ''
+S3DIRECT_AWS_SECRET_ACCESS_KEY = ''
 
 # The region of your bucket, more info:
 # http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
@@ -145,6 +147,16 @@ S3DIRECT_REGION = 'us-east-1'
 # content_disposition [optional] Useful for sending files as attachments.
 # bucket [optional] Specify a different bucket for this particular object.
 # server_side_encryption [optional] Encryption headers for buckets that require it.
+#
+# DANGER!
+# Due to limitations in EvaporateJS the arguments (other than 'auth') cannot be reliably validated in AWS request
+# signing phase. Therefore, any request passing a single 'auth' function for any destination allows using
+# s3direct's AWS credentials for any other destination, and if s3direct has a wide enough IAM policy, authenticating to
+# other AWS services. Also, a malicious user can easily override allowed, acl, cache_control etc. by modifying
+# the request between validation and signing.
+#
+# So, always configure 'auth' scenarios that users pass only if you are comfortable giving them full access
+# to any destination, and use a separate IAM policy for s3direct that only allows a minimal set of S3 operations.
 
 S3DIRECT_DESTINATIONS = {
     'example_destination': {
@@ -152,7 +164,7 @@ S3DIRECT_DESTINATIONS = {
         'key': 'uploads/images',
 
         # OPTIONAL
-        'auth': lambda u: u.is_staff, # Default allow anybody to upload
+        'auth': lambda u: u.is_staff, # Default allow anybody to upload (to any destination)
         'allowed': ['image/jpeg', 'image/png', 'video/mp4'],  # Default allow all mime types
         'bucket': 'pdf-bucket', # Default is 'AWS_STORAGE_BUCKET_NAME'
         'acl': 'private', # Defaults to 'public-read'
@@ -162,6 +174,7 @@ S3DIRECT_DESTINATIONS = {
         'server_side_encryption': 'AES256', # Default no encryption
     },
     'example_other': {
+        'auth': lambda u: u.is_staff,
         'key': lambda filename, args: args + '/' + filename,
     	'key_args': 'uploads/images',  # Only if 'key' is a function
     }
