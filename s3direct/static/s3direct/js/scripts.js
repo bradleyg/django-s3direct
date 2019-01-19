@@ -95,7 +95,7 @@ const SparkMD5 = require('spark-md5');
         return createHash('sha256').update(data, 'utf-8').digest('hex');
     };
 
-    const initiateMultipartUpload = function (element, signingUrl, objectKey, awsKey, awsRegion, awsBucket, awsBucketUrl, cacheControl, contentDisposition, acl, serverSideEncryption, file) {
+    const initiateMultipartUpload = function (element, signingUrl, objectKey, awsKey, awsRegion, awsBucket, awsBucketUrl, cacheControl, contentDisposition, acl, serverSideEncryption, sessionToken, file) {
         // Enclosed so we can propagate errors to the correct `element` in case of failure.
         const getAwsV4Signature = function (signParams, signHeaders, stringToSign, signatureDateTime, canonicalRequest) {
             return new Promise(function (resolve, reject) {
@@ -120,12 +120,19 @@ const SparkMD5 = require('spark-md5');
             })
         };
 
-        const generateAmazonHeaders = function (acl, serverSideEncryption) {
+        const generateAmzInitHeaders = function (acl, serverSideEncryption, sessionToken) {
             // Either of these may be null, so don't add them unless they exist:
-            let headers = {}
+            const headers = {};
             if (acl) headers['x-amz-acl'] = acl;
+            if (sessionToken) headers['x-amz-security-token'] = sessionToken;
             if (serverSideEncryption) headers['x-amz-server-side-encryption'] = serverSideEncryption;
             return headers;
+        };
+
+        const generateAmzCommonHeaders = function (sessionToken) {
+          const headers = {};
+          if (sessionToken) headers['x-amz-security-token'] = sessionToken;
+          return headers;
         };
 
         Evaporate.create(
@@ -150,7 +157,8 @@ const SparkMD5 = require('spark-md5');
                 name: objectKey,
                 file: file,
                 contentType: file.type,
-                xAmzHeadersAtInitiate: generateAmazonHeaders(acl, serverSideEncryption),
+                xAmzHeadersCommon: generateAmzCommonHeaders(sessionToken),
+                xAmzHeadersAtInitiate: generateAmzInitHeaders(acl, serverSideEncryption, sessionToken),
                 notSignedHeadersAtInitiate: {'Cache-Control': cacheControl, 'Content-Disposition': contentDisposition},
                 progress: function (progressRatio, stats) { updateProgressBar(element, progressRatio); },
             }).then(
@@ -199,6 +207,7 @@ const SparkMD5 = require('spark-md5');
                         uploadParameters.content_disposition,
                         uploadParameters.acl,
                         uploadParameters.server_side_encryption,
+                        uploadParameters.session_token,
                         file
                     );
                     break;

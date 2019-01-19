@@ -83,7 +83,9 @@ is a dependency of your project.
 
 ### S3 CORS
 
-Setup a CORS policy on your S3 bucket.
+Setup a CORS policy on your S3 bucket. Note the ETag header is particularly
+important as it is used for multipart uploads by EvaporateJS. For more information
+see [here](https://github.com/TTLabs/EvaporateJS/wiki/Configuring-The-AWS-S3-Bucket)
 
 ```xml
 <CORSConfiguration>
@@ -119,11 +121,11 @@ TEMPLATES = [{
 
 # AWS
 
-# If these are not defined, the EC2 instance profile and IAM role are used.
+# If these are set to None, the EC2 instance profile and IAM role are used.
 # This requires you to add boto3 (or botocore, which is a dependency of boto3)
 # to your project dependencies.
-AWS_ACCESS_KEY_ID = ''
-AWS_SECRET_ACCESS_KEY = ''
+AWS_ACCESS_KEY_ID = 'your-aws-access-key-id'
+AWS_SECRET_ACCESS_KEY = 'your-aws-secret-access-key'
 
 AWS_STORAGE_BUCKET_NAME = ''
 

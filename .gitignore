@@ -10,3 +10,4 @@ example/example/settings-test.py
 .idea
 node_modules
 npm-debug.log
+.tox/
