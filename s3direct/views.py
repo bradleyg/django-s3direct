@@ -87,4 +87,4 @@ def generate_aws_v4_signature(request):
     signing_date = datetime.strptime(request.POST['datetime'], '%Y%m%dT%H%M%SZ')
     signing_key = get_aws_v4_signing_key(aws_credentials.secret_key, signing_date, settings.S3DIRECT_REGION, 's3')
     signature = get_aws_v4_signature(signing_key, message)
-    return HttpResponse(signature)
+    return HttpResponse(signature, content_type="text/plain")
