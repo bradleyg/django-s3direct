@@ -71,11 +71,19 @@ def get_upload_params(request):
         'region': region,
         'bucket': bucket,
         'bucket_url': bucket_url,
-        'cache_control': dest.get('cache_control'),
-        'content_disposition': dest.get('content_disposition'),
         'acl': dest.get('acl') or 'public-read',
-        'server_side_encryption': dest.get('server_side_encryption'),
     }
+
+    optional_params = ['content_disposition', 'cache_control', 'server_side_encryption']
+
+    for optional_param in optional_params:
+        if optional_param in dest:
+            option = dest.get(optional_param)
+            if hasattr(option, '__call__'):
+                upload_data[optional_param] = option(file_name)
+            else:
+                upload_data[optional_param] = option
+
     return HttpResponse(json.dumps(upload_data), content_type='application/json')
 
 

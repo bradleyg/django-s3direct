@@ -159,7 +159,7 @@ S3DIRECT_DESTINATIONS = {
         'bucket': 'pdf-bucket', # Default is 'AWS_STORAGE_BUCKET_NAME'
         'acl': 'private', # Defaults to 'public-read'
         'cache_control': 'max-age=2592000', # Default no cache-control
-        'content_disposition': 'attachment',  # Default no content disposition
+        'content_disposition': lambda x: 'attachment; filename="{}"'.format(x),  # Default no content disposition
         'content_length_range': (5000, 20000000), # Default allow any size
         'server_side_encryption': 'AES256', # Default no encryption
     },
