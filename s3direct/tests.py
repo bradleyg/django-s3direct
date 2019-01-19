@@ -7,11 +7,16 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.test.utils import override_settings
 try:
+    from unittest import mock
+except ImportError:
+    import mock
+try:
     from django.urls import resolve, reverse
 except ImportError:
     from django.core.urlresolvers import resolve, reverse
 
 from s3direct import widgets
+from s3direct.utils import get_aws_credentials
 
 
 HTML_OUTPUT = (
@@ -62,7 +67,7 @@ TEST_DESTINATIONS = {
 }
 
 
-@override_settings(S3DIRECT_DESTINATIONS=TEST_DESTINATIONS)
+@override_settings(S3DIRECT_DESTINATIONS=TEST_DESTINATIONS, AWS_ACCESS_KEY_ID='123', AWS_SECRET_ACCESS_KEY='123')
 class WidgetTestCase(TestCase):
 
     def setUp(self):
@@ -227,3 +232,31 @@ class SignatureViewTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, self.EXPECTED_SIGNATURE)
+
+
+class AWSCredentialsTest(TestCase):
+    @mock.patch('s3direct.utils.InstanceMetadataProvider')
+    @mock.patch('s3direct.utils.InstanceMetadataFetcher')
+    @override_settings(AWS_ACCESS_KEY_ID=None, AWS_SECRET_ACCESS_KEY=None)
+    def test_retrieves_aws_credentials_from_botocore(self, fetcher_mock, provider_mock):
+        credentials_mock = mock.Mock(
+            token='token',
+            secret_key='secret_key',
+            access_key='access_key',
+        )
+        aws_response_mock = mock.Mock()
+        aws_response_mock.load.return_value = credentials_mock
+        fetcher_mock.return_value = 'metadata'
+        provider_mock.return_value = aws_response_mock
+        credentials = get_aws_credentials()
+        provider_mock.assert_called_once_with(iam_role_fetcher='metadata')
+        self.assertEqual(credentials.token, 'token')
+        self.assertEqual(credentials.secret_key, 'secret_key')
+        self.assertEqual(credentials.access_key, 'access_key')
+
+    @override_settings(AWS_ACCESS_KEY_ID='local_access_key', AWS_SECRET_ACCESS_KEY='local_secret_key')
+    def test_retrieves_aws_credentials_from_django_config(self):
+        credentials = get_aws_credentials()
+        self.assertIsNone(credentials.token)
+        self.assertEqual(credentials.secret_key, 'local_secret_key')
+        self.assertEqual(credentials.access_key, 'local_access_key')
