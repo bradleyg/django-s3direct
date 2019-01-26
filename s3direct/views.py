@@ -57,7 +57,11 @@ def get_upload_params(request):
     else:
         object_key = get_key(key, file_name, dest)
 
-    bucket = dest.get('bucket') or settings.AWS_STORAGE_BUCKET_NAME
+    bucket = dest.get('bucket') or getattr(settings, 'AWS_STORAGE_BUCKET_NAME', None)
+    if not bucket:
+        return HttpResponseServerError(json.dumps({'error': 'Missing S3 bucket config.'}),
+                                       content_type='application/json')
+
     region = dest.get('region') or getattr(settings, 'S3DIRECT_REGION', None) or 'us-east-1'
     endpoint = 's3.amazonaws.com' if region == 'us-east-1' else ('s3-%s.amazonaws.com' % region)
 

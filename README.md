@@ -126,8 +126,7 @@ TEMPLATES = [{
 # to your project dependencies.
 AWS_ACCESS_KEY_ID = 'your-aws-access-key-id'
 AWS_SECRET_ACCESS_KEY = 'your-aws-secret-access-key'
-
-AWS_STORAGE_BUCKET_NAME = ''
+AWS_STORAGE_BUCKET_NAME = 'your-aws-s3-bucket-name'
 
 # The region of your bucket, more info:
 # http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
