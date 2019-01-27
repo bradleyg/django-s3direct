@@ -161,6 +161,11 @@ const SparkMD5 = require('spark-md5');
                 xAmzHeadersAtInitiate: generateAmzInitHeaders(acl, serverSideEncryption, sessionToken),
                 notSignedHeadersAtInitiate: {'Cache-Control': cacheControl, 'Content-Disposition': contentDisposition},
                 progress: function (progressRatio, stats) { updateProgressBar(element, progressRatio); },
+                warn: function(warnType, area, msg) {
+                    if(msg.includes('InvalidAccessKeyId')){
+                        return error(element, msg);
+                    }
+                }
             }).then(
                 function (awsS3ObjectKey) {
                     console.log('Successfully uploaded to:', awsS3ObjectKey);
