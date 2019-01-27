@@ -23,10 +23,3 @@ install:
 - pip install -q mock $DEPS
 script:
 - python runtests.py
-deploy:
-  provider: pypi
-  user: bradleyg
-  on:
-    tags: true
-  password:
-    secure: a+Xq1e2yuTNtjcJ5wJ5oQxsfx/lqwYD7dbFEqdoazpkflZ8UA9AErgL2quAbo0RIRKFDBXwRNUspRtQdQ6TClKxgzsaa4AQEPWxYxx353kYMdhPjXe0/ib1rWJ0eefs/RDu0mndpQu/slNjxzV351QXPoPKo9tHgnLHWoNzYAzs=
