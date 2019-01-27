@@ -349,7 +349,7 @@ class WidgetTestCase(TestCase):
 @override_settings(AWS_ACCESS_KEY_ID='abc', AWS_SECRET_ACCESS_KEY='123')
 class SignatureViewTestCase(TestCase):
     EXAMPLE_SIGNING_DATE = datetime(2017, 4, 6, 8, 30)
-    EXPECTED_SIGNATURE = b'76ea6730e10ddc9d392f40bf64872ddb1728cab58301dccb9efb67cb560a9272'
+    EXPECTED_SIGNATURE = '76ea6730e10ddc9d392f40bf64872ddb1728cab58301dccb9efb67cb560a9272'
 
     def setUp(self):
         admin = User.objects.create_superuser('admin', 'u@email.com', 'admin')
@@ -399,7 +399,7 @@ class SignatureViewTestCase(TestCase):
         )
         expected = '{"s3ObjKey": "%s"}' % self.EXPECTED_SIGNATURE
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, expected)
+        self.assertEqual(response.content, expected.encode('utf-8'))
 
     def test_signing_with_protected(self):
         """Check login accepted to generate signature."""
@@ -416,7 +416,7 @@ class SignatureViewTestCase(TestCase):
         )
         expected = '{"s3ObjKey": "%s"}' % self.EXPECTED_SIGNATURE
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, expected)
+        self.assertEqual(response.content, expected.encode('utf-8'))
 
     def test_signing_with_protected_without_valid_auth(self):
         """Check denied if not logged in to generate signature."""
@@ -431,7 +431,7 @@ class SignatureViewTestCase(TestCase):
             enforce_csrf_checks=True,
         )
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.content, '{"error": "Permission denied."}')
+        self.assertEqual(response.content, b'{"error": "Permission denied."}')
 
 
 class AWSCredentialsTest(TestCase):
