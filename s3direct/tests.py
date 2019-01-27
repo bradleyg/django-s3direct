@@ -393,7 +393,7 @@ class SignatureViewTestCase(TestCase):
             data={
                 'to_sign': string_to_sign,
                 'datetime': datetime.strftime(signing_date, '%Y%m%dT%H%M%SZ'),
-                'dest': 'misc' # auth: not protected
+                'dest': 'misc'  # auth: not protected
             },
             enforce_csrf_checks=True,
         )
@@ -409,7 +409,7 @@ class SignatureViewTestCase(TestCase):
             data={
                 'to_sign': string_to_sign,
                 'datetime': datetime.strftime(signing_date, '%Y%m%dT%H%M%SZ'),
-                'dest': 'files' # auth: is_staff
+                'dest': 'files'  # auth: is_staff
             },
             enforce_csrf_checks=True,
         )
@@ -424,7 +424,7 @@ class SignatureViewTestCase(TestCase):
             data={
                 'to_sign': string_to_sign,
                 'datetime': datetime.strftime(signing_date, '%Y%m%dT%H%M%SZ'),
-                'dest': 'files' # auth: is_staff
+                'dest': 'files'  # auth: is_staff
             },
             enforce_csrf_checks=True,
         )

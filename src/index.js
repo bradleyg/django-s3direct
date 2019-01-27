@@ -131,16 +131,16 @@ const generateCustomAuthMethod = (element, signingUrl, dest) => {
         form.append('datetime', signatureDateTime);
         form.append('dest', dest);
 
-        request('POST', signingUrl, form, headers, element, (status, s3Objkey) => {
+        request('POST', signingUrl, form, headers, element, (status, resp) => {
+          const response = parseJson(resp);
+          console.log(response)
           switch (status) {
             case 200:
-              resolve(s3Objkey);
+              resolve(response.s3ObjKey);
               break;
             case 403:
-              reject('Permission denied to generate AWS v4 signature.');
-              break;
             default:
-              reject('Could not generate AWS v4 signature.');
+              reject(response.error);
               break;
             };
         });
