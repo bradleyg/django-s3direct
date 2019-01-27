@@ -255,20 +255,18 @@ $ cd django-s3direct
 $ virtualenv venv
 $ source venv/bin/activate
 $ pip install -r requirements-dev.txt
-$ python setup.py install
-$ npm install
+$ python setup.py develop
 
-# Add your AWS keys to your environment
-export AWS_ACCESS_KEY_ID='…'
-export AWS_SECRET_ACCESS_KEY='…'
-export AWS_STORAGE_BUCKET_NAME='…'
-export S3DIRECT_REGION='…'    # e.g. 'eu-west-1'
+$ npm install
+$ mv .env-dist .env
+
+# Add your AWS keys/details to .env file and export
+$ export $(cat .env)
 
 # Run examples
-$ cd django-s3direct
-$ python manage.py migrate
-$ python manage.py createsuperuser
-$ python manage.py runserver
+$ python example/manage.py migrate
+$ python example/manage.py createsuperuser
+$ python example/manage.py runserver
 
 # Run tests
 $ npm run test
