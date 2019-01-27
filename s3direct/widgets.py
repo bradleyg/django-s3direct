@@ -14,16 +14,9 @@ from django.conf import settings
 
 
 class S3DirectWidget(widgets.TextInput):
-
     class Media:
-        js = (
-            's3direct/dist/index.js',
-        )
-        css = {
-            'all': (
-                's3direct/dist/index.css',
-            )
-        }
+        js = ('s3direct/dist/index.js', )
+        css = {'all': ('s3direct/dist/index.css', )}
 
     def __init__(self, *args, **kwargs):
         self.dest = kwargs.pop('dest', None)
@@ -36,16 +29,26 @@ class S3DirectWidget(widgets.TextInput):
             file_name = ''
 
         tpl = os.path.join('s3direct', 's3direct-widget.tpl')
-        output = render_to_string(tpl, {
-            'policy_url': reverse('s3direct'),
-            'signing_url': reverse('s3direct-signing'),
-            'element_id': self.build_attrs(attrs).get('id', '') if attrs else '',
-            'file_name': file_name,
-            'dest': self.dest,
-            'file_url': value or '',
-            'name': name,
-            'style': self.build_attrs(attrs).get('style', '') if attrs else '',
-            'csrf_cookie_name': getattr(settings, 'CSRF_COOKIE_NAME', 'csrftoken'),
-        })
+        output = render_to_string(
+            tpl, {
+                'policy_url':
+                reverse('s3direct'),
+                'signing_url':
+                reverse('s3direct-signing'),
+                'element_id':
+                self.build_attrs(attrs).get('id', '') if attrs else '',
+                'file_name':
+                file_name,
+                'dest':
+                self.dest,
+                'file_url':
+                value or '',
+                'name':
+                name,
+                'style':
+                self.build_attrs(attrs).get('style', '') if attrs else '',
+                'csrf_cookie_name':
+                getattr(settings, 'CSRF_COOKIE_NAME', 'csrftoken'),
+            })
 
         return mark_safe(output)

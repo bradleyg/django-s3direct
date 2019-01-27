@@ -10,13 +10,14 @@ from django.conf import settings
 # however dependency on botocore is not enforced as this a secondary
 # method for retrieving credentials.
 try:
-    from botocore.credentials import InstanceMetadataProvider, InstanceMetadataFetcher
+    from botocore.credentials import (InstanceMetadataProvider,
+                                      InstanceMetadataFetcher)
 except ImportError:
     InstanceMetadataProvider = None
     InstanceMetadataFetcher = None
 
-
-AWSCredentials = namedtuple('AWSCredentials', ['token', 'secret_key', 'access_key'])
+AWSCredentials = namedtuple('AWSCredentials',
+                            ['token', 'secret_key', 'access_key'])
 
 
 def get_at(index, t):
@@ -30,13 +31,14 @@ def get_at(index, t):
 def get_s3direct_destinations():
     """Returns s3direct destinations.
 
-    NOTE: Don't use constant as it will break ability to change at runtime (e.g. tests)
+    NOTE: Don't use constant as it will break ability to change at runtime.
     """
     return getattr(settings, 'S3DIRECT_DESTINATIONS', None)
 
 
 # AWS Signature v4 Key derivation functions. See:
 # http://docs.aws.amazon.com/general/latest/gr/signature-v4-examples.html#signature-v4-examples-python
+
 
 def sign(key, message):
     return hmac.new(key, message.encode("utf-8"), hashlib.sha256).digest()
@@ -57,7 +59,9 @@ def get_aws_v4_signature(key, message):
 
 def get_key(key, file_name, dest):
     if hasattr(key, '__call__'):
-        fn_args = [file_name, ]
+        fn_args = [
+            file_name,
+        ]
         args = dest.get('key_args')
         if args:
             fn_args.append(args)
@@ -81,7 +85,6 @@ def get_aws_credentials():
         return AWSCredentials(None, None, None)
 
     provider = InstanceMetadataProvider(
-        iam_role_fetcher=InstanceMetadataFetcher(timeout=1000, num_attempts=2)
-    )
+        iam_role_fetcher=InstanceMetadataFetcher(timeout=1000, num_attempts=2))
     creds = provider.load()
     return AWSCredentials(creds.token, creds.secret_key, creds.access_key)

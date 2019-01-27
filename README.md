@@ -279,6 +279,9 @@ $ npm run dev
 # Build frontend
 $ npm run build
 
+# Format python // PEP8
+$ npm run yapf
+
 # Upload to PYPI
 $ npm run pypi
 ```

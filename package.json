@@ -18,6 +18,7 @@
     "test": "python runtests.py",
     "build": "parcel build --no-source-maps src/index.js -d s3direct/static/s3direct/dist/",
     "dev": "parcel watch src/index.js -d s3direct/static/s3direct/dist/",
+    "yapf": "yapf s3direct/ --recursive --in-place",
     "pypi": "python setup.py sdist && twine upload dist/*"
   },
   "repository": {
