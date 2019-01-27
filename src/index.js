@@ -3,6 +3,9 @@ const createHash = require('sha.js')
 const Evaporate = require('evaporate');
 const SparkMD5 = require('spark-md5');
 
+import './css/bootstrap.css';
+import './css/styles.css';
+
 
 (function(){
 

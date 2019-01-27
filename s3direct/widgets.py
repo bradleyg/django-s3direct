@@ -17,12 +17,11 @@ class S3DirectWidget(widgets.TextInput):
 
     class Media:
         js = (
-            's3direct/js/index.js',
+            's3direct/dist/index.js',
         )
         css = {
             'all': (
-                's3direct/css/bootstrap-progress.min.css',
-                's3direct/css/styles.css',
+                's3direct/dist/index.css',
             )
         }
 
