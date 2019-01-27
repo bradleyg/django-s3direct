@@ -116,7 +116,7 @@ const generateAmzCommonHeaders = (sessionToken) => {
   return headers;
 };
 
-const generateCustomAuthMethod = (element, signingUrl) => {
+const generateCustomAuthMethod = (element, signingUrl, dest) => {
   const getAwsV4Signature = (
     signParams,
     signHeaders,
@@ -129,15 +129,18 @@ const generateCustomAuthMethod = (element, signingUrl) => {
 
         form.append('to_sign', stringToSign);
         form.append('datetime', signatureDateTime);
+        form.append('dest', dest);
 
-        request('POST', signingUrl, form, headers, element, (status, resp) => {
+        request('POST', signingUrl, form, headers, element, (status, s3Objkey) => {
           switch (status) {
             case 200:
-              resolve(resp);
+              resolve(s3Objkey);
+              break;
+            case 403:
+              reject('Permission denied to generate AWS v4 signature.');
               break;
             default:
-              error(element, 'Could not generate AWS v4 signature.');
-              reject();
+              reject('Could not generate AWS v4 signature.');
               break;
             };
         });
@@ -147,10 +150,10 @@ const generateCustomAuthMethod = (element, signingUrl) => {
   return getAwsV4Signature;
 };
 
-const initiateUpload = (element, signingUrl, uploadParameters, file) => {
+const initiateUpload = (element, signingUrl, uploadParameters, file, dest) => {
 
   const createConfig = {
-    customAuthMethod: generateCustomAuthMethod(element, signingUrl),
+    customAuthMethod: generateCustomAuthMethod(element, signingUrl, dest),
     aws_key: uploadParameters.access_key_id,
     bucket: uploadParameters.bucket,
     awsRegion: uploadParameters.region,
@@ -198,8 +201,8 @@ const initiateUpload = (element, signingUrl, uploadParameters, file) => {
         evaporate
           .add(addConfig)
           .then(
-            (s3ObjectKey) => {
-              finishUpload(element, uploadParameters.bucket_url, s3ObjectKey);
+            (s3Objkey) => {
+              finishUpload(element, uploadParameters.bucket_url, s3Objkey);
             },
             (reason) => {
               return error(element, reason);
@@ -227,7 +230,7 @@ const checkFileAndInitiateUpload = (event) => {
     const uploadParameters = parseJson(response);
     switch(status) {
       case 200:
-        initiateUpload(element, signerUrl, uploadParameters, file);
+        initiateUpload(element, signerUrl, uploadParameters, file, dest);
         break;
       case 400:
       case 403:

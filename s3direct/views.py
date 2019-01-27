@@ -102,8 +102,14 @@ def get_upload_params(request):
 def generate_aws_v4_signature(request):
     aws_credentials = get_aws_credentials()
     message = unquote(request.POST['to_sign'])
+    dest = get_s3direct_destinations().get(unquote(request.POST['dest']))
     signing_date = datetime.strptime(request.POST['datetime'],
                                      '%Y%m%dT%H%M%SZ')
+    auth = dest.get('auth')
+    if auth and not auth(request.user):
+        resp = json.dumps({'error': 'Permission denied.'})
+        return HttpResponseForbidden(resp, content_type='application/json')
+
     signing_key = get_aws_v4_signing_key(aws_credentials.secret_key,
                                          signing_date,
                                          settings.S3DIRECT_REGION, 's3')

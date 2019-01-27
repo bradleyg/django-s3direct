@@ -388,17 +388,48 @@ class SignatureViewTestCase(TestCase):
     def test_signing(self):
         """Check that the signature is as expected for a known signing request."""
         string_to_sign, signing_date = self.create_dummy_signing_request()
-        self.client.login(username='admin', password='admin')
         response = self.client.post(
             reverse('s3direct-signing'),
             data={
                 'to_sign': string_to_sign,
-                'datetime': datetime.strftime(signing_date, '%Y%m%dT%H%M%SZ')
+                'datetime': datetime.strftime(signing_date, '%Y%m%dT%H%M%SZ'),
+                'dest': 'misc' # auth: not protected
             },
             enforce_csrf_checks=True,
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, self.EXPECTED_SIGNATURE)
+
+    def test_signing_with_protected(self):
+        """Check login accepted to generate signature."""
+        string_to_sign, signing_date = self.create_dummy_signing_request()
+        self.client.login(username='admin', password='admin')
+        response = self.client.post(
+            reverse('s3direct-signing'),
+            data={
+                'to_sign': string_to_sign,
+                'datetime': datetime.strftime(signing_date, '%Y%m%dT%H%M%SZ'),
+                'dest': 'files' # auth: is_staff
+            },
+            enforce_csrf_checks=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, self.EXPECTED_SIGNATURE)
+
+    def test_signing_with_protected_without_valid_auth(self):
+        """Check denied if not logged in to generate signature."""
+        string_to_sign, signing_date = self.create_dummy_signing_request()
+        response = self.client.post(
+            reverse('s3direct-signing'),
+            data={
+                'to_sign': string_to_sign,
+                'datetime': datetime.strftime(signing_date, '%Y%m%dT%H%M%SZ'),
+                'dest': 'files' # auth: is_staff
+            },
+            enforce_csrf_checks=True,
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.content, '{"error": "Permission denied."}')
 
 
 class AWSCredentialsTest(TestCase):
