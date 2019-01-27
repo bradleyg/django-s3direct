@@ -63,6 +63,9 @@ TEST_DESTINATIONS = {
                'content_disposition': 'attachment', 'server_side_encryption': 'AES256'},
     'accidental-leading-slash': {'key': '/directory/leading'},
     'accidental-trailing-slash': {'key': 'directory/trailing/'},
+    'region-cn': {'key': 'uploads/vids', 'region': 'cn-north-1'},
+    'region-eu': {'key': 'uploads/vids', 'region': 'eu-west-1'},
+    'region-default': {'key': 'uploads/vids'},
     'key_args': {'key': lambda original_filename, args: args + '/' +'background.jpg', 'key_args': 'assets/backgrounds'},
 }
 
@@ -175,6 +178,30 @@ class WidgetTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         policy_dict = json.loads(response.content.decode())
         self.assertEqual(policy_dict['object_key'], TEST_DESTINATIONS['key_args']['key_args'] + '/' + data['name'])
+
+    def test_function_region_cn_north_1(self):
+        data = {'dest': 'region-cn', 'name': 'background.jpg', 'type': 'image/jpeg', 'size': 1000}
+        self.client.login(username='admin', password='admin')
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 200)
+        policy_dict = json.loads(response.content.decode())
+        self.assertEqual(policy_dict['bucket_url'], 'https://s3.cn-north-1.amazonaws.com.cn/%s' % settings.AWS_STORAGE_BUCKET_NAME)
+
+    def test_function_region_eu_west_1(self):
+        data = {'dest': 'region-eu', 'name': 'background.jpg', 'type': 'image/jpeg', 'size': 1000}
+        self.client.login(username='admin', password='admin')
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 200)
+        policy_dict = json.loads(response.content.decode())
+        self.assertEqual(policy_dict['bucket_url'], 'https://s3-eu-west-1.amazonaws.com/%s' % settings.AWS_STORAGE_BUCKET_NAME)
+
+    def test_function_region_default(self):
+        data = {'dest': 'region-default', 'name': 'background.jpg', 'type': 'image/jpeg', 'size': 1000}
+        self.client.login(username='admin', password='admin')
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 200)
+        policy_dict = json.loads(response.content.decode())
+        self.assertEqual(policy_dict['bucket_url'], 'https://s3.amazonaws.com/%s' % settings.AWS_STORAGE_BUCKET_NAME)
 
     def test_policy_conditions(self):
         self.client.login(username='admin', password='admin')

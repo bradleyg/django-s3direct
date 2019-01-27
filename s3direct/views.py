@@ -65,6 +65,9 @@ def get_upload_params(request):
     region = dest.get('region') or getattr(settings, 'S3DIRECT_REGION', None) or 'us-east-1'
     endpoint = 's3.amazonaws.com' if region == 'us-east-1' else ('s3-%s.amazonaws.com' % region)
 
+    if region in ('cn-north-1', 'cn-northwest-1'):
+        endpoint = 's3.%s.amazonaws.com.cn' % region
+
     aws_credentials = get_aws_credentials()
     bucket_url = 'https://{0}/{1}'.format(endpoint, bucket)
 
