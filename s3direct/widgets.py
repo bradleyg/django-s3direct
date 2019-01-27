@@ -17,7 +17,7 @@ class S3DirectWidget(widgets.TextInput):
 
     class Media:
         js = (
-            's3direct/js/bundled.js',
+            's3direct/js/index.js',
         )
         css = {
             'all': (

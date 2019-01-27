@@ -1,6 +1,6 @@
 {
   "name": "django-s3direct",
-  "version": "0.4.10",
+  "version": "1.0.5",
   "description": "Add direct uploads to S3 functionality with a progress bar to file input fields.",
   "directories": {
     "example": "example"
@@ -12,13 +12,12 @@
     "spark-md5": "^3.0.0"
   },
   "devDependencies": {
-    "browserify": "^14.3.0",
-    "watchify": "^3.9.0"
+    "parcel-bundler": "^1.11.0"
   },
   "scripts": {
     "test": "python runtests.py",
-    "build": "browserify s3direct/static/s3direct/js/scripts.js -o s3direct/static/s3direct/js/bundled.js",
-    "watch": "watchify s3direct/static/s3direct/js/scripts.js -o s3direct/static/s3direct/js/bundled.js --debug --verbose",
+    "build": "parcel build --no-source-maps src/index.js -d s3direct/static/s3direct/js/",
+    "dev": "parcel watch src/index.js -d s3direct/static/s3direct/js/",
     "pypi": "python setup.py sdist && twine upload dist/*"
   },
   "repository": {
