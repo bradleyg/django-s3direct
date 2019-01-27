@@ -246,7 +246,7 @@ $ python manage.py createsuperuser
 $ python manage.py runserver
 ```
 
-Visit ```http://localhost:8080/admin``` to view the admin widget and ```http://localhost:8080/form``` to view the custom form widget.
+Visit ```http://localhost:8000/admin``` to view the admin widget and ```http://localhost:8000/form``` to view the custom form widget.
 
 ## Development
 ```shell
