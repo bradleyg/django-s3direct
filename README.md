@@ -16,81 +16,70 @@ Install with Pip:
 
 ```pip install django-s3direct```
 
-### Backwards-Compatiblity
-
-With 1.0.0 supporting multipart-upload, most of the internals have been
-changed, a new endpoint has been added, and support has been dropped for
-old style positional settings. There are also new requirements to allow
-`GET` and `HEAD` cross-origin requests to S3, as well as
-the `ETAG` header. Django compatibility has been raised to `>=1.8`.
-
-If you used any of these features or relied on the previous behaviour,
-it's recommended that you pin `django-s3direct` to `<1.0` until you
-can test the new version in your project:
-
-```sh
-pip install 'django-s3direct <1.0'
-```
-
-
 ## AWS Setup
 
 ### Access Credentials
 
 You have two options of providing access to AWS resources:
 
-1. Add credentials of an IAM user to your Django settings (see below)
+1. Add credentials of an IAM user to your Django settings
 2. Use the EC2 instance profile and its attached IAM role
 
 Whether you are using an IAM user or a role, there needs to be an IAM policy
-in effect that grants permission to upload to S3:
+in effect that grants permission to upload to S3. Remember to swap out __YOUR_BUCKET_NAME__ for your bucket.
 
 ```json
-"Statement": [
-  {
-    "Effect": "Allow",
-    "Action": [
-      "s3:GetObject",
-      "s3:PutObject",
-      "s3:PutObjectAcl",
-      "s3:ListMultipartUploadParts",
-      "s3:AbortMultipartUpload"
-    ],
-    "Resource": "arn:aws:s3:::your-bucket-name/*"
-  }
-]
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:PutObjectAcl",
+        "s3:ListMultipartUploadParts",
+        "s3:AbortMultipartUpload"
+      ],
+      "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME/*"
+    }
+  ]
+}
 ```
 
 If the instance profile is to be used, the IAM role needs to have a
 Trust Relationship configuration applied:
 
 ```json
-"Statement": [
-	{
-		"Effect": "Allow",
-		"Principal": {
-			"Service": "ec2.amazonaws.com"
-		},
-		"Action": "sts:AssumeRole"
-	}
-]
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
 ```
 
 Note that in order to use the EC2 instance profile, django-s3direct needs
 to query the EC2 instance metadata using utility functions from the
-[botocore] package. You already have `botocore` installed if `boto3`
+[botocore](https://github.com/boto/botocore) package. You already have `botocore` installed if `boto3`
 is a dependency of your project.
 
 ### S3 CORS
 
 Setup a CORS policy on your S3 bucket. Note the ETag header is particularly
 important as it is used for multipart uploads by EvaporateJS. For more information
-see [here](https://github.com/TTLabs/EvaporateJS/wiki/Configuring-The-AWS-S3-Bucket)
+see [here](https://github.com/TTLabs/EvaporateJS/wiki/Configuring-The-AWS-S3-Bucket). Remember to swap out YOURDOMAIN.COM for your domain, including port if developing locally.
 
 ```xml
 <CORSConfiguration>
     <CORSRule>
-        <AllowedOrigin>http://yourdomain.com:8080</AllowedOrigin>
+        <AllowedOrigin>http://YOURDOMAIN.COM:8080</AllowedOrigin>
         <AllowedMethod>GET</AllowedMethod>
         <AllowedMethod>HEAD</AllowedMethod>
         <AllowedMethod>PUT</AllowedMethod>
@@ -173,7 +162,9 @@ S3DIRECT_DESTINATIONS = {
 
 ```python
 urlpatterns = [
+    ...
     url(r'^s3direct/', include('s3direct.urls')),
+    ...
 ]
 ```
 
@@ -252,9 +243,42 @@ export S3DIRECT_REGION='…'    # e.g. 'eu-west-1'
 
 $ python manage.py migrate
 $ python manage.py createsuperuser
-$ python manage.py runserver 0.0.0.0:5000
+$ python manage.py runserver
 ```
 
-Visit ```http://localhost:5000/admin``` to view the admin widget and ```http://localhost:5000/form``` to view the custom form widget.
+Visit ```http://localhost:8080/admin``` to view the admin widget and ```http://localhost:8080/form``` to view the custom form widget.
 
-[botocore]: https://github.com/boto/botocore
+## Development
+```shell
+$ git clone git@github.com:bradleyg/django-s3direct.git
+$ cd django-s3direct
+$ virtualenv venv
+$ source venv/bin/activate
+$ pip install -r requirements-dev.txt
+$ python setup.py install
+$ npm install
+
+# Add your AWS keys to your environment
+export AWS_ACCESS_KEY_ID='…'
+export AWS_SECRET_ACCESS_KEY='…'
+export AWS_STORAGE_BUCKET_NAME='…'
+export S3DIRECT_REGION='…'    # e.g. 'eu-west-1'
+
+# Run examples
+$ cd django-s3direct
+$ python manage.py migrate
+$ python manage.py createsuperuser
+$ python manage.py runserver
+
+# Run tests
+$ npm run test
+
+# Run frontend dev bundler
+$ npm run dev
+
+# Build frontend
+$ npm run build
+
+# Upload to PYPI
+$ npm run pypi
+```
