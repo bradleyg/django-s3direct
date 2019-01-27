@@ -252,21 +252,23 @@ Visit ```http://localhost:8000/admin``` to view the admin widget and ```http://l
 ```shell
 $ git clone git@github.com:bradleyg/django-s3direct.git
 $ cd django-s3direct
-$ virtualenv venv
-$ source venv/bin/activate
-$ pip install -r requirements-dev.txt
-$ python setup.py develop
 
-$ npm install
-$ mv .env-dist .env
+# Build docker image
+$ docker build . --build-arg SKIP_TOX=true -t s3direct
+$ docker run -itv $(pwd):/code -p 8000:8000 s3direct bash
+$ npm i
 
 # Add your AWS keys/details to .env file and export
+$ cp .env-dist .env
 $ export $(cat .env)
 
 # Run examples
 $ python example/manage.py migrate
 $ python example/manage.py createsuperuser
-$ python example/manage.py runserver
+$ python example/manage.py runserver 0.0.0.0:8000
+
+# Run tox tests
+$ tox
 
 # Run tests
 $ npm run test
