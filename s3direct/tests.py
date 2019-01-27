@@ -397,8 +397,9 @@ class SignatureViewTestCase(TestCase):
             },
             enforce_csrf_checks=True,
         )
+        expected = '{"s3ObjKey": "%s"}' % self.EXPECTED_SIGNATURE
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, self.EXPECTED_SIGNATURE)
+        self.assertEqual(response.content, expected)
 
     def test_signing_with_protected(self):
         """Check login accepted to generate signature."""
@@ -413,8 +414,9 @@ class SignatureViewTestCase(TestCase):
             },
             enforce_csrf_checks=True,
         )
+        expected = '{"s3ObjKey": "%s"}' % self.EXPECTED_SIGNATURE
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, self.EXPECTED_SIGNATURE)
+        self.assertEqual(response.content, expected)
 
     def test_signing_with_protected_without_valid_auth(self):
         """Check denied if not logged in to generate signature."""
