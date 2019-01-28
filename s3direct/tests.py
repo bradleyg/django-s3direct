@@ -18,88 +18,7 @@ except ImportError:
 from s3direct import widgets
 from s3direct.utils import get_aws_credentials
 
-HTML_OUTPUT = (
-    '<div class="s3direct" data-policy-url="/get_upload_params/" '
-    'data-signing-url="/get_aws_v4_signature/">\n'
-    '  <a class="file-link" target="_blank" href=""></a>\n'
-    '  <a class="file-remove" href="#remove">Remove</a>\n'
-    '  <input class="csrf-cookie-name" type="hidden" value="csrftoken">\n'
-    '  <input class="file-url" type="hidden" value="" id="" name="filename" />'
-    '\n'
-    '  <input class="file-dest" type="hidden" value="foo">\n'
-    '  <input class="file-input" type="file"  style=""/>\n'
-    '  <div class="progress progress-striped active">\n'
-    '    <div class="bar"></div>\n'
-    '  </div>\n'
-    '</div>\n')
 
-
-def is_authenticated(user):
-    if callable(user.is_authenticated):  # Django =< 1.9
-        return user.is_authenticated()
-    return user.is_authenticated
-
-
-TEST_DESTINATIONS = {
-    'misc': {
-        'key': lambda original_filename: 'images/unique.jpg'
-    },
-    'files': {
-        'key': '/',
-        'auth': lambda u: u.is_staff
-    },
-    'imgs': {
-        'key': 'uploads/imgs',
-        'allowed': ['image/jpeg', 'image/png']
-    },
-    'thumbs': {
-        'key': 'uploads/thumbs',
-        'allowed': ['image/jpeg'],
-        'content_length_range': (1000, 50000)
-    },
-    'vids': {
-        'key': 'uploads/vids',
-        'auth': is_authenticated,
-        'allowed': ['video/mp4']
-    },
-    'cached': {
-        'key': 'uploads/vids',
-        'auth': is_authenticated,
-        'allowed': '*',
-        'acl': 'authenticated-read',
-        'bucket': 'astoragebucketname',
-        'cache_control': 'max-age=2592000',
-        'content_disposition': 'attachment',
-        'server_side_encryption': 'AES256'
-    },
-    'accidental-leading-slash': {
-        'key': '/directory/leading'
-    },
-    'accidental-trailing-slash': {
-        'key': 'directory/trailing/'
-    },
-    'region-cn': {
-        'key': 'uploads/vids',
-        'region': 'cn-north-1'
-    },
-    'region-eu': {
-        'key': 'uploads/vids',
-        'region': 'eu-west-1'
-    },
-    'region-default': {
-        'key': 'uploads/vids'
-    },
-    'key_args': {
-        'key': lambda original_filename, args: args + '/' + 'background.jpg',
-        'key_args': 'assets/backgrounds'
-    },
-}
-
-
-@override_settings(
-    S3DIRECT_DESTINATIONS=TEST_DESTINATIONS,
-    AWS_ACCESS_KEY_ID='123',
-    AWS_SECRET_ACCESS_KEY='123')
 class WidgetTestCase(TestCase):
     def setUp(self):
         admin = User.objects.create_superuser('admin', 'u@email.com', 'admin')
@@ -112,8 +31,23 @@ class WidgetTestCase(TestCase):
         self.assertEqual(resolved_url.view_name, 's3direct')
 
     def test_widget_html(self):
+        expected = (
+            '<div class="s3direct" data-policy-url="/get_upload_params/" '
+            'data-signing-url="/get_aws_v4_signature/">\n'
+            '  <a class="file-link" target="_blank" href=""></a>\n'
+            '  <a class="file-remove" href="#remove">Remove</a>\n'
+            '  <input class="csrf-cookie-name" type="hidden" value="csrftoken">\n'
+            '  <input class="file-url" type="hidden" value="" id="" name="filename" />'
+            '\n'
+            '  <input class="file-dest" type="hidden" value="foo">\n'
+            '  <input class="file-input" type="file"  style=""/>\n'
+            '  <div class="progress progress-striped active">\n'
+            '    <div class="bar"></div>\n'
+            '  </div>\n'
+            '</div>\n')
+
         widget = widgets.S3DirectWidget(dest='foo')
-        self.assertEqual(widget.render('filename', None), HTML_OUTPUT)
+        self.assertEqual(widget.render('filename', None), expected)
 
     def test_get_upload_parameters_logged_in(self):
         self.client.login(username='admin', password='admin')
@@ -280,7 +214,8 @@ class WidgetTestCase(TestCase):
         policy_dict = json.loads(response.content.decode())
         self.assertEqual(
             policy_dict['object_key'],
-            TEST_DESTINATIONS['key_args']['key_args'] + '/' + data['name'])
+            settings.S3DIRECT_DESTINATIONS['key_args']['key_args'] + '/' +
+            data['name'])
 
     def test_function_region_cn_north_1(self):
         data = {
@@ -346,7 +281,6 @@ class WidgetTestCase(TestCase):
         self.assertEqual(policy_dict['server_side_encryption'], u'AES256')
 
 
-@override_settings(AWS_ACCESS_KEY_ID='abc', AWS_SECRET_ACCESS_KEY='123')
 class SignatureViewTestCase(TestCase):
     EXAMPLE_SIGNING_DATE = datetime(2017, 4, 6, 8, 30)
     EXPECTED_SIGNATURE = '76ea6730e10ddc9d392f40bf64872ddb1728cab58301dccb9efb67cb560a9272'
@@ -393,7 +327,7 @@ class SignatureViewTestCase(TestCase):
             data={
                 'to_sign': string_to_sign,
                 'datetime': datetime.strftime(signing_date, '%Y%m%dT%H%M%SZ'),
-                'dest': 'misc'  # auth: not protected
+                'dest': 'not_protected'  # auth: not protected
             },
             enforce_csrf_checks=True,
         )
@@ -410,7 +344,7 @@ class SignatureViewTestCase(TestCase):
             data={
                 'to_sign': string_to_sign,
                 'datetime': datetime.strftime(signing_date, '%Y%m%dT%H%M%SZ'),
-                'dest': 'files'  # auth: is_staff
+                'dest': 'protected'  # auth: is_staff
             },
             enforce_csrf_checks=True,
         )
@@ -426,7 +360,7 @@ class SignatureViewTestCase(TestCase):
             data={
                 'to_sign': string_to_sign,
                 'datetime': datetime.strftime(signing_date, '%Y%m%dT%H%M%SZ'),
-                'dest': 'files'  # auth: is_staff
+                'dest': 'protected'  # auth: is_staff
             },
             enforce_csrf_checks=True,
         )
