@@ -118,11 +118,11 @@ const generateAmzCommonHeaders = (sessionToken) => {
 
 const generateCustomAuthMethod = (element, signingUrl, dest) => {
   const getAwsV4Signature = (
-    signParams,
-    signHeaders,
+    _signParams,
+    _signHeaders,
     stringToSign,
     signatureDateTime,
-    canonicalRequest) => {
+    _canonicalRequest) => {
       return new Promise((resolve, reject) => {
         const form = new FormData();
         const headers = {'X-CSRFToken': getCsrfToken(element)};
