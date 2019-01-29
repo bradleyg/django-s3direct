@@ -21,54 +21,54 @@ def get_upload_params(request):
     file_name = request.POST['name']
     file_type = request.POST['type']
     file_size = int(request.POST['size'])
-    dest = get_s3direct_destinations().get(request.POST['dest'])
+
+    dest = get_s3direct_destinations().get(request.POST.get('dest', None), None)
     if not dest:
         resp = json.dumps({'error': 'File destination does not exist.'})
         return HttpResponseNotFound(resp, content_type='application/json')
 
-    # Validate request and destination config:
-    allowed = dest.get('allowed')
     auth = dest.get('auth')
-    key = dest.get('key')
-    cl_range = dest.get('content_length_range')
-
     if auth and not auth(request.user):
         resp = json.dumps({'error': 'Permission denied.'})
         return HttpResponseForbidden(resp, content_type='application/json')
 
+    allowed = dest.get('allowed')
     if (allowed and file_type not in allowed) and allowed != '*':
         resp = json.dumps({'error': 'Invalid file type (%s).' % file_type})
         return HttpResponseBadRequest(resp, content_type='application/json')
 
+    cl_range = dest.get('content_length_range')
     if (cl_range and not cl_range[0] <= file_size <= cl_range[1]):
         msg = 'Invalid file size (must be between %s and %s bytes).'
         resp = json.dumps({'error': (msg % cl_range)})
         return HttpResponseBadRequest(resp, content_type='application/json')
 
+    key = dest.get('key')
     if not key:
         resp = json.dumps({'error': 'Missing destination path.'})
         return HttpResponseServerError(resp, content_type='application/json')
 
-    bucket = dest.get('bucket')
+    bucket = dest.get('bucket',
+                      getattr(settings, 'AWS_STORAGE_BUCKET_NAME', None))
     if not bucket:
-        bucket = getattr(settings, 'AWS_STORAGE_BUCKET_NAME', None)
-        if not bucket:
-            resp = json.dumps({'error': 'Missing S3 bucket config.'})
-            return HttpResponseServerError(
-                resp, content_type='application/json')
+        resp = json.dumps({'error': 'S3 bucket config missing.'})
+        return HttpResponseServerError(resp, content_type='application/json')
 
-    region = dest.get('region', getattr(settings, 'AWS_S3_REGION_NAME'))
+    region = dest.get('region', getattr(settings, 'AWS_S3_REGION_NAME', None))
+    if not region:
+        resp = json.dumps({'error': 'S3 region config missing.'})
+        return HttpResponseServerError(resp, content_type='application/json')
 
-    endpoint = dest.get('endpoint', getattr(settings, 'AWS_S3_ENDPOINT_URL', None))
+    endpoint = dest.get('endpoint',
+                        getattr(settings, 'AWS_S3_ENDPOINT_URL', None))
     if not endpoint:
-        if region == 'us-east-1':
-            endpoint = 'https://s3.amazonaws.com'
-        elif region in ('cn-north-1', 'cn-northwest-1'):
-            endpoint = 'https://s3.%s.amazonaws.com.cn' % region
-        else:
-            endpoint = 'https://s3-%s.amazonaws.com' % region
+        resp = json.dumps({'error': 'S3 endpoint config missing.'})
+        return HttpResponseServerError(resp, content_type='application/json')
 
     aws_credentials = get_aws_credentials()
+    if not aws_credentials.secret_key:
+        resp = json.dumps({'error': 'AWS credentials config missing.'})
+        return HttpResponseServerError(resp, content_type='application/json')
 
     upload_data = {
         'object_key': get_key(key, file_name, dest),
@@ -99,23 +99,28 @@ def get_upload_params(request):
 @csrf_protect
 @require_POST
 def generate_aws_v4_signature(request):
-    aws_credentials = get_aws_credentials()
     message = unquote(request.POST['to_sign'])
     dest = get_s3direct_destinations().get(unquote(request.POST['dest']))
     signing_date = datetime.strptime(request.POST['datetime'],
                                      '%Y%m%dT%H%M%SZ')
-    region = getattr(settings, 'AWS_S3_REGION_NAME')
+
     auth = dest.get('auth')
     if auth and not auth(request.user):
         resp = json.dumps({'error': 'Permission denied.'})
         return HttpResponseForbidden(resp, content_type='application/json')
 
-    if not aws_credentials.secret_key:
-        resp = json.dumps({'error': 'Invalid AWS credentials.'})
+    region = getattr(settings, 'AWS_S3_REGION_NAME', None)
+    if not region:
+        resp = json.dumps({'error': 'S3 region config missing.'})
         return HttpResponseServerError(resp, content_type='application/json')
 
-    signing_key = get_aws_v4_signing_key(
-        aws_credentials.secret_key, signing_date, region, 's3')
+    aws_credentials = get_aws_credentials()
+    if not aws_credentials.secret_key:
+        resp = json.dumps({'error': 'AWS credentials config missing.'})
+        return HttpResponseServerError(resp, content_type='application/json')
+
+    signing_key = get_aws_v4_signing_key(aws_credentials.secret_key,
+                                         signing_date, region, 's3')
 
     signature = get_aws_v4_signature(signing_key, message)
     resp = json.dumps({'s3ObjKey': signature})
