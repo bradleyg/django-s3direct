@@ -76,6 +76,9 @@ Setup a CORS policy on your S3 bucket. Note the ETag header is particularly
 important as it is used for multipart uploads by EvaporateJS. For more information
 see [here](https://github.com/TTLabs/EvaporateJS/wiki/Configuring-The-AWS-S3-Bucket). Remember to swap out YOURDOMAIN.COM for your domain, including port if developing locally.
 
+If using Digital Ocean Spaces you must upload the CORs config via the API. See [here](https://www.digitalocean.com/community/questions/why-can-i-use-http-localhost-port-with-cors-in-spaces)
+for more details.
+
 ```xml
 <CORSConfiguration>
     <CORSRule>
@@ -119,7 +122,11 @@ AWS_STORAGE_BUCKET_NAME = 'your-aws-s3-bucket-name'
 
 # The region of your bucket, more info:
 # http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
-S3DIRECT_REGION = 'us-east-1'
+AWS_S3_REGION_NAME = 'eu-west-1'
+
+# The endpoint of your bucket, more info:
+# http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
+AWS_S3_ENDPOINT_URL = 'https://s3-eu-west-1.amazonaws.com'
 
 # Destinations, with the following keys:
 #
@@ -239,7 +246,8 @@ $ cd example
 export AWS_ACCESS_KEY_ID='…'
 export AWS_SECRET_ACCESS_KEY='…'
 export AWS_STORAGE_BUCKET_NAME='…'
-export S3DIRECT_REGION='…'    # e.g. 'eu-west-1'
+export AWS_S3_REGION_NAME='…'    # e.g. 'eu-west-1'
+export AWS_S3_ENDPOINT_URL='…' # e.g. 'https://s3-eu-west-1.amazonaws.com'
 
 $ python manage.py migrate
 $ python manage.py createsuperuser

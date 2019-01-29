@@ -14,6 +14,11 @@ from .utils import (get_aws_credentials, get_aws_v4_signature,
                     get_aws_v4_signing_key, get_s3direct_destinations, get_key)
 
 
+AWS_S3_ENDPOINT_URL = getattr(settings, 'AWS_S3_ENDPOINT_URL', None)
+# Backwards compatability
+AWS_S3_REGION_NAME = getattr(settings, 'AWS_S3_REGION_NAME',
+                             getattr(settings, 'S3DIRECT_REGION'))
+
 @csrf_protect
 @require_POST
 def get_upload_params(request):
@@ -57,19 +62,18 @@ def get_upload_params(request):
             return HttpResponseServerError(
                 resp, content_type='application/json')
 
-    region = dest.get('region')
-    if not region:
-        region = getattr(settings, 'S3DIRECT_REGION', 'us-east-1')
+    region = dest.get('region', AWS_S3_REGION_NAME)
 
-    if region == 'us-east-1':
-        endpoint = 's3.amazonaws.com'
-    elif region in ('cn-north-1', 'cn-northwest-1'):
-        endpoint = 's3.%s.amazonaws.com.cn' % region
-    else:
-        endpoint = 's3-%s.amazonaws.com' % region
+    endpoint = dest.get('endpoint', AWS_S3_ENDPOINT_URL)
+    if not endpoint:
+        if region == 'us-east-1':
+            endpoint = 'https://s3.amazonaws.com'
+        elif region in ('cn-north-1', 'cn-northwest-1'):
+            endpoint = 'https://s3.%s.amazonaws.com.cn' % region
+        else:
+            endpoint = 'https://s3-%s.amazonaws.com' % region
 
     aws_credentials = get_aws_credentials()
-    bucket_url = 'https://{0}/{1}'.format(endpoint, bucket)
 
     upload_data = {
         'object_key': get_key(key, file_name, dest),
@@ -77,7 +81,7 @@ def get_upload_params(request):
         'session_token': aws_credentials.token,
         'region': region,
         'bucket': bucket,
-        'bucket_url': bucket_url,
+        'endpoint': endpoint,
         'acl': dest.get('acl') or 'public-read',
     }
 
@@ -114,9 +118,8 @@ def generate_aws_v4_signature(request):
         resp = json.dumps({'error': 'Invalid AWS credentials.'})
         return HttpResponseServerError(resp, content_type='application/json')
 
-    signing_key = get_aws_v4_signing_key(aws_credentials.secret_key,
-                                         signing_date,
-                                         settings.S3DIRECT_REGION, 's3')
+    signing_key = get_aws_v4_signing_key(
+        aws_credentials.secret_key, signing_date, AWS_S3_REGION_NAME, 's3')
 
     signature = get_aws_v4_signature(signing_key, message)
     resp = json.dumps({'s3ObjKey': signature})
