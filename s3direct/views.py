@@ -14,11 +14,6 @@ from .utils import (get_aws_credentials, get_aws_v4_signature,
                     get_aws_v4_signing_key, get_s3direct_destinations, get_key)
 
 
-AWS_S3_ENDPOINT_URL = getattr(settings, 'AWS_S3_ENDPOINT_URL', None)
-# Backwards compatability
-AWS_S3_REGION_NAME = getattr(settings, 'AWS_S3_REGION_NAME',
-                             getattr(settings, 'S3DIRECT_REGION'))
-
 @csrf_protect
 @require_POST
 def get_upload_params(request):
@@ -62,9 +57,9 @@ def get_upload_params(request):
             return HttpResponseServerError(
                 resp, content_type='application/json')
 
-    region = dest.get('region', AWS_S3_REGION_NAME)
+    region = dest.get('region', getattr(settings, 'AWS_S3_REGION_NAME'))
 
-    endpoint = dest.get('endpoint', AWS_S3_ENDPOINT_URL)
+    endpoint = dest.get('endpoint', getattr(settings, 'AWS_S3_ENDPOINT_URL', None))
     if not endpoint:
         if region == 'us-east-1':
             endpoint = 'https://s3.amazonaws.com'
@@ -109,6 +104,7 @@ def generate_aws_v4_signature(request):
     dest = get_s3direct_destinations().get(unquote(request.POST['dest']))
     signing_date = datetime.strptime(request.POST['datetime'],
                                      '%Y%m%dT%H%M%SZ')
+    region = getattr(settings, 'AWS_S3_REGION_NAME')
     auth = dest.get('auth')
     if auth and not auth(request.user):
         resp = json.dumps({'error': 'Permission denied.'})
@@ -119,7 +115,7 @@ def generate_aws_v4_signature(request):
         return HttpResponseServerError(resp, content_type='application/json')
 
     signing_key = get_aws_v4_signing_key(
-        aws_credentials.secret_key, signing_date, AWS_S3_REGION_NAME, 's3')
+        aws_credentials.secret_key, signing_date, region, 's3')
 
     signature = get_aws_v4_signature(signing_key, message)
     resp = json.dumps({'s3ObjKey': signature})

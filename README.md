@@ -141,6 +141,8 @@ AWS_S3_ENDPOINT_URL = 'https://s3-eu-west-1.amazonaws.com'
 # cache_control [optional] Cache control headers, eg 'max-age=2592000'.
 # content_disposition [optional] Useful for sending files as attachments.
 # bucket [optional] Specify a different bucket for this particular object.
+# endpoint [optional] Specify a different endpoint for this particular object.
+# region [optional] Specify a different region for this particular bucket.
 # server_side_encryption [optional] Encryption headers for buckets that require it.
 
 S3DIRECT_DESTINATIONS = {
@@ -152,6 +154,8 @@ S3DIRECT_DESTINATIONS = {
         'auth': lambda u: u.is_staff, # Default allow anybody to upload
         'allowed': ['image/jpeg', 'image/png', 'video/mp4'],  # Default allow all mime types
         'bucket': 'pdf-bucket', # Default is 'AWS_STORAGE_BUCKET_NAME'
+        'endpoint': 'pdf-endpoint', # Default is 'AWS_S3_ENDPOINT_URL'
+        'region': 'pdf-endpoint', # Default is 'AWS_S3_REGION_NAME'
         'acl': 'private', # Defaults to 'public-read'
         'cache_control': 'max-age=2592000', # Default no cache-control
         'content_disposition': lambda x: 'attachment; filename="{}"'.format(x),  # Default no content disposition
@@ -265,6 +269,9 @@ $ cd django-s3direct
 $ docker build . --build-arg SKIP_TOX=true -t s3direct
 $ docker run -itv $(pwd):/code -p 8000:8000 s3direct bash
 $ npm i
+
+# Install locally
+$ python setup.py develop
 
 # Add your AWS keys/details to .env file and export
 $ cp .env-dist .env
