@@ -345,7 +345,7 @@ class WidgetTestCaseOverideSecretAccessKey(TestCase):
 
 class SignatureViewTestCase(TestCase):
     EXAMPLE_SIGNING_DATE = datetime(2017, 4, 6, 8, 30)
-    EXPECTED_SIGNATURE = '8b2c0ad3ff3289b6ea55675527610beb2594a011767e464006f325ffb5cd05de'
+    EXPECTED_SIGNATURE = '76ea6730e10ddc9d392f40bf64872ddb1728cab58301dccb9efb67cb560a9272'
 
     def setUp(self):
         admin = User.objects.create_superuser('admin', 'u@email.com', 'admin')
