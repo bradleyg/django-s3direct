@@ -49,10 +49,39 @@ class WidgetTestCase(TestCase):
         widget = widgets.S3DirectWidget(dest='foo')
         self.assertEqual(widget.render('filename', None), expected)
 
+    def test_missing_dest(self):
+        data = {
+            'name': 'image.jpg',
+            'type': 'image/jpeg',
+            'size': 1000
+        }
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 404)
+
+    def test_incorrectly_named_dest(self):
+        data = {
+            'dest': 'non-existent',
+            'name': 'image.jpg',
+            'type': 'image/jpeg',
+            'size': 1000
+        }
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 404)
+
+    def test_missing_key(self):
+        data = {
+            'dest': 'missing-key',
+            'name': 'image.jpg',
+            'type': 'image/jpeg',
+            'size': 1000
+        }
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 500)
+
     def test_get_upload_parameters_logged_in(self):
         self.client.login(username='admin', password='admin')
         data = {
-            'dest': 'files',
+            'dest': 'login-required',
             'name': 'image.jpg',
             'type': 'image/jpeg',
             'size': 1000
@@ -62,7 +91,7 @@ class WidgetTestCase(TestCase):
 
     def test_get_upload_parameters_logged_out(self):
         data = {
-            'dest': 'files',
+            'dest': 'login-required',
             'name': 'image.jpg',
             'type': 'image/jpeg',
             'size': 1000
@@ -72,7 +101,7 @@ class WidgetTestCase(TestCase):
 
     def test_allowed_type(self):
         data = {
-            'dest': 'imgs',
+            'dest': 'only-images',
             'name': 'image.jpg',
             'type': 'image/jpeg',
             'size': 1000
@@ -82,8 +111,8 @@ class WidgetTestCase(TestCase):
 
     def test_disallowed_type(self):
         data = {
-            'dest': 'imgs',
-            'name': 'image.mp4',
+            'dest': 'only-images',
+            'name': 'filename.mp4',
             'type': 'video/mp4',
             'size': 1000
         }
@@ -92,8 +121,8 @@ class WidgetTestCase(TestCase):
 
     def test_allowed_size(self):
         data = {
-            'dest': 'thumbs',
-            'name': 'thumbnail.jpg',
+            'dest': 'limited-size',
+            'name': 'filename.jpg',
             'type': 'image/jpeg',
             'size': 20000
         }
@@ -102,39 +131,18 @@ class WidgetTestCase(TestCase):
 
     def test_disallowed_size(self):
         data = {
-            'dest': 'thumbs',
-            'name': 'thumbnail.jpg',
+            'dest': 'limited-size',
+            'name': 'filename.jpg',
             'type': 'image/jpeg',
             'size': 200000
         }
         response = self.client.post(reverse('s3direct'), data)
         self.assertEqual(response.status_code, 400)
 
-    def test_allowed_type_logged_in(self):
-        self.client.login(username='admin', password='admin')
+    def test_root_object_key(self):
         data = {
-            'dest': 'vids',
-            'name': 'video.mp4',
-            'type': 'video/mp4',
-            'size': 1000
-        }
-        response = self.client.post(reverse('s3direct'), data)
-        self.assertEqual(response.status_code, 200)
-
-    def test_disallowed_type_logged_out(self):
-        data = {
-            u'dest': u'vids',
-            u'name': u'video.mp4',
-            u'type': u'video/mp4',
-            'size': 1000
-        }
-        response = self.client.post(reverse('s3direct'), data)
-        self.assertEqual(response.status_code, 403)
-
-    def test_default_upload_key(self):
-        data = {
-            'dest': 'files',
-            'name': 'image.jpg',
+            'dest': 'generic',
+            'name': 'filename.jpg',
             'type': 'image/jpeg',
             'size': 1000
         }
@@ -146,8 +154,8 @@ class WidgetTestCase(TestCase):
 
     def test_directory_object_key(self):
         data = {
-            'dest': 'imgs',
-            'name': 'image.jpg',
+            'dest': 'folder-upload',
+            'name': 'filename.jpg',
             'type': 'image/jpeg',
             'size': 1000
         }
@@ -156,13 +164,12 @@ class WidgetTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         policy_dict = json.loads(response.content.decode())
         self.assertEqual(policy_dict['object_key'],
-                         'uploads/imgs/%s' % data['name'])
+                         'uploads/folder/%s' % data['name'])
 
     def test_directory_object_key_with_leading_slash(self):
-        """Don't want <bucket>//directory/leading/filename.jpeg"""
         data = {
             'dest': 'accidental-leading-slash',
-            'name': 'filename.jpeg',
+            'name': 'filename.jpg',
             'type': 'image/jpeg',
             'size': 1000
         }
@@ -171,13 +178,12 @@ class WidgetTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         policy_dict = json.loads(response.content.decode())
         self.assertEqual(policy_dict['object_key'],
-                         'directory/leading/filename.jpeg')
+                         'uploads/folder/filename.jpg')
 
     def test_directory_object_key_with_trailing_slash(self):
-        """Don't want <bucket>/directory/trailing//filename.jpeg"""
         data = {
             'dest': 'accidental-trailing-slash',
-            'name': 'filename.jpeg',
+            'name': 'filename.jpg',
             'type': 'image/jpeg',
             'size': 1000
         }
@@ -186,12 +192,12 @@ class WidgetTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         policy_dict = json.loads(response.content.decode())
         self.assertEqual(policy_dict['object_key'],
-                         'directory/trailing/filename.jpeg')
+                         'uploads/folder/filename.jpg')
 
     def test_function_object_key(self):
         data = {
-            'dest': 'misc',
-            'name': 'image.jpg',
+            'dest': 'function-object-key',
+            'name': 'filename.jpg',
             'type': 'image/jpeg',
             'size': 1000
         }
@@ -203,8 +209,8 @@ class WidgetTestCase(TestCase):
 
     def test_function_object_key_with_args(self):
         data = {
-            'dest': 'key_args',
-            'name': 'background.jpg',
+            'dest': 'function-object-key-args',
+            'name': 'filename.jpg',
             'type': 'image/jpeg',
             'size': 1000
         }
@@ -214,61 +220,15 @@ class WidgetTestCase(TestCase):
         policy_dict = json.loads(response.content.decode())
         self.assertEqual(
             policy_dict['object_key'],
-            settings.S3DIRECT_DESTINATIONS['key_args']['key_args'] + '/' +
-            data['name'])
-
-    def test_function_region_cn_north_1(self):
-        data = {
-            'dest': 'region-cn',
-            'name': 'background.jpg',
-            'type': 'image/jpeg',
-            'size': 1000
-        }
-        self.client.login(username='admin', password='admin')
-        response = self.client.post(reverse('s3direct'), data)
-        self.assertEqual(response.status_code, 200)
-        policy_dict = json.loads(response.content.decode())
-        self.assertEqual(
-            policy_dict['bucket_url'],
-            'https://s3.cn-north-1.amazonaws.com.cn/%s' %
-            settings.AWS_STORAGE_BUCKET_NAME)
-
-    def test_function_region_eu_west_1(self):
-        data = {
-            'dest': 'region-eu',
-            'name': 'background.jpg',
-            'type': 'image/jpeg',
-            'size': 1000
-        }
-        self.client.login(username='admin', password='admin')
-        response = self.client.post(reverse('s3direct'), data)
-        self.assertEqual(response.status_code, 200)
-        policy_dict = json.loads(response.content.decode())
-        self.assertEqual(
-            policy_dict['bucket_url'], 'https://s3-eu-west-1.amazonaws.com/%s'
-            % settings.AWS_STORAGE_BUCKET_NAME)
-
-    def test_function_region_default(self):
-        data = {
-            'dest': 'region-default',
-            'name': 'background.jpg',
-            'type': 'image/jpeg',
-            'size': 1000
-        }
-        self.client.login(username='admin', password='admin')
-        response = self.client.post(reverse('s3direct'), data)
-        self.assertEqual(response.status_code, 200)
-        policy_dict = json.loads(response.content.decode())
-        self.assertEqual(
-            policy_dict['bucket_url'],
-            'https://s3.amazonaws.com/%s' % settings.AWS_STORAGE_BUCKET_NAME)
+            settings.S3DIRECT_DESTINATIONS['function-object-key-args']
+            ['key_args'] + '/' + data['name'])
 
     def test_policy_conditions(self):
         self.client.login(username='admin', password='admin')
         data = {
-            u'dest': u'cached',
-            u'name': u'video.mp4',
-            u'type': u'video/mp4',
+            'dest': 'policy-conditions',
+            'name': 'filename.jpg',
+            'type': 'image/jpeg',
             'size': 1000
         }
         response = self.client.post(reverse('s3direct'), data)
@@ -279,11 +239,113 @@ class WidgetTestCase(TestCase):
         self.assertEqual(policy_dict['cache_control'], u'max-age=2592000')
         self.assertEqual(policy_dict['content_disposition'], u'attachment')
         self.assertEqual(policy_dict['server_side_encryption'], u'AES256')
+    
+    def test_custom_region_bucket(self):
+        data = {
+            'dest': 'custom-region-bucket',
+            'name': 'filename.jpg',
+            'type': 'image/jpeg',
+            'size': 1000
+        }
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 200)
+        policy_dict = json.loads(response.content.decode())
+        self.assertEqual(policy_dict['endpoint'],
+                         'https://s3.cn-north-1.amazonaws.com.cn')
+
+    def test_optional_param_content_disposition_callable(self):
+        data = {
+            'dest': 'optional-content-disposition-callable',
+            'name': 'filename.jpg',
+            'type': 'image/jpeg',
+            'size': 1000,
+        }
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 200)
+        policy_dict = json.loads(response.content.decode())
+        self.assertEqual(policy_dict['content_disposition'], 'attachment; filename="filename.jpg"')
+
+    def test_optional_param_cache_control_non_callable(self):
+        data = {
+            'dest': 'optional-cache-control-non-callable',
+            'name': 'filename.jpg',
+            'type': 'image/jpeg',
+            'size': 1000,
+        }
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 200)
+        policy_dict = json.loads(response.content.decode())
+        self.assertEqual(policy_dict['cache_control'], 'public')
+
+
+@override_settings(AWS_STORAGE_BUCKET_NAME=None)
+class WidgetTestCaseOverideBucket(TestCase):
+    def test_missing_bucket(self):
+        data = {
+            'dest': 'generic',
+            'name': 'filename.jpg',
+            'type': 'image/jpeg',
+            'size': 1000
+        }
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 500)
+
+
+@override_settings(AWS_S3_REGION_NAME=None)
+class WidgetTestCaseOverideRegion(TestCase):
+    def test_missing_bucket(self):
+        data = {
+            'dest': 'generic',
+            'name': 'filename.jpg',
+            'type': 'image/jpeg',
+            'size': 1000
+        }
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 500)
+
+
+@override_settings(AWS_S3_ENDPOINT_URL=None)
+class WidgetTestCaseOverideEndpoint(TestCase):
+    def test_missing_bucket(self):
+        data = {
+            'dest': 'generic',
+            'name': 'filename.jpg',
+            'type': 'image/jpeg',
+            'size': 1000
+        }
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 500)
+
+
+@override_settings(AWS_ACCESS_KEY_ID=None)
+class WidgetTestCaseOverideAccessKey(TestCase):
+    def test_missing_bucket(self):
+        data = {
+            'dest': 'generic',
+            'name': 'filename.jpg',
+            'type': 'image/jpeg',
+            'size': 1000
+        }
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 500)
+
+
+@override_settings(AWS_SECRET_ACCESS_KEY=None)
+class WidgetTestCaseOverideSecretAccessKey(TestCase):
+    def test_missing_bucket(self):
+        data = {
+            'dest': 'generic',
+            'name': 'filename.jpg',
+            'type': 'image/jpeg',
+            'size': 1000
+        }
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 500)
 
 
 class SignatureViewTestCase(TestCase):
     EXAMPLE_SIGNING_DATE = datetime(2017, 4, 6, 8, 30)
-    EXPECTED_SIGNATURE = '76ea6730e10ddc9d392f40bf64872ddb1728cab58301dccb9efb67cb560a9272'
+    EXPECTED_SIGNATURE = '8b2c0ad3ff3289b6ea55675527610beb2594a011767e464006f325ffb5cd05de'
 
     def setUp(self):
         admin = User.objects.create_superuser('admin', 'u@email.com', 'admin')
@@ -327,7 +389,7 @@ class SignatureViewTestCase(TestCase):
             data={
                 'to_sign': string_to_sign,
                 'datetime': datetime.strftime(signing_date, '%Y%m%dT%H%M%SZ'),
-                'dest': 'not_protected'  # auth: not protected
+                'dest': 'login-not-required' 
             },
             enforce_csrf_checks=True,
         )
@@ -344,7 +406,7 @@ class SignatureViewTestCase(TestCase):
             data={
                 'to_sign': string_to_sign,
                 'datetime': datetime.strftime(signing_date, '%Y%m%dT%H%M%SZ'),
-                'dest': 'protected'  # auth: is_staff
+                'dest': 'login-required'
             },
             enforce_csrf_checks=True,
         )
@@ -360,7 +422,7 @@ class SignatureViewTestCase(TestCase):
             data={
                 'to_sign': string_to_sign,
                 'datetime': datetime.strftime(signing_date, '%Y%m%dT%H%M%SZ'),
-                'dest': 'protected'  # auth: is_staff
+                'dest': 'login-required'
             },
             enforce_csrf_checks=True,
         )

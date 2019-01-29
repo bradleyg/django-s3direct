@@ -51,38 +51,48 @@ settings.configure(
     AWS_SECRET_ACCESS_KEY=environ.get('AWS_SECRET_ACCESS_KEY', '123'),
     AWS_STORAGE_BUCKET_NAME=environ.get(
         'AWS_STORAGE_BUCKET_NAME', 'test-bucket'),
-    S3DIRECT_REGION='us-east-1',
+    AWS_S3_REGION_NAME=environ.get('AWS_S3_REGION_NAME', 'us-east-1'),
+    AWS_S3_ENDPOINT_URL=environ.get('AWS_SECRET_ACCESS_KEY', 'https://s3.amazonaws.com'),
     S3DIRECT_DESTINATIONS={
-        'misc': {
-            'key': lambda original_filename: 'images/unique.jpg'
+        'generic': {
+            'key': '/'
         },
-        'files': {
+        'missing-key': {
+            'key': None
+        },
+        'login-required': {
             'key': '/',
             'auth': lambda u: u.is_staff
         },
-        'protected': {
-            'key': '/',
-            'auth': lambda u: u.is_staff
+        'login-not-required': {
+            'key': '/'
         },
-        'not_protected': {
+        'only-images': {
             'key': '/',
-        },
-        'imgs': {
-            'key': 'uploads/imgs',
             'allowed': ['image/jpeg', 'image/png']
         },
-        'thumbs': {
-            'key': 'uploads/thumbs',
-            'allowed': ['image/jpeg'],
+        'limited-size': {
+            'key': '/',
             'content_length_range': (1000, 50000)
         },
-        'vids': {
-            'key': 'uploads/vids',
-            'auth': is_authenticated,
-            'allowed': ['video/mp4']
+        'folder-upload' : {
+            'key': 'uploads/folder'
         },
-        'cached': {
-            'key': 'uploads/vids',
+        'accidental-leading-slash': {
+            'key': '/uploads/folder'
+        },
+        'accidental-trailing-slash': {
+            'key': 'uploads/folder/'
+        },
+        'function-object-key': {
+            'key': lambda original_filename: 'images/unique.jpg'
+        },
+        'function-object-key-args': {
+            'key': lambda original_filename, args: args + '/' + 'filename.jpg',
+            'key_args': 'uploads/folder'
+        },
+        'policy-conditions': {
+            'key': '/',
             'auth': is_authenticated,
             'allowed': '*',
             'acl': 'authenticated-read',
@@ -91,27 +101,19 @@ settings.configure(
             'content_disposition': 'attachment',
             'server_side_encryption': 'AES256'
         },
-        'accidental-leading-slash': {
-            'key': '/directory/leading'
+        'custom-region-bucket': {
+            'key': 'uploads',
+            'region': 'cn-north-1',
+            'endpoint': 'https://s3.cn-north-1.amazonaws.com.cn'
         },
-        'accidental-trailing-slash': {
-            'key': 'directory/trailing/'
+        'optional-content-disposition-callable': {
+            'key': '/',
+            'content_disposition': lambda x: 'attachment; filename="{}"'.format(x)
         },
-        'region-cn': {
-            'key': 'uploads/vids',
-            'region': 'cn-north-1'
-        },
-        'region-eu': {
-            'key': 'uploads/vids',
-            'region': 'eu-west-1'
-        },
-        'region-default': {
-            'key': 'uploads/vids'
-        },
-        'key_args': {
-            'key': lambda original_filename, args: args + '/' + 'background.jpg',
-            'key_args': 'assets/backgrounds'
-        },
+        'optional-cache-control-non-callable': {
+            'key': '/',
+            'cache_control': 'public' 
+        }
     }
 )
 
