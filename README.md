@@ -22,7 +22,7 @@ Install with Pip:
 __Generate access credentials and add them directly to your Django settings__  
 If you're not using AWS S3 you can skip to [CORS setup](#cors-setup). If using 
 Amazon S3 you'll also need to create an IAM policy which grants permission to 
-upload to your bucket for your newly created credentials. Rememberto swap out 
+upload to your bucket for your newly created credentials. Remember to swap out 
 __YOUR_BUCKET_NAME__ for your actual bucket.
 
 ```json
