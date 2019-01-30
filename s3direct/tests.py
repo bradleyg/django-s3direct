@@ -293,7 +293,7 @@ class WidgetTestCaseOverideBucket(TestCase):
 
 @override_settings(AWS_S3_REGION_NAME=None)
 class WidgetTestCaseOverideRegion(TestCase):
-    def test_missing_bucket(self):
+    def test_missing_region(self):
         data = {
             'dest': 'generic',
             'name': 'filename.jpg',
