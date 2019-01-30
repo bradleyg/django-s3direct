@@ -74,10 +74,10 @@ const beginUpload = (element) => {
   element.className = 's3direct progress-active';
 };
 
-const finishUpload = (element, awsBucketUrl, objectKey) => {
+const finishUpload = (element, endpoint, bucket, objectKey) => {
   const link = element.querySelector('.file-link');
   const url = element.querySelector('.file-url');
-  url.value = awsBucketUrl + '/' + objectKey;
+  url.value = endpoint + '/' + bucket + '/' + objectKey;
   link.setAttribute('href', url.value);
   link.innerHTML = parseNameFromUrl(url.value).split('/').pop();
   element.className = 's3direct link-active';
@@ -118,11 +118,11 @@ const generateAmzCommonHeaders = (sessionToken) => {
 
 const generateCustomAuthMethod = (element, signingUrl, dest) => {
   const getAwsV4Signature = (
-    signParams,
-    signHeaders,
+    _signParams,
+    _signHeaders,
     stringToSign,
     signatureDateTime,
-    canonicalRequest) => {
+    _canonicalRequest) => {
       return new Promise((resolve, reject) => {
         const form = new FormData();
         const headers = {'X-CSRFToken': getCsrfToken(element)};
@@ -156,6 +156,7 @@ const initiateUpload = (element, signingUrl, uploadParameters, file, dest) => {
     customAuthMethod: generateCustomAuthMethod(element, signingUrl, dest),
     aws_key: uploadParameters.access_key_id,
     bucket: uploadParameters.bucket,
+    aws_url: uploadParameters.endpoint,
     awsRegion: uploadParameters.region,
     computeContentMd5: true,
     cryptoMd5Method: computeMd5,
@@ -202,7 +203,12 @@ const initiateUpload = (element, signingUrl, uploadParameters, file, dest) => {
           .add(addConfig)
           .then(
             (s3Objkey) => {
-              finishUpload(element, uploadParameters.bucket_url, s3Objkey);
+              finishUpload(
+                element, 
+                uploadParameters.endpoint, 
+                uploadParameters.bucket, 
+                s3Objkey
+              );
             },
             (reason) => {
               return error(element, reason);

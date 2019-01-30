@@ -87,4 +87,8 @@ def get_aws_credentials():
     provider = InstanceMetadataProvider(
         iam_role_fetcher=InstanceMetadataFetcher(timeout=1000, num_attempts=2))
     creds = provider.load()
-    return AWSCredentials(creds.token, creds.secret_key, creds.access_key)
+    if creds:
+        return AWSCredentials(creds.token, creds.secret_key, creds.access_key)
+    else:
+        # Creds are incorrect
+        return AWSCredentials(None, None, None)
