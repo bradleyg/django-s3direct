@@ -47,12 +47,11 @@ settings.configure(
             }
         },
     ],
-    AWS_ACCESS_KEY_ID=environ.get('AWS_ACCESS_KEY_ID', '123'),
-    AWS_SECRET_ACCESS_KEY=environ.get('AWS_SECRET_ACCESS_KEY', '123'),
-    AWS_STORAGE_BUCKET_NAME=environ.get(
-        'AWS_STORAGE_BUCKET_NAME', 'test-bucket'),
-    AWS_S3_REGION_NAME=environ.get('AWS_S3_REGION_NAME', 'us-east-1'),
-    AWS_S3_ENDPOINT_URL=environ.get('AWS_SECRET_ACCESS_KEY', 'https://s3.amazonaws.com'),
+    AWS_ACCESS_KEY_ID='123',
+    AWS_SECRET_ACCESS_KEY='123',
+    AWS_STORAGE_BUCKET_NAME='test-bucket',
+    AWS_S3_REGION_NAME='us-east-1',
+    AWS_S3_ENDPOINT_URL='https://s3.amazonaws.com',
     S3DIRECT_DESTINATIONS={
         'generic': {
             'key': '/'

@@ -66,7 +66,7 @@ def get_upload_params(request):
         return HttpResponseServerError(resp, content_type='application/json')
 
     aws_credentials = get_aws_credentials()
-    if not aws_credentials.secret_key:
+    if not aws_credentials.secret_key or not aws_credentials.access_key:
         resp = json.dumps({'error': 'AWS credentials config missing.'})
         return HttpResponseServerError(resp, content_type='application/json')
 
@@ -115,7 +115,7 @@ def generate_aws_v4_signature(request):
         return HttpResponseServerError(resp, content_type='application/json')
 
     aws_credentials = get_aws_credentials()
-    if not aws_credentials.secret_key:
+    if not aws_credentials.secret_key or not aws_credentials.access_key:
         resp = json.dumps({'error': 'AWS credentials config missing.'})
         return HttpResponseServerError(resp, content_type='application/json')
 
