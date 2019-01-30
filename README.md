@@ -302,10 +302,13 @@ $ tox
 # Run tests
 $ npm run test
 
-# Run frontend dev bundler
+# Run frontend bundler and Django server
 $ npm run dev
 
-# Build frontend
+# Watch and build frontend (dev)
+$ npm run watch
+
+# Build frontend (prod)
 $ npm run build
 
 # Format python // PEP8
