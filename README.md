@@ -1,32 +1,29 @@
 django-s3direct
 ===============
 
-Upload files directly to S3 from Django
+Upload files directly to S3 (or compatible service) from Django.
 -------------------------------------
 
 [![Build Status](https://travis-ci.org/bradleyg/django-s3direct.svg?branch=master)](https://travis-ci.org/bradleyg/django-s3direct)
 
-Add direct uploads to AWS S3 functionality with a progress bar to file input fields.
-
+Directly upload files to S3 and other compatible services (such as [Digital Ocean's Spaces](https://www.digitalocean.com/docs/spaces/)) with Django.  
 <img src="https://raw.githubusercontent.com/bradleyg/django-s3direct/master/screenshot.png" width="381"/>
 
 ## Installation
 
-Install with Pip:
-
+Install with Pip:  
 ```pip install django-s3direct```
 
-## AWS Setup
+## Access setup
 
-### Access Credentials
+### When setting up access credentials you have two options:
 
-You have two options of providing access to AWS resources:
-
-1. Add credentials of an IAM user to your Django settings
-2. Use the EC2 instance profile and its attached IAM role
-
-Whether you are using an IAM user or a role, there needs to be an IAM policy
-in effect that grants permission to upload to S3. Remember to swap out __YOUR_BUCKET_NAME__ for your bucket.
+### Option 1:
+__Generate access credentials and add them directly to your Django settings__  
+If you're not using AWS S3 you can skip to [CORS setup](#cors-setup). If using 
+Amazon S3 you'll also need to create an IAM policy which grants permission to 
+upload to your bucket for your newly created credentials. Rememberto swap out 
+__YOUR_BUCKET_NAME__ for your actual bucket.
 
 ```json
 {
@@ -47,8 +44,13 @@ in effect that grants permission to upload to S3. Remember to swap out __YOUR_BU
 }
 ```
 
-If the instance profile is to be used, the IAM role needs to have a
-Trust Relationship configuration applied:
+### Option 2: 
+__Use the EC2 instance profile and its attached IAM role (AWS only)__  
+You'll need to ensure the following trust policy is in place in additon to the 
+policy above. You'll also need to ensure you have the 
+[botocore](https://github.com/boto/botocore) package installed. You already 
+have `botocore` installed if `boto3`
+is a dependency of your project.
 
 ```json
 {
@@ -65,18 +67,16 @@ Trust Relationship configuration applied:
 }
 ```
 
-Note that in order to use the EC2 instance profile, django-s3direct needs
-to query the EC2 instance metadata using utility functions from the
-[botocore](https://github.com/boto/botocore) package. You already have `botocore` installed if `boto3`
-is a dependency of your project.
+### CORS setup
 
-### S3 CORS
+You'll need to add a CORS policy on your bucket. Note the ETag header is 
+particularly important as it is used for multipart uploads. For more information 
+see [here](https://github.com/TTLabs/EvaporateJS/wiki/Configuring-The-AWS-S3-Bucket). 
+Remember to swap out YOURDOMAIN.COM in the example below with your domain, 
+including port if developing locally.
 
-Setup a CORS policy on your S3 bucket. Note the ETag header is particularly
-important as it is used for multipart uploads by EvaporateJS. For more information
-see [here](https://github.com/TTLabs/EvaporateJS/wiki/Configuring-The-AWS-S3-Bucket). Remember to swap out YOURDOMAIN.COM for your domain, including port if developing locally.
-
-If using Digital Ocean Spaces you must upload the CORs config via the API. See [here](https://www.digitalocean.com/community/questions/why-can-i-use-http-localhost-port-with-cors-in-spaces)
+If using Digital Ocean Spaces you must upload the CORS config via the API/s3cmd 
+CLI. See [here](https://www.digitalocean.com/community/questions/why-can-i-use-http-localhost-port-with-cors-in-spaces)
 for more details.
 
 ```xml
@@ -114,10 +114,10 @@ TEMPLATES = [{
 # AWS
 
 # If these are set to None, the EC2 instance profile and IAM role are used.
-# This requires you to add boto3 (or botocore, which is a dependency of boto3)
-# to your project dependencies.
 AWS_ACCESS_KEY_ID = 'your-aws-access-key-id'
 AWS_SECRET_ACCESS_KEY = 'your-aws-secret-access-key'
+
+# Bucket name
 AWS_STORAGE_BUCKET_NAME = 'your-aws-s3-bucket-name'
 
 # The region of your bucket, more info:
@@ -128,43 +128,56 @@ AWS_S3_REGION_NAME = 'eu-west-1'
 # http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
 AWS_S3_ENDPOINT_URL = 'https://s3-eu-west-1.amazonaws.com'
 
-# Destinations, with the following keys:
-#
-# key [required] Where to upload the file to, can be either:
-#     1. '/' = Upload to root with the original filename.
-#     2. 'some/path' = Upload to some/path with the original filename.
-#     3. functionName = Pass a function and create your own path/filename.
-# key_args [optional] Arguments to be passed to 'key' if it's a function.
-# auth [optional] An ACL function to whether the current Django user can perform this action.
-# allowed [optional] List of allowed MIME types.
-# acl [optional] Give the object another ACL rather than 'public-read'.
-# cache_control [optional] Cache control headers, eg 'max-age=2592000'.
-# content_disposition [optional] Useful for sending files as attachments.
-# bucket [optional] Specify a different bucket for this particular object.
-# endpoint [optional] Specify a different endpoint for this particular object.
-# region [optional] Specify a different region for this particular bucket.
-# server_side_encryption [optional] Encryption headers for buckets that require it.
-
 S3DIRECT_DESTINATIONS = {
     'example_destination': {
-        # REQUIRED
+        # "key" [required] The location to upload file
+        #       1. String: folder path to upload to
+        #       2. Function: generate folder path + filename using a function  
         'key': 'uploads/images',
+    
+        # "auth" [optional] Limit to specfic Django users
+        #        Function: ACL function
+        'auth': lambda u: u.is_staff,
+    
+        # "allowed" [optional] Limit to specific mime types
+        #           List: list of mime types
+        'allowed': ['image/jpeg', 'image/png', 'video/mp4'],
 
-        # OPTIONAL
-        'auth': lambda u: u.is_staff, # Default allow anybody to upload
-        'allowed': ['image/jpeg', 'image/png', 'video/mp4'],  # Default allow all mime types
-        'bucket': 'pdf-bucket', # Default is 'AWS_STORAGE_BUCKET_NAME'
-        'endpoint': 'pdf-endpoint', # Default is 'AWS_S3_ENDPOINT_URL'
-        'region': 'pdf-endpoint', # Default is 'AWS_S3_REGION_NAME'
-        'acl': 'private', # Defaults to 'public-read'
-        'cache_control': 'max-age=2592000', # Default no cache-control
-        'content_disposition': lambda x: 'attachment; filename="{}"'.format(x),  # Default no content disposition
-        'content_length_range': (5000, 20000000), # Default allow any size
-        'server_side_encryption': 'AES256', # Default no encryption
+        # "bucket" [optional] Bucket if different from AWS_STORAGE_BUCKET_NAME
+        #          String: bucket name
+        'bucket': 'custom-bucket',
+
+        # "endpoint" [optional] Endpoint if different from AWS_S3_ENDPOINT_URL
+        #            String: endpoint URL
+        'endpoint': 'custom-endpoint',
+
+        # "region" [optional] Region if different from AWS_S3_REGION_NAME
+        #          String: region name
+        'region': 'custom-region', # Default is 'AWS_S3_REGION_NAME'
+        
+        # "acl" [optional] Custom ACL for object, default is 'public-read'
+        #       String: ACL
+        'acl': 'private',
+
+        # "cache_control" [optional] Custom cache control header
+        #                 String: header
+        'cache_control': 'max-age=2592000',
+
+        # "content_disposition" [optional] Custom content disposition header
+        #                       String: header
+        'content_disposition': lambda x: 'attachment; filename="{}"'.format(x),
+
+        # "content_length_range" [optional] Limit file size
+        #                        Tuple: (from, to) in bytes
+        'content_length_range': (5000, 20000000),
+
+        # "server_side_encryption" [optional] Use serverside encryption
+        #                        String: encrytion standard
+        'server_side_encryption': 'AES256',
     },
-    'example_other': {
+    'example_destination_two': {
         'key': lambda filename, args: args + '/' + filename,
-    	'key_args': 'uploads/images',  # Only if 'key' is a function
+    	'key_args': 'uploads/images',
     }
 }
 ```
@@ -246,19 +259,20 @@ $ cd django-s3direct
 $ python setup.py install
 $ cd example
 
-# Add your AWS keys to your environment
+# Add config to your environment
 export AWS_ACCESS_KEY_ID='…'
 export AWS_SECRET_ACCESS_KEY='…'
 export AWS_STORAGE_BUCKET_NAME='…'
-export AWS_S3_REGION_NAME='…'    # e.g. 'eu-west-1'
-export AWS_S3_ENDPOINT_URL='…' # e.g. 'https://s3-eu-west-1.amazonaws.com'
+export AWS_S3_REGION_NAME='…'
+export AWS_S3_ENDPOINT_URL='…'
 
 $ python manage.py migrate
 $ python manage.py createsuperuser
 $ python manage.py runserver
 ```
 
-Visit ```http://localhost:8000/admin``` to view the admin widget and ```http://localhost:8000/form``` to view the custom form widget.
+Visit ```http://localhost:8000/admin``` to view the admin widget and 
+```http://localhost:8000/form``` to view the custom form widget.
 
 ## Development
 ```shell
