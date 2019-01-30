@@ -306,7 +306,7 @@ class WidgetTestCaseOverideRegion(TestCase):
 
 @override_settings(AWS_S3_ENDPOINT_URL=None)
 class WidgetTestCaseOverideEndpoint(TestCase):
-    def test_missing_bucket(self):
+    def test_missing_endpoint(self):
         data = {
             'dest': 'generic',
             'name': 'filename.jpg',
@@ -319,7 +319,7 @@ class WidgetTestCaseOverideEndpoint(TestCase):
 
 @override_settings(AWS_ACCESS_KEY_ID=None)
 class WidgetTestCaseOverideAccessKey(TestCase):
-    def test_missing_bucket(self):
+    def test_missing_access_key(self):
         data = {
             'dest': 'generic',
             'name': 'filename.jpg',
@@ -332,7 +332,7 @@ class WidgetTestCaseOverideAccessKey(TestCase):
 
 @override_settings(AWS_SECRET_ACCESS_KEY=None)
 class WidgetTestCaseOverideSecretAccessKey(TestCase):
-    def test_missing_bucket(self):
+    def test_missing_secret_key(self):
         data = {
             'dest': 'generic',
             'name': 'filename.jpg',
