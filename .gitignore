@@ -14,3 +14,4 @@ npm-debug.log
 .tox/
 .env
 .cache
+settings.json
