@@ -179,10 +179,6 @@ const initiateUpload = (element, signingUrl, uploadParameters, file, dest) => {
       uploadParameters.server_side_encryption,
       uploadParameters.session_token
     ),
-    notSignedHeadersAtInitiate: {
-      'Cache-Control': uploadParameters.cache_control,
-      'Content-Disposition': uploadParameters.content_disposition
-    },
     progress: (progressRatio, stats) => {
       updateProgressBar(element, progressRatio);
     },
@@ -192,6 +188,18 @@ const initiateUpload = (element, signingUrl, uploadParameters, file, dest) => {
       }
     }
   };
+
+  const optHeaders = {}
+
+  if(uploadParameters.cache_control) {
+    optHeaders['Cache-Control'] = uploadParameters.cache_control
+  }
+
+  if(uploadParameters.content_disposition) {
+    optHeaders['Content-Disposition'] = uploadParameters.content_disposition
+  }
+
+  addConfig['notSignedHeadersAtInitiate'] = optHeaders
 
   Evaporate
     .create(createConfig)
