@@ -22,7 +22,8 @@ def get_upload_params(request):
     file_type = request.POST['type']
     file_size = int(request.POST['size'])
 
-    dest = get_s3direct_destinations().get(request.POST.get('dest', None), None)
+    dest = get_s3direct_destinations().get(
+        request.POST.get('dest', None), None)
     if not dest:
         resp = json.dumps({'error': 'File destination does not exist.'})
         return HttpResponseNotFound(resp, content_type='application/json')

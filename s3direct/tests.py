@@ -50,11 +50,7 @@ class WidgetTestCase(TestCase):
         self.assertEqual(widget.render('filename', None), expected)
 
     def test_missing_dest(self):
-        data = {
-            'name': 'image.jpg',
-            'type': 'image/jpeg',
-            'size': 1000
-        }
+        data = {'name': 'image.jpg', 'type': 'image/jpeg', 'size': 1000}
         response = self.client.post(reverse('s3direct'), data)
         self.assertEqual(response.status_code, 404)
 
@@ -239,7 +235,7 @@ class WidgetTestCase(TestCase):
         self.assertEqual(policy_dict['cache_control'], u'max-age=2592000')
         self.assertEqual(policy_dict['content_disposition'], u'attachment')
         self.assertEqual(policy_dict['server_side_encryption'], u'AES256')
-    
+
     def test_custom_region_bucket(self):
         data = {
             'dest': 'custom-region-bucket',
@@ -263,7 +259,8 @@ class WidgetTestCase(TestCase):
         response = self.client.post(reverse('s3direct'), data)
         self.assertEqual(response.status_code, 200)
         policy_dict = json.loads(response.content.decode())
-        self.assertEqual(policy_dict['content_disposition'], 'attachment; filename="filename.jpg"')
+        self.assertEqual(policy_dict['content_disposition'],
+                         'attachment; filename="filename.jpg"')
 
     def test_optional_param_cache_control_non_callable(self):
         data = {
@@ -389,7 +386,7 @@ class SignatureViewTestCase(TestCase):
             data={
                 'to_sign': string_to_sign,
                 'datetime': datetime.strftime(signing_date, '%Y%m%dT%H%M%SZ'),
-                'dest': 'login-not-required' 
+                'dest': 'login-not-required'
             },
             enforce_csrf_checks=True,
         )
