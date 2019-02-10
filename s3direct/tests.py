@@ -236,6 +236,42 @@ class WidgetTestCase(TestCase):
         self.assertEqual(policy_dict['content_disposition'], u'attachment')
         self.assertEqual(policy_dict['server_side_encryption'], u'AES256')
 
+    def test_custom_existence_optimisation_true(self):
+        data = {
+            'dest': 'allow-existence-optimisation',
+            'name': 'filename.jpg',
+            'type': 'image/jpeg',
+            'size': 1000
+        }
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 200)
+        policy_dict = json.loads(response.content.decode())
+        self.assertEqual(policy_dict['allow_existence_optimization'], True)
+
+    def test_custom_existence_optimisation_false(self):
+        data = {
+            'dest': 'disallow-existence-optimisation',
+            'name': 'filename.jpg',
+            'type': 'image/jpeg',
+            'size': 1000
+        }
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 200)
+        policy_dict = json.loads(response.content.decode())
+        self.assertEqual(policy_dict['allow_existence_optimization'], False)
+
+    def test_custom_existence_optimisation_unset(self):
+        data = {
+            'dest': 'unset-existence-optimisation',
+            'name': 'filename.jpg',
+            'type': 'image/jpeg',
+            'size': 1000
+        }
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 200)
+        policy_dict = json.loads(response.content.decode())
+        self.assertEqual(policy_dict['allow_existence_optimization'], False)
+
     def test_custom_region_bucket(self):
         data = {
             'dest': 'custom-region-bucket',

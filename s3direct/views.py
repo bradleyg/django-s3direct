@@ -79,6 +79,7 @@ def get_upload_params(request):
         'bucket': bucket,
         'endpoint': endpoint,
         'acl': dest.get('acl') or 'public-read',
+        'allow_existence_optimization': dest.get('allow_existence_optimization', False)
     }
 
     optional_params = [
