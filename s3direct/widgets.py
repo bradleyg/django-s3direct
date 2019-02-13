@@ -22,33 +22,20 @@ class S3DirectWidget(widgets.TextInput):
         self.dest = kwargs.pop('dest', None)
         super(S3DirectWidget, self).__init__(*args, **kwargs)
 
-    def render(self, name, value, attrs=None, **kwargs):
-        if value:
-            file_name = os.path.basename(urlunquote_plus(value))
-        else:
-            file_name = ''
+    def render(self, name, value, **kwargs):
+        file_url = value or ''
+        csrf_cookie_name = getattr(settings, 'CSRF_COOKIE_NAME', 'csrftoken')
 
-        tpl = os.path.join('s3direct', 's3direct-widget.tpl')
-        output = render_to_string(
-            tpl, {
-                'policy_url':
-                reverse('s3direct'),
-                'signing_url':
-                reverse('s3direct-signing'),
-                'element_id':
-                self.build_attrs(attrs).get('id', '') if attrs else '',
-                'file_name':
-                file_name,
-                'dest':
-                self.dest,
-                'file_url':
-                value or '',
-                'name':
-                name,
-                'style':
-                self.build_attrs(attrs).get('style', '') if attrs else '',
-                'csrf_cookie_name':
-                getattr(settings, 'CSRF_COOKIE_NAME', 'csrftoken'),
-            })
+        ctx = {
+            'policy_url': reverse('s3direct'),
+            'signing_url': reverse('s3direct-signing'),
+            'dest': self.dest,
+            'name': name,
+            'csrf_cookie_name': csrf_cookie_name,
+            'file_url': file_url,
+            'file_name': os.path.basename(urlunquote_plus(file_url)),
+        }
 
-        return mark_safe(output)
+        return mark_safe(
+            render_to_string(
+                os.path.join('s3direct', 's3direct-widget.tpl'), ctx))
