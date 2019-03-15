@@ -140,6 +140,7 @@ S3DIRECT_DESTINATIONS = {
             'image/png'
         ],
         'content_length_range': (5000, 20000000),
+        'allow_existence_optimization': True
     },
 
     # Allow authenticated users to upload mp4's

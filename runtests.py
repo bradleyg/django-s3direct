@@ -100,6 +100,17 @@ settings.configure(
             'content_disposition': 'attachment',
             'server_side_encryption': 'AES256'
         },
+        'allow-existence-optimisation': {
+            'key': 'uploads',
+            'allow_existence_optimization': True,
+        },
+        'disallow-existence-optimisation': {
+            'key': 'uploads',
+            'allow_existence_optimization': False,
+        },
+        'unset-existence-optimisation': {
+            'key': 'uploads',
+        },
         'custom-region-bucket': {
             'key': 'uploads',
             'region': 'cn-north-1',

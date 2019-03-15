@@ -166,8 +166,8 @@ const initiateUpload = (element, signingUrl, uploadParameters, file, dest) => {
     cryptoHexEncodedHash256: computeSha256,
     partSize: 20 * 1024 * 1024,
     logging: true,
-    allowS3ExistenceOptimization: true,
-    s3FileCacheHoursAgo: 12
+    allowS3ExistenceOptimization: uploadParameters.allow_existence_optimization,
+    s3FileCacheHoursAgo: uploadParameters.allow_existence_optimization ? 12 : 0
   };
 
   const addConfig = {

@@ -172,8 +172,13 @@ S3DIRECT_DESTINATIONS = {
         'content_length_range': (5000, 20000000),
 
         # "server_side_encryption" [optional] Use serverside encryption
-        #                        String: encrytion standard
+        #                          String: encrytion standard
         'server_side_encryption': 'AES256',
+
+        # "allow_existence_optimization" [optional] Checks to see if file already exists,
+        #                                returns the URL to the object if so (no upload)
+        #                                Boolean: True, False
+        'allow_existence_optimization': False,
     },
     'example_destination_two': {
         'key': lambda filename, args: args + '/' + filename,
