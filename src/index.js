@@ -225,12 +225,14 @@ const checkFileAndInitiateUpload = event => {
   const element = event.target.parentElement;
   const file = element.querySelector('.file-input').files[0];
   const dest = element.querySelector('.file-dest').value;
+  const keyArgs = element.querySelector('.file-key_args').value;
   const destCheckUrl = element.getAttribute('data-policy-url');
   const signerUrl = element.getAttribute('data-signing-url');
   const form = new FormData();
   const headers = { 'X-CSRFToken': getCsrfToken(element) };
 
   form.append('dest', dest);
+  form.append('keyArgs', keyArgs);
   form.append('name', file.name);
   form.append('type', file.type);
   form.append('size', file.size);

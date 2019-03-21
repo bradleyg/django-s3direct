@@ -183,6 +183,10 @@ S3DIRECT_DESTINATIONS = {
     'example_destination_two': {
         'key': lambda filename, args: args + '/' + filename,
     	'key_args': 'uploads/images',
+    },
+    'example_destination_three': {
+        'key': lambda filename, args: args['customer_id'] + '/' + filename,
+    	# key_args, are dynamically supplied by the form
     }
 }
 ```
@@ -224,6 +228,25 @@ class S3DirectUploadForm(forms.Form):
 ```
 
 __*Optional.__ You can modify the HTML of the widget by overiding template __s3direct/templates/s3direct-widget.tpl__
+
+__*Optional.__ You can supply the __key_args__ parameter when creating the widget in order to dynamically define the resulting s3 keys.
+For this to work correctly, __key_args__ must be json serializable:
+
+```python
+from django import forms
+from s3direct.widgets import S3DirectWidget
+
+class S3DirectUploadForm(forms.Form):
+    images = forms.URLField(widget=S3DirectWidget(dest='example_destination'))
+    
+    def __init__(self, *args, **kwargs):
+        instance = kwargs.get('instance', None)
+
+        if instance:
+            self.base_fields['images'].widget = S3DirectWidget(dest='example_destination_3', key_args={'customer_id':instance.customer.pk})
+                
+        super().__init__(*args, **kwargs)
+```
 
 ### views.py
 

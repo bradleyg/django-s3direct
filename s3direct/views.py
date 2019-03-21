@@ -21,6 +21,7 @@ def get_upload_params(request):
     file_name = request.POST['name']
     file_type = request.POST['type']
     file_size = int(request.POST['size'])
+    key_args = request.POST.get('keyArgs')
 
     dest = get_s3direct_destinations().get(
         request.POST.get('dest', None), None)
@@ -49,6 +50,13 @@ def get_upload_params(request):
         resp = json.dumps({'error': 'Missing destination path.'})
         return HttpResponseServerError(resp, content_type='application/json')
 
+    if key_args:
+        try:
+            key_args = json.loads(key_args)
+        except Exception:
+            resp = json.dumps({'error': 'Malformed key_args override defined on widget, make sure it\'s json serializable'})
+            return HttpResponseServerError(resp, content_type='application/json')
+
     bucket = dest.get('bucket',
                       getattr(settings, 'AWS_STORAGE_BUCKET_NAME', None))
     if not bucket:
@@ -72,7 +80,7 @@ def get_upload_params(request):
         return HttpResponseServerError(resp, content_type='application/json')
 
     upload_data = {
-        'object_key': get_key(key, file_name, dest),
+        'object_key': get_key(key, file_name, dest, key_args),
         'access_key_id': aws_credentials.access_key,
         'session_token': aws_credentials.token,
         'region': region,
