@@ -6,6 +6,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.test.utils import override_settings
+from django.utils.html import escape
+
 try:
     from unittest import mock
 except ImportError:
@@ -40,6 +42,7 @@ class WidgetTestCase(TestCase):
             '  <input class="file-url" type="hidden" value="" id="" name="filename" />'
             '\n'
             '  <input class="file-dest" type="hidden" value="foo">\n'
+            '  <input class="file-key_args" type="hidden" value="">\n'
             '  <input class="file-input" type="file"  style=""/>\n'
             '  <div class="progress progress-striped active">\n'
             '    <div class="bar"></div>\n'
@@ -47,6 +50,26 @@ class WidgetTestCase(TestCase):
             '</div>\n')
 
         widget = widgets.S3DirectWidget(dest='foo')
+        self.assertEqual(widget.render('filename', None), expected)
+
+    def test_widget_html_dynamic_key_args(self):
+        expected = (
+            '<div class="s3direct" data-policy-url="/get_upload_params/" '
+            'data-signing-url="/get_aws_v4_signature/">\n'
+            '  <a class="file-link" target="_blank" href=""></a>\n'
+            '  <a class="file-remove" href="#remove">Remove</a>\n'
+            '  <input class="csrf-cookie-name" type="hidden" value="csrftoken">\n'
+            '  <input class="file-url" type="hidden" value="" id="" name="filename" />'
+            '\n'
+            '  <input class="file-dest" type="hidden" value="foo">\n'
+            '  <input class="file-key_args" type="hidden" value="'+escape('{"arg": 2}')+'">\n'
+            '  <input class="file-input" type="file"  style=""/>\n'
+            '  <div class="progress progress-striped active">\n'
+            '    <div class="bar"></div>\n'
+            '  </div>\n'
+            '</div>\n')
+
+        widget = widgets.S3DirectWidget(dest='foo',key_args={"arg": 2})
         self.assertEqual(widget.render('filename', None), expected)
 
     def test_missing_dest(self):
@@ -218,6 +241,22 @@ class WidgetTestCase(TestCase):
             policy_dict['object_key'],
             settings.S3DIRECT_DESTINATIONS['function-object-key-args']
             ['key_args'] + '/' + data['name'])
+
+    def test_function_object_key_with_dynamic_args(self):
+        data = {
+            'dest': 'function-object-dynamic-key-args',
+            'keyArgs': '"uploads/folder"', # This is a json serialized string
+            'name': 'filename.jpg',
+            'type': 'image/jpeg',
+            'size': 1000
+        }
+        self.client.login(username='admin', password='admin')
+        response = self.client.post(reverse('s3direct'), data)
+        self.assertEqual(response.status_code, 200)
+        policy_dict = json.loads(response.content.decode())
+        self.assertEqual(
+            policy_dict['object_key'],
+            'uploads/folder' + '/' + data['name'])
 
     def test_policy_conditions(self):
         self.client.login(username='admin', password='admin')
