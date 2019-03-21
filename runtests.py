@@ -90,6 +90,9 @@ settings.configure(
             'key': lambda original_filename, args: args + '/' + 'filename.jpg',
             'key_args': 'uploads/folder'
         },
+        'function-object-dynamic-key-args': {
+            'key': lambda original_filename, args: args + '/' + 'filename.jpg'
+        },
         'policy-conditions': {
             'key': '/',
             'auth': is_authenticated,

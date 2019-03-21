@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import json
 import os
 from django.forms import widgets
 from django.utils.safestring import mark_safe
@@ -20,6 +21,7 @@ class S3DirectWidget(widgets.TextInput):
 
     def __init__(self, *args, **kwargs):
         self.dest = kwargs.pop('dest', None)
+        self.key_args = kwargs.pop('key_args', None)
         super(S3DirectWidget, self).__init__(*args, **kwargs)
 
     def render(self, name, value, **kwargs):
@@ -35,6 +37,12 @@ class S3DirectWidget(widgets.TextInput):
             'file_url': file_url,
             'file_name': os.path.basename(urlunquote_plus(file_url)),
         }
+
+        if self.key_args:
+            try:
+                ctx.update(key_args=json.dumps(self.key_args))
+            except Exception:
+                raise RuntimeError('widget argument key_args is not json-serializable')
 
         return mark_safe(
             render_to_string(
