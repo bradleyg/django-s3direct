@@ -75,7 +75,7 @@ see [here](https://github.com/TTLabs/EvaporateJS/wiki/Configuring-The-AWS-S3-Buc
 Remember to swap out YOURDOMAIN.COM in the example below with your domain, 
 including port if developing locally.
 
-If using Digital Ocean Spaces you must upload the CORS config via the API/s3cmd 
+If using Digital Ocean Spaces you can edit the CORS config via your Space's Settings tab or by uploading the CORS config via the API/s3cmd 
 CLI. See [here](https://www.digitalocean.com/community/questions/why-can-i-use-http-localhost-port-with-cors-in-spaces)
 for more details.
 
