@@ -15,6 +15,7 @@ setup(
     version=package['version'],
     description=package['description'],
     long_description=readme,
+    long_description_content_type='text/markdown',
     author=package['author']['name'],
     author_email=package['author']['email'],
     url=package['homepage'],
