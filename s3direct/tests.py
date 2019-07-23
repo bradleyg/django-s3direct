@@ -478,7 +478,7 @@ class AWSCredentialsTest(TestCase):
         )
         botocore_mock.get_session().get_credentials.return_value = credentials_mock
         credentials = get_aws_credentials()
-        botocore_mock.get_session().get_credentials.assert_called_once()
+        botocore_mock.get_session().get_credentials.assert_called_once_with()
         self.assertEqual(credentials.token, 'token')
         self.assertEqual(credentials.secret_key, 'secret_key')
         self.assertEqual(credentials.access_key, 'access_key')
