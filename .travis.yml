@@ -28,10 +28,18 @@ matrix:
     env: DEPS='Django==2.1'
   - python: 2.7
     env: DEPS='Django==2.1 boto3'
+  - python: 2.7
+    env: DEPS='Django==2.2'
+  - python: 2.7
+    env: DEPS='Django==2.2 boto3'
   - python: 3.4
     env: DEPS='Django==2.1'
   - python: 3.4
     env: DEPS='Django==2.1 boto3'
+  - python: 3.4
+    env: DEPS='Django==2.2'
+  - python: 3.4
+    env: DEPS='Django==2.2 boto3'
 install:
 - pip install -q mock $DEPS
 script:
