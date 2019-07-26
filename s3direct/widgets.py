@@ -37,5 +37,5 @@ class S3DirectWidget(widgets.TextInput):
         }
 
         return mark_safe(
-            render_to_string(
-                os.path.join('s3direct', 's3direct-widget.tpl'), ctx))
+            render_to_string(os.path.join('s3direct', 's3direct-widget.tpl'),
+                             ctx))

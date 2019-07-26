@@ -22,8 +22,8 @@ def get_upload_params(request):
     file_type = request.POST['type']
     file_size = int(request.POST['size'])
 
-    dest = get_s3direct_destinations().get(
-        request.POST.get('dest', None), None)
+    dest = get_s3direct_destinations().get(request.POST.get('dest', None),
+                                           None)
     if not dest:
         resp = json.dumps({'error': 'File destination does not exist.'})
         return HttpResponseNotFound(resp, content_type='application/json')
@@ -72,14 +72,22 @@ def get_upload_params(request):
         return HttpResponseServerError(resp, content_type='application/json')
 
     upload_data = {
-        'object_key': get_key(key, file_name, dest),
-        'access_key_id': aws_credentials.access_key,
-        'session_token': aws_credentials.token,
-        'region': region,
-        'bucket': bucket,
-        'endpoint': endpoint,
-        'acl': dest.get('acl') or 'public-read',
-        'allow_existence_optimization': dest.get('allow_existence_optimization', False)
+        'object_key':
+        get_key(key, file_name, dest),
+        'access_key_id':
+        aws_credentials.access_key,
+        'session_token':
+        aws_credentials.token,
+        'region':
+        region,
+        'bucket':
+        bucket,
+        'endpoint':
+        endpoint,
+        'acl':
+        dest.get('acl') or 'public-read',
+        'allow_existence_optimization':
+        dest.get('allow_existence_optimization', False)
     }
 
     optional_params = [
