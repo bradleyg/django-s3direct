@@ -26,11 +26,13 @@ settings.configure(
         'django.contrib.contenttypes',
         'django.contrib.sessions',
         'django.contrib.admin',
+        'django.contrib.messages',
         's3direct',
     ),
     MIDDLEWARE=(
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
     ),
     MIDDLEWARE_CLASSES=(
         'django.contrib.sessions.middleware.SessionMiddleware',
@@ -43,6 +45,7 @@ settings.configure(
             'OPTIONS': {
                 'context_processors': [
                     "django.contrib.auth.context_processors.auth",
+                    'django.contrib.messages.context_processors.messages',
                 ]
             }
         },
@@ -122,7 +125,7 @@ settings.configure(
         },
         'optional-cache-control-non-callable': {
             'key': '/',
-            'cache_control': 'public' 
+            'cache_control': 'public'
         }
     }
 )

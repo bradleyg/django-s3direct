@@ -4,6 +4,7 @@ python:
 - 3.4
 - 3.5
 - 3.6
+- 3.7
 env:
 - DEPS='Django==1.9'
 - DEPS='Django==1.9 boto3'
@@ -15,6 +16,8 @@ env:
 - DEPS='Django==2.0 boto3'
 - DEPS='Django==2.1'
 - DEPS='Django==2.1 boto3'
+- DEPS='Django==2.2'
+- DEPS='Django==2.2 boto3'
 matrix:
   exclude:
   - python: 2.7
