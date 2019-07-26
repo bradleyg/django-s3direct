@@ -20,9 +20,9 @@ Install with Pip:
 
 ### Option 1:
 __Generate access credentials and add them directly to your Django settings__  
-If you're not using AWS S3 you can skip to [CORS setup](#cors-setup). If using 
-Amazon S3 you'll also need to create an IAM policy which grants permission to 
-upload to your bucket for your newly created credentials. Remember to swap out 
+If you're not using AWS S3 you can skip to [CORS setup](#cors-setup). If using
+Amazon S3 you'll also need to create an IAM policy which grants permission to
+upload to your bucket for your newly created credentials. Remember to swap out
 __YOUR_BUCKET_NAME__ for your actual bucket.
 
 ```json
@@ -44,11 +44,11 @@ __YOUR_BUCKET_NAME__ for your actual bucket.
 }
 ```
 
-### Option 2: 
+### Option 2:
 __Use the EC2 instance profile and its attached IAM role (AWS only)__  
-You'll need to ensure the following trust policy is in place in additon to the 
-policy above. You'll also need to ensure you have the 
-[botocore](https://github.com/boto/botocore) package installed. You already 
+You'll need to ensure the following trust policy is in place in additon to the
+policy above. You'll also need to ensure you have the
+[botocore](https://github.com/boto/botocore) package installed. You already
 have `botocore` installed if `boto3`
 is a dependency of your project.
 
@@ -69,13 +69,13 @@ is a dependency of your project.
 
 ### CORS setup
 
-You'll need to add a CORS policy on your bucket. Note the ETag header is 
-particularly important as it is used for multipart uploads. For more information 
-see [here](https://github.com/TTLabs/EvaporateJS/wiki/Configuring-The-AWS-S3-Bucket). 
-Remember to swap out YOURDOMAIN.COM in the example below with your domain, 
+You'll need to add a CORS policy on your bucket. Note the ETag header is
+particularly important as it is used for multipart uploads. For more information
+see [here](https://github.com/TTLabs/EvaporateJS/wiki/Configuring-The-AWS-S3-Bucket).
+Remember to swap out YOURDOMAIN.COM in the example below with your domain,
 including port if developing locally.
 
-If using Digital Ocean Spaces you must upload the CORS config via the API/s3cmd 
+If using Digital Ocean Spaces you must upload the CORS config via the API/s3cmd
 CLI. See [here](https://www.digitalocean.com/community/questions/why-can-i-use-http-localhost-port-with-cors-in-spaces)
 for more details.
 
@@ -134,11 +134,11 @@ S3DIRECT_DESTINATIONS = {
         #       1. String: folder path to upload to
         #       2. Function: generate folder path + filename using a function  
         'key': 'uploads/images',
-    
+
         # "auth" [optional] Limit to specfic Django users
         #        Function: ACL function
         'auth': lambda u: u.is_staff,
-    
+
         # "allowed" [optional] Limit to specific mime types
         #           List: list of mime types
         'allowed': ['image/jpeg', 'image/png', 'video/mp4'],
@@ -154,7 +154,7 @@ S3DIRECT_DESTINATIONS = {
         # "region" [optional] Region if different from AWS_S3_REGION_NAME
         #          String: region name
         'region': 'custom-region', # Default is 'AWS_S3_REGION_NAME'
-        
+
         # "acl" [optional] Custom ACL for object, default is 'public-read'
         #       String: ACL
         'acl': 'private',
@@ -276,7 +276,7 @@ $ python manage.py createsuperuser
 $ python manage.py runserver
 ```
 
-Visit ```http://localhost:8000/admin``` to view the admin widget and 
+Visit ```http://localhost:8000/admin``` to view the admin widget and
 ```http://localhost:8000/form``` to view the custom form widget.
 
 ## Development
@@ -284,17 +284,16 @@ Visit ```http://localhost:8000/admin``` to view the admin widget and
 $ git clone git@github.com:bradleyg/django-s3direct.git
 $ cd django-s3direct
 
+# Add your AWS keys/details to .env file and export
+$ cp .env-dist .env
+
 # Build docker image
 $ docker build . --build-arg SKIP_TOX=true -t s3direct
-$ docker run -itv $(pwd):/code -p 8000:8000 s3direct bash
+$ docker run -itv $(pwd):/code -p 8000:8000 --env-file .env s3direct bash
 $ npm i
 
 # Install locally
 $ python setup.py develop
-
-# Add your AWS keys/details to .env file and export
-$ cp .env-dist .env
-$ export $(cat .env)
 
 # Run examples
 $ python example/manage.py migrate
