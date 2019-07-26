@@ -350,9 +350,11 @@ class WidgetTestCaseOverideEndpoint(TestCase):
         self.assertEqual(response.status_code, 500)
 
 
+@mock.patch('s3direct.utils.session')
 @override_settings(AWS_ACCESS_KEY_ID=None)
 class WidgetTestCaseOverideAccessKey(TestCase):
-    def test_missing_access_key(self):
+    def test_missing_access_key(self, botocore_mock):
+        botocore_mock.get_session().get_credentials.return_value = {}
         data = {
             'dest': 'generic',
             'name': 'filename.jpg',
@@ -363,9 +365,11 @@ class WidgetTestCaseOverideAccessKey(TestCase):
         self.assertEqual(response.status_code, 500)
 
 
+@mock.patch('s3direct.utils.session')
 @override_settings(AWS_SECRET_ACCESS_KEY=None)
 class WidgetTestCaseOverideSecretAccessKey(TestCase):
-    def test_missing_secret_key(self):
+    def test_missing_secret_key(self, botocore_mock):
+        botocore_mock.get_session().get_credentials.return_value = {}
         data = {
             'dest': 'generic',
             'name': 'filename.jpg',
@@ -464,22 +468,17 @@ class SignatureViewTestCase(TestCase):
 
 
 class AWSCredentialsTest(TestCase):
-    @mock.patch('s3direct.utils.InstanceMetadataProvider')
-    @mock.patch('s3direct.utils.InstanceMetadataFetcher')
+    @mock.patch('s3direct.utils.session')
     @override_settings(AWS_ACCESS_KEY_ID=None, AWS_SECRET_ACCESS_KEY=None)
-    def test_retrieves_aws_credentials_from_botocore(self, fetcher_mock,
-                                                     provider_mock):
+    def test_retrieves_aws_credentials_from_botocore(self, botocore_mock):
         credentials_mock = mock.Mock(
             token='token',
             secret_key='secret_key',
             access_key='access_key',
         )
-        aws_response_mock = mock.Mock()
-        aws_response_mock.load.return_value = credentials_mock
-        fetcher_mock.return_value = 'metadata'
-        provider_mock.return_value = aws_response_mock
+        botocore_mock.get_session().get_credentials.return_value = credentials_mock
         credentials = get_aws_credentials()
-        provider_mock.assert_called_once_with(iam_role_fetcher='metadata')
+        botocore_mock.get_session().get_credentials.assert_called_once_with()
         self.assertEqual(credentials.token, 'token')
         self.assertEqual(credentials.secret_key, 'secret_key')
         self.assertEqual(credentials.access_key, 'access_key')

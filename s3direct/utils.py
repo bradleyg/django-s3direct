@@ -10,11 +10,9 @@ from django.conf import settings
 # however dependency on botocore is not enforced as this a secondary
 # method for retrieving credentials.
 try:
-    from botocore.credentials import (InstanceMetadataProvider,
-                                      InstanceMetadataFetcher)
+    from botocore import session
 except ImportError:
-    InstanceMetadataProvider = None
-    InstanceMetadataFetcher = None
+    session = None
 
 AWSCredentials = namedtuple('AWSCredentials',
                             ['token', 'secret_key', 'access_key'])
@@ -80,13 +78,11 @@ def get_aws_credentials():
         # AWS tokens are not created for pregenerated access keys
         return AWSCredentials(None, secret_key, access_key)
 
-    if not InstanceMetadataProvider or not InstanceMetadataFetcher:
+    if not session:
         # AWS credentials are not required for publicly-writable buckets
         return AWSCredentials(None, None, None)
 
-    provider = InstanceMetadataProvider(
-        iam_role_fetcher=InstanceMetadataFetcher(timeout=1000, num_attempts=2))
-    creds = provider.load()
+    creds = session.get_session().get_credentials()
     if creds:
         return AWSCredentials(creds.token, creds.secret_key, creds.access_key)
     else:
