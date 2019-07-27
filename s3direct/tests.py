@@ -36,9 +36,10 @@ class WidgetTestCase(TestCase):
             'data-signing-url="/get_aws_v4_signature/">\n'
             '  <a class="file-link" target="_blank" href=""></a>\n'
             '  <a class="file-remove" href="#remove">Remove</a>\n'
-            '  <input class="csrf-cookie-name" type="hidden" value="csrftoken">\n'
-            '  <input class="file-url" type="hidden" value="" id="" name="filename" />'
-            '\n'
+            '  <input class="csrf-cookie-name" type="hidden" '
+            'value="csrftoken">\n'
+            '  <input class="file-url" type="hidden" value="" id="" '
+            'name="filename" />\n'
             '  <input class="file-dest" type="hidden" value="foo">\n'
             '  <input class="file-input" type="file"  style=""/>\n'
             '  <div class="progress progress-striped active">\n'
@@ -383,7 +384,8 @@ class WidgetTestCaseOverideSecretAccessKey(TestCase):
 
 class SignatureViewTestCase(TestCase):
     EXAMPLE_SIGNING_DATE = datetime(2017, 4, 6, 8, 30)
-    EXPECTED_SIGNATURE = '76ea6730e10ddc9d392f40bf64872ddb1728cab58301dccb9efb67cb560a9272'
+    EXPECTED_SIGNATURE = (
+        '76ea6730e10ddc9d392f40bf64872ddb1728cab58301dccb9efb67cb560a9272')
 
     def setUp(self):
         admin = User.objects.create_superuser('admin', 'u@email.com', 'admin')
@@ -420,7 +422,7 @@ class SignatureViewTestCase(TestCase):
         return string_to_sign, signing_date,
 
     def test_signing(self):
-        """Check that the signature is as expected for a known signing request."""
+        """Test signature is as expected for a known signing request."""
         string_to_sign, signing_date = self.create_dummy_signing_request()
         response = self.client.post(
             reverse('s3direct-signing'),
