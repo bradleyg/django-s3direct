@@ -1,11 +1,5 @@
 dist: bionic
 language: python
-python:
-- 2.7
-- 3.4
-- 3.5
-- 3.6
-- 3.7
 services: sqlite
 env:
 - DEPS='Django==1.9'
@@ -21,6 +15,13 @@ env:
 - DEPS='Django==2.2'
 - DEPS='Django==2.2 boto3'
 matrix:
+  include:
+    - python: 2.7
+    - python: 3.4
+    - python: 3.5
+    - python: 3.6
+    - python: 3.7
+      dist: xenial
   exclude:
   - python: 2.7
     env: DEPS='Django==2.0'
