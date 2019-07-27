@@ -2,16 +2,12 @@ language: python
 services:
   - sqlite
 python:
-- 2.7
-- 3.4
-- 3.5
-- 3.6
-- 3.7
+# - 2.7
+# - 3.4
+# - 3.5
+# - 3.6
+# - 3.7
 env:
-- DEPS='Django==1.9'
-- DEPS='Django==1.9 boto3'
-- DEPS='Django==1.10'
-- DEPS='Django==1.10 boto3'
 - DEPS='Django==1.11'
 - DEPS='Django==1.11 boto3'
 - DEPS='Django==2.0'
@@ -24,6 +20,7 @@ matrix:
   include:
   - python: 3.7
     dist: bionic
+    env: DEPS='Django==2.2'
   exclude:
   - python: 2.7
     env: DEPS='Django==2.0'
