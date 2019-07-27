@@ -18,14 +18,6 @@ AWSCredentials = namedtuple('AWSCredentials',
                             ['token', 'secret_key', 'access_key'])
 
 
-def get_at(index, t):
-    try:
-        value = t[index]
-    except IndexError:
-        value = None
-    return value
-
-
 def get_s3direct_destinations():
     """Returns s3direct destinations.
 
