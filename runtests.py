@@ -1,25 +1,15 @@
 """Tests for s3direct package."""
 
-from os import environ
 import sys
-from distutils.version import StrictVersion
 import django
 from django.conf import settings
-
-
-def is_authenticated(user):
-    if callable(user.is_authenticated):  # Django =< 1.9
-        return user.is_authenticated()
-    return user.is_authenticated
-
+from django.test.utils import get_runner
 
 settings.configure(
     DEBUG=True,
-    DATABASES={
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-        }
-    },
+    DATABASES={'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+    }},
     ROOT_URLCONF='s3direct.urls',
     INSTALLED_APPS=(
         'django.contrib.auth',
@@ -33,10 +23,6 @@ settings.configure(
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
-    ),
-    MIDDLEWARE_CLASSES=(
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
     ),
     TEMPLATES=[
         {
@@ -77,7 +63,7 @@ settings.configure(
             'key': '/',
             'content_length_range': (1000, 50000)
         },
-        'folder-upload' : {
+        'folder-upload': {
             'key': 'uploads/folder'
         },
         'accidental-leading-slash': {
@@ -95,7 +81,7 @@ settings.configure(
         },
         'policy-conditions': {
             'key': '/',
-            'auth': is_authenticated,
+            'auth': lambda user: user.is_authenticated,
             'allowed': '*',
             'acl': 'authenticated-read',
             'bucket': 'astoragebucketname',
@@ -121,26 +107,19 @@ settings.configure(
         },
         'optional-content-disposition-callable': {
             'key': '/',
-            'content_disposition': lambda x: 'attachment; filename="{}"'.format(x)
+            'content_disposition':
+            lambda x: 'attachment; filename="{}"'.format(x)
         },
         'optional-cache-control-non-callable': {
             'key': '/',
             'cache_control': 'public'
         }
-    }
-)
+    })
 
-if hasattr(django, 'setup'):
-    django.setup()
+django.setup()
 
-if django.get_version() < StrictVersion('1.6'):
-    from django.test.simple import DjangoTestSuiteRunner
-    test_runner = DjangoTestSuiteRunner(verbosity=1)
-else:
-    from django.test.runner import DiscoverRunner
-    test_runner = DiscoverRunner(verbosity=1)
+TestRunner = get_runner(settings)
+test_runner = TestRunner()
 
-failures = test_runner.run_tests(['s3direct', ])
-
-if failures:
-    sys.exit(failures)
+failures = test_runner.run_tests(['s3direct'])
+sys.exit(bool(failures))

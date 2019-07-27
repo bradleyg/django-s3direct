@@ -19,11 +19,10 @@ Install with Pip:
 ### When setting up access credentials you have two options:
 
 ### Option 1:
-__Generate access credentials and add them directly to your Django settings__  
-If you're not using AWS S3 you can skip to [CORS setup](#cors-setup). If using
-Amazon S3 you'll also need to create an IAM policy which grants permission to
-upload to your bucket for your newly created credentials. Remember to swap out
-__YOUR_BUCKET_NAME__ for your actual bucket.
+__Generate access credentials and add them directly to your Django settings__.
+If using Amazon S3 you'll also need to create an IAM policy which grants
+permission to upload to your bucket for your newly created credentials.
+Remember to swap out __YOUR_BUCKET_NAME__ for your actual bucket.
 
 ```json
 {
@@ -46,11 +45,9 @@ __YOUR_BUCKET_NAME__ for your actual bucket.
 
 ### Option 2:
 __Use the EC2 instance profile and its attached IAM role (AWS only)__  
-You'll need to ensure the following trust policy is in place in additon to the
-policy above. You'll also need to ensure you have the
-[botocore](https://github.com/boto/botocore) package installed. You already
-have `botocore` installed if `boto3`
-is a dependency of your project.
+You'll need to ensure the following trust policy is in place in addition to the
+policy above. You'll also need the
+[boto3](https://github.com/boto/boto3) package installed.
 
 ```json
 {
@@ -70,13 +67,14 @@ is a dependency of your project.
 ### CORS setup
 
 You'll need to add a CORS policy on your bucket. Note the ETag header is
-particularly important as it is used for multipart uploads. For more information
-see [here](https://github.com/TTLabs/EvaporateJS/wiki/Configuring-The-AWS-S3-Bucket).
-Remember to swap out YOURDOMAIN.COM in the example below with your domain,
-including port if developing locally.
+important as it is used for multipart uploads. For more information see
+[here](https://github.com/TTLabs/EvaporateJS/wiki/Configuring-The-AWS-S3-Bucket).
+Remember to swap out YOURDOMAIN.COM in the example below, including port if
+developing locally.
 
 If using Digital Ocean Spaces you must upload the CORS config via the API/s3cmd
-CLI. See [here](https://www.digitalocean.com/community/questions/why-can-i-use-http-localhost-port-with-cors-in-spaces)
+CLI (as you can't add the ```ExposeHeader``` rule). See
+[here](https://www.digitalocean.com/community/questions/why-can-i-use-http-localhost-port-with-cors-in-spaces)
 for more details.
 
 ```xml
