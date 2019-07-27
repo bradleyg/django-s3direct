@@ -7,5 +7,6 @@
   <input class="file-input" type="file"  style="{{ style }}"/>
   <div class="progress progress-striped active">
     <div class="bar"></div>
+    <a href="#cancel" class="cancel-button">&times;</a>
   </div>
 </div>

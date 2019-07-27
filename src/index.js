@@ -69,11 +69,6 @@ const disableSubmit = status => {
   });
 };
 
-const beginUpload = element => {
-  disableSubmit(true);
-  element.className = 's3direct progress-active';
-};
-
 const finishUpload = (element, endpoint, bucket, objectKey) => {
   const link = element.querySelector('.file-link');
   const url = element.querySelector('.file-url');
@@ -203,10 +198,22 @@ const initiateUpload = (element, signingUrl, uploadParameters, file, dest) => {
   addConfig['notSignedHeadersAtInitiate'] = optHeaders;
 
   Evaporate.create(createConfig).then(evaporate => {
-    beginUpload(element);
+    disableSubmit(true);
+
+    element.className = 's3direct progress-active';
+
+    const cancelButton = element.querySelector('.cancel-button');
+
+    const cancelUpload = e => {
+      e.preventDefault();
+      evaporate.cancel(`${uploadParameters.bucket}/${addConfig.name}`);
+    };
+
+    cancelButton.addEventListener('click', cancelUpload, false);
 
     evaporate.add(addConfig).then(
       s3Objkey => {
+        cancelButton.removeEventListener('click', cancelUpload);
         finishUpload(
           element,
           uploadParameters.endpoint,
@@ -215,6 +222,7 @@ const initiateUpload = (element, signingUrl, uploadParameters, file, dest) => {
         );
       },
       reason => {
+        cancelButton.removeEventListener('click', cancelUpload);
         return error(element, reason);
       }
     );

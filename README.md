@@ -85,6 +85,7 @@ for more details.
         <AllowedMethod>HEAD</AllowedMethod>
         <AllowedMethod>PUT</AllowedMethod>
         <AllowedMethod>POST</AllowedMethod>
+        <AllowedMethod>DELETE</AllowedMethod>
         <MaxAgeSeconds>3000</MaxAgeSeconds>
         <ExposeHeader>ETag</ExposeHeader>
         <AllowedHeader>*</AllowedHeader>
@@ -287,7 +288,7 @@ $ cp .env-dist .env
 
 # Build docker image
 $ docker build . --build-arg SKIP_TOX=true -t s3direct
-$ docker run -itv $(pwd):/code -p 8000:8000 --env-file .env s3direct bash
+$ docker run -itv $(pwd):/code -p 8000-8001:8000-8001 --env-file .env s3direct bash
 $ npm i
 
 # Install locally
