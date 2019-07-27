@@ -1,3 +1,4 @@
+dist: bionic
 language: python
 python:
 - 2.7
@@ -5,6 +6,7 @@ python:
 - 3.5
 - 3.6
 - 3.7
+services: sqlite
 env:
 - DEPS='Django==1.9'
 - DEPS='Django==1.9 boto3'
