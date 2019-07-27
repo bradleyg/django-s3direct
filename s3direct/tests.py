@@ -43,6 +43,7 @@ class WidgetTestCase(TestCase):
             '  <input class="file-input" type="file"  style=""/>\n'
             '  <div class="progress progress-striped active">\n'
             '    <div class="bar"></div>\n'
+            '    <a href="#cancel" class="cancel-button">&times;</a>\n'
             '  </div>\n'
             '</div>\n')
 
