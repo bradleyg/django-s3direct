@@ -9,8 +9,9 @@ python:
 - 3.6
 - 3.7
 env:
-- DEPS='Django==1.11'
-- DEPS='Django==1.11 boto3'
+# only 1.11.17 supports Python 3.7
+- DEPS='Django==1.11.17'
+- DEPS='Django==1.11.17 boto3'
 - DEPS='Django==2.0'
 - DEPS='Django==2.0 boto3'
 - DEPS='Django==2.1'
