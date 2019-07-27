@@ -1,6 +1,12 @@
-dist: bionic
 language: python
-services: sqlite
+services:
+  - sqlite
+python:
+- 2.7
+- 3.4
+- 3.5
+- 3.6
+- 3.7
 env:
 - DEPS='Django==1.9'
 - DEPS='Django==1.9 boto3'
@@ -16,12 +22,8 @@ env:
 - DEPS='Django==2.2 boto3'
 matrix:
   include:
-    - python: 2.7
-    - python: 3.4
-    - python: 3.5
-    - python: 3.6
-    - python: 3.7
-      dist: xenial
+  - python: 3.7
+    dist: bionic
   exclude:
   - python: 2.7
     env: DEPS='Django==2.0'
