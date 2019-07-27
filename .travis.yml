@@ -19,13 +19,13 @@ env:
 matrix:
   include:
   - python: 3.5
-    dist: bionic
+    dist: xenial
     env: DEPS='Django==2.2'
   - python: 3.6
-    dist: bionic
+    dist: xenial
     env: DEPS='Django==2.2'
   - python: 3.7
-    dist: bionic
+    dist: xenial
     env: DEPS='Django==2.2'
   # exclude:
   # - python: 2.7
