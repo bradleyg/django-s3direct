@@ -21,7 +21,6 @@ Install with Pip:
 __Generate access credentials and add them directly to your Django settings__.
 If using Amazon S3 you'll also need to create an IAM policy which grants
 permission to upload to your bucket for your newly created credentials.
-Remember to swap out __YOUR_BUCKET_NAME__ for your actual bucket.
 
 ```json
 {
@@ -44,8 +43,8 @@ Remember to swap out __YOUR_BUCKET_NAME__ for your actual bucket.
 
 ### Option 2:
 __Use the EC2 instance profile and its attached IAM role (AWS only)__  
-You'll need to ensure the following trust policy is in place in addition to the
-policy above. You'll also need the
+Ensure the following trust policy is in place in addition to the policy 
+above. You'll also need the
 [boto3](https://github.com/boto/boto3) package installed.
 
 ```json
@@ -65,11 +64,9 @@ policy above. You'll also need the
 
 ### CORS setup
 
-You'll need to add a CORS policy on your bucket. Note the ETag header is
+Add a CORS policy to your bucket. Note the ETag header is
 important as it is used for multipart uploads. For more information see
 [here](https://github.com/TTLabs/EvaporateJS/wiki/Configuring-The-AWS-S3-Bucket).
-Remember to swap out YOURDOMAIN.COM in the example below, including port if
-developing locally.
 
 If using Digital Ocean Spaces you must upload the CORS config via the API/s3cmd
 CLI (as you can't add the ```ExposeHeader``` rule). See
