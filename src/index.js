@@ -42,11 +42,12 @@ const parseJson = json => {
 
 const updateProgressBar = (element, progressRatio) => {
   const bar = element.querySelector('.bar');
-  bar.style.width = Math.round(progressRatio * 100) + '%';
+  if (bar != null) {bar.style.width = Math.round(progressRatio * 100) + '%';};
 };
 
 const error = (el, msg) => {
-  el.className = 's3direct form-active';
+  el.classList.remove('link-active');
+  el.classList.add('form-active');
   el.querySelector('.file-input').value = '';
   alert(msg);
 };
@@ -77,8 +78,10 @@ const finishUpload = (element, endpoint, bucket, objectKey) => {
   link.innerHTML = parseNameFromUrl(url.value)
     .split('/')
     .pop();
-  element.className = 's3direct link-active';
-  element.querySelector('.bar').style.width = '0%';
+  element.classList.remove('progress-active');
+  element.classList.add('link-active');
+  const bar = element.querySelector('.bar');
+  if (bar != null) {bar.style.width = '0%'};
   disableSubmit(false);
 };
 
@@ -200,7 +203,9 @@ const initiateUpload = (element, signingUrl, uploadParameters, file, dest) => {
   Evaporate.create(createConfig).then(evaporate => {
     disableSubmit(true);
 
-    element.className = 's3direct progress-active';
+    element.classList.remove('link-active');
+    element.classList.add('progress-active');
+
 
     const cancelButton = element.querySelector('.cancel-button');
 
@@ -265,29 +270,27 @@ const removeUpload = e => {
   const el = e.target.parentElement;
   el.querySelector('.file-url').value = '';
   el.querySelector('.file-input').value = '';
-  el.className = 's3direct form-active';
+  el.classList.remove('link-active');
+  el.classList.remove('form-active');
+  el.classList.remove('progress-active');
+  el.classList.add('form-active');
 };
+
+
 
 const addHandlers = el => {
   const url = el.querySelector('.file-url');
   const input = el.querySelector('.file-input');
   const remove = el.querySelector('.file-remove');
   const status = url.value === '' ? 'form' : 'link';
-
-  el.className = 's3direct ' + status + '-active';
+  el.classList.remove('form-active');
+  el.classList.remove('link-active');
+  el.classList.add(status + '-active');
   remove.addEventListener('click', removeUpload, false);
   input.addEventListener('change', checkFileAndInitiateUpload, false);
 };
 
-document.addEventListener('DOMContentLoaded', event => {
-  [].forEach.call(document.querySelectorAll('.s3direct'), addHandlers);
-});
 
-document.addEventListener('DOMNodeInserted', event => {
-  if (event.target.tagName) {
-    const el = event.target.querySelectorAll('.s3direct');
-    [].forEach.call(el, (element, index, array) => {
-      addHandlers(element);
-    });
-  }
-});
+const observer = new MutationObserver(function (m) {[].forEach.call(document.querySelectorAll('.s3direct'), addHandlers);});
+const observer_config = {childList: true, subtree: true};
+observer.observe(document.body, observer_config);
