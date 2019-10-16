@@ -41,8 +41,21 @@ const parseJson = json => {
 };
 
 const updateProgressBar = (element, progressRatio) => {
-  const bar = element.querySelector('.bar');
-  if (bar != null) {bar.style.width = Math.round(progressRatio * 100) + '%';};
+  const use = element.querySelector('use');
+  const ab = use.getAttribute('data-gradient')
+  const grade = document.querySelector('#'+ab)
+  const left = grade.querySelector('.left-stop');
+  const right = grade.querySelector('.right-stop');
+  if (progressRatio === 1 && left != null && right != null) {
+    use.setAttribute('href', '#upload-done');
+    left.setAttribute('offset', 0);
+    right.setAttribute('offset', 0);
+    return
+  }
+  if (left != null && right != null) {
+    left.setAttribute('offset', progressRatio);
+    right.setAttribute('offset', progressRatio + 0.0001);
+  }
 };
 
 const error = (el, msg) => {
