@@ -21,7 +21,7 @@ setup(
     url=package['homepage'],
     packages=['s3direct'],
     include_package_data=True,
-    install_requires=['django>=1.8'],
+    install_requires=['django>=1.8', 'djangorestframework', 'botocore'],
     zip_safe=False,
     classifiers=[
         'Development Status :: 4 - Beta',

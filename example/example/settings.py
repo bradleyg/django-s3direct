@@ -13,8 +13,9 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from s3direct.api.keys import S3KeyWithUUID
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
@@ -27,7 +28,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
 
     's3direct',
     'cat',
@@ -72,7 +73,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'example.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
@@ -96,7 +96,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
@@ -109,7 +108,8 @@ AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', '')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', '')
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
 AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL', '')
-AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', '')
+S3DIRECT_REGION = os.environ.get('AWS_S3_REGION_NAME', '')
+S3DIRECT_URL_STRUCTURE = 'http://{0}/{1}'
 
 
 def create_filename(filename):
@@ -154,4 +154,15 @@ S3DIRECT_DESTINATIONS = {
     'custom_filename': {
         'key': create_filename
     },
+
+    # Test api
+    'images_api': {
+        'key': S3KeyWithUUID('users/avatars/'),
+        'auth': lambda user: True,
+        'allowed': ['image/jpeg', 'image/png'],
+        'acl': 'public-read',
+        'content_length_range': (0, 20000000),
+    },
 }
+
+DEFAULT_DESTINATION = 'images'
