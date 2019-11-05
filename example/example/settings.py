@@ -108,7 +108,7 @@ AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', '')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', '')
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
 AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL', '')
-S3DIRECT_REGION = os.environ.get('AWS_S3_REGION_NAME', '')
+AWS_S3_DIRECT_REGION = os.environ.get('AWS_S3_REGION_NAME', '')
 S3DIRECT_URL_STRUCTURE = 'http://{0}/{1}'
 
 

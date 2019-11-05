@@ -202,7 +202,7 @@ def create_upload_data(
     expires_dt = datetime.utcnow() + expires_in
     expires = expires_dt.strftime('%Y-%m-%dT%H:%M:%S.000Z')
 
-    region = getattr(settings, 'S3DIRECT_REGION', None)
+    region = getattr(settings, 'AWS_S3_DIRECT_REGION', None)
 
     endpoint = get_aws_endpoint(region)
 
