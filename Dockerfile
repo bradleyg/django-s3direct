@@ -1,4 +1,4 @@
-FROM themattrix/tox
+FROM python:3.7-stretch
 ADD . /code
 WORKDIR /code
 RUN apt-get update
