@@ -4,8 +4,6 @@ django-s3direct
 Directly upload files to S3 compatible services with Django.
 -------------------------------------
 
-[![Build Status](https://travis-ci.org/bradleyg/django-s3direct.svg?branch=master)](https://travis-ci.org/bradleyg/django-s3direct)
-  
 <img src="https://raw.githubusercontent.com/bradleyg/django-s3direct/master/screenshot.png" width="100%"/>
 
 ## Installation
