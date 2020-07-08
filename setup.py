@@ -1,11 +1,12 @@
 import os
+import io
 import json
 from setuptools import setup
 
-with open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding="utf-8") as f:
+with io.open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding="utf-8") as f:
     readme = f.read()
 
-with open(os.path.join(os.path.dirname(__file__), 'package.json'), encoding="utf-8") as f:
+with io.open(os.path.join(os.path.dirname(__file__), 'package.json'), encoding="utf-8") as f:
     package = json.loads(f.read())
 
 setup(
