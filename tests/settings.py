@@ -80,8 +80,8 @@ def create_filename(filename):
     return path.join("custom", filename)
 
 
-AWS_ACCESS_KEY_ID = getenv("AWS_ACCESS_KEY_ID", "")
-AWS_SECRET_ACCESS_KEY = getenv("AWS_SECRET_ACCESS_KEY", "")
+AWS_ACCESS_KEY_ID = getenv("AWS_ACCESS_KEY_ID", "XXX")
+AWS_SECRET_ACCESS_KEY = getenv("AWS_SECRET_ACCESS_KEY", "XXX")
 AWS_STORAGE_BUCKET_NAME = getenv("AWS_STORAGE_BUCKET_NAME", "test-bucket")
 
 S3UPLOAD_REGION = "us-east-1"

@@ -2,6 +2,7 @@ import json
 from os.path import splitext
 
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponse
 from django.utils.text import get_valid_filename
 from django.views.decorators.http import require_POST
@@ -15,6 +16,15 @@ from .utils import (
 
 @require_POST
 def get_upload_params(request):  # noqa: C901
+
+    try:
+        access_key_id = settings.AWS_ACCESS_KEY_ID
+        secret_access_key = settings.AWS_SECRET_ACCESS_KEY
+    except AttributeError:
+        raise ImproperlyConfigured(
+            "AWS_ACCESS_KEY_ID or AWS_SECRET_ACCESS_KEY_ID setting is missing"
+        )
+
     content_type = request.POST["type"]
     filename = get_valid_filename(request.POST["name"])
     dest = get_s3upload_destinations().get(request.POST["dest"])
@@ -64,43 +74,6 @@ def get_upload_params(request):  # noqa: C901
     else:
         key = "{0}/{1}".format(key, filename)
 
-    access_key = getattr(settings, "AWS_ACCESS_KEY_ID", None)
-    secret_access_key = getattr(settings, "AWS_SECRET_ACCESS_KEY", None)
-    token = None
-
-    if access_key is None or secret_access_key is None:
-        # Get credentials from instance profile if not defined in settings --
-        # this avoids the need to put access credentials in the settings.py file.
-        # Assumes we're running on EC2.
-
-        try:
-            from botocore.credentials import (
-                InstanceMetadataFetcher,
-                InstanceMetadataProvider,
-            )
-        except ImportError:
-            InstanceMetadataProvider = None
-            InstanceMetadataFetcher = None
-
-        if all([InstanceMetadataProvider, InstanceMetadataFetcher]):
-            provider = InstanceMetadataProvider(
-                iam_role_fetcher=InstanceMetadataFetcher(timeout=1000, num_attempts=2)
-            )
-            creds = provider.load()
-            access_key = creds.access_key
-            secret_access_key = creds.secret_key
-            token = creds.token
-        else:
-            data = json.dumps(
-                {
-                    "error": (
-                        "Failed to access EC2 instance metadata due to missing "
-                        "dependency."
-                    )
-                }
-            )
-            return HttpResponse(data, content_type="application/json", status=500)
-
     data = create_upload_data(
         content_type,
         key,
@@ -110,9 +83,8 @@ def get_upload_params(request):  # noqa: C901
         content_disposition,
         content_length_range,
         server_side_encryption,
-        access_key,
+        access_key_id,
         secret_access_key,
-        token,
     )
 
     url = None
