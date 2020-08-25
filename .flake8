@@ -1,0 +1,29 @@
+[flake8]
+max-line-length = 88
+max-complexity = 8
+
+exclude =
+  .git,
+  .venv,
+  .tox,
+  build,
+  example,
+  tests,
+  migrations
+
+ignore =
+  # http://flake8.pycqa.org/en/2.5.5/warnings.html#warning-error-codes
+  # pydocstyle - docstring conventions (PEP257)
+  D1    # [pydocstyle] missing docstring
+  D203  # [pydocstyle] 1 blank line required before class docstring
+  D212  # [pydocstyle] Multi-line docstring summary should start at the first line
+  D406  # [pydocstyle] Section name should end with a newline
+  D407  # [pydocstyle] Missing dashed underline after section
+  D412  # [pydocstyle] No blank lines allowed between a section header and its content
+  # pycodestyle - style checker (PEP8)
+  W503  # [pycodestyle] line break before binary operator
+  W504  # [pycodestyle] line break after binary operator
+  # bandit - security warnings
+  S308  # [bandit] Use of mark_safe
+  S311  # [bandit] Use of random
+  S703  # [bandit] Use of django_mark_safe

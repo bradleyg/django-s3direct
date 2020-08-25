@@ -1,7 +1,5 @@
-from django.conf.urls import url
+from django.urls import path
 
 from .views import get_upload_params
 
-urlpatterns = [
-    url('^get_upload_params/', get_upload_params, name='s3upload')
-]
+urlpatterns = [path("get_upload_params/", get_upload_params, name="s3upload")]

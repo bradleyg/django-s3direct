@@ -1,0 +1,34 @@
+repos:
+    # python import sorting - will amend files
+    - repo: https://github.com/pre-commit/mirrors-isort
+      rev: v5.4.2
+      hooks:
+          - id: isort
+
+    # python code formatting - will amend files
+    - repo: https://github.com/ambv/black
+      rev: 19.10b0
+      hooks:
+          - id: black
+
+    # Flake8 includes pyflakes, pycodestyle, mccabe, pydocstyle, bandit
+    - repo: https://gitlab.com/pycqa/flake8
+      rev: 3.8.3
+      hooks:
+          - id: flake8
+            additional_dependencies: ["flake8-docstrings", "flake8-bandit"]
+            exclude: ^tests|migrations
+
+    # python static type checking
+    - repo: https://github.com/pre-commit/mirrors-mypy
+      rev: v0.782
+      hooks:
+          - id: mypy
+            args:
+                - --disallow-untyped-defs
+                - --disallow-incomplete-defs
+                - --check-untyped-defs
+                - --no-implicit-optional
+                - --ignore-missing-imports
+                - --follow-imports=silent
+            exclude: ^tests
