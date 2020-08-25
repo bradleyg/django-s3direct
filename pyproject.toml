@@ -26,7 +26,7 @@ packages = [{ include = "s3upload" }]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-django = "^2.2 || ^3.1"
+django = "^2.2 || ^3.0"
 boto3 = "^1.14.48"
 
 [tool.poetry.dev-dependencies]
