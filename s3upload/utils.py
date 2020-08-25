@@ -1,67 +1,31 @@
+from __future__ import annotations
+
 import hashlib
 import hmac
 import json
 from base64 import b64encode
 from datetime import datetime, timedelta
+from typing import Any, Dict, Optional, Union
 from urllib.parse import unquote, urlparse
 
 import boto3
 from django.conf import settings
 
 
-def get_at(index, t):
-    try:
-        value = t[index]
-    except IndexError:
-        value = None
-    return value
-
-
-# NOTE: Don't use constant as it will break ability to change at runtime
-# (E.g. tests)
-def get_s3upload_destinations():
-    """Return s3upload destinations, converting old format if necessary."""
-    destinations = getattr(settings, "S3UPLOAD_DESTINATIONS", None)
-    if destinations is None:
-        return None
-
-    # TODO: Remove when older "positional" settings are no longer supported
-    converted_destinations = {}
-    key_mapping = {
-        0: "key",
-        1: "auth",
-        2: "allowed_types",
-        3: "acl",
-        4: "bucket",
-        5: "cache_control",
-        6: "content_disposition",
-        7: "server_side_encryption",
-    }
-    if destinations:
-        for dest, dest_value in destinations.items():
-            if type(dest_value) is tuple or type(dest_value) is list:
-                converted_destinations[dest] = {}
-                for index, key_name in key_mapping.items():
-                    converted_destinations[dest][key_name] = get_at(index, dest_value)
-            else:
-                converted_destinations[dest] = dest_value
-
-    return converted_destinations
-
-
 def create_upload_data(  # noqa: C901
-    content_type,
-    key,
-    acl,
-    bucket=None,
-    cache_control=None,
-    content_disposition=None,
-    content_length_range=None,
-    server_side_encryption=None,
-    access_key=None,
-    secret_access_key=None,
-    token=None,
-):
+    *,
+    content_type: str,
+    key: str,
+    acl: str,
+    bucket: Optional[str] = None,
+    cache_control: Optional[str] = None,
+    content_disposition: Optional[str] = None,
+    content_length_range: Optional[str] = None,
+    server_side_encryption: Optional[str] = None,
+    token: Optional[str] = None,
+) -> Dict[str, Union[str, int]]:
+    access_key = settings.AWS_ACCESS_KEY_ID
+    secret_access_key = settings.AWS_SECRET_ACCESS_KEY
     bucket = bucket or settings.AWS_STORAGE_BUCKET_NAME
     region = getattr(settings, "S3UPLOAD_REGION", None)
     if not region or region == "us-east-1":
@@ -73,7 +37,7 @@ def create_upload_data(  # noqa: C901
     now_date = datetime.utcnow().strftime("%Y%m%dT%H%M%S000Z")
     raw_date = datetime.utcnow().strftime("%Y%m%d")
 
-    policy_dict = {
+    policy_dict: Dict[str, Any] = {
         "expiration": expires,
         "conditions": [
             {"bucket": bucket},
@@ -166,7 +130,9 @@ def create_upload_data(  # noqa: C901
     return return_dict
 
 
-def get_s3_path_from_url(url, bucket_name=settings.AWS_STORAGE_BUCKET_NAME):
+def get_s3_path_from_url(
+    url: str, bucket_name: str = settings.AWS_STORAGE_BUCKET_NAME
+) -> str:
     decoded = unquote(url)
     path = urlparse(decoded).path
 
@@ -182,8 +148,8 @@ def get_s3_path_from_url(url, bucket_name=settings.AWS_STORAGE_BUCKET_NAME):
 
 
 def get_signed_download_url(
-    key, bucket_name=settings.AWS_STORAGE_BUCKET_NAME, ttl=60,
-):
+    key: str, bucket_name: str = settings.AWS_STORAGE_BUCKET_NAME, ttl: int = 60,
+) -> str:
     s3 = boto3.client(
         "s3",
         aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
