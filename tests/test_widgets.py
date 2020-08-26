@@ -31,14 +31,14 @@ HTML_OUTPUT = """<div class="s3upload" data-policy-url="/s3upload/get_upload_par
 """
 
 FOO_RESPONSE = {
-    u"x-amz-algorithm": u"AWS4-HMAC-SHA256",
-    u"form_action": u"https://s3.amazonaws.com/{}".format(
+    "x-amz-algorithm": "AWS4-HMAC-SHA256",
+    "form_action": "https://s3.amazonaws.com/{}".format(
         settings.AWS_STORAGE_BUCKET_NAME
     ),
-    u"success_action_status": 201,
-    u"acl": u"public-read",
-    u"key": u"uploads/imgs/image.jpg",
-    u"content-type": u"image/jpeg",
+    "success_action_status": 201,
+    "acl": "public-read",
+    "key": "uploads/imgs/image.jpg",
+    "content-type": "image/jpeg",
 }
 
 
@@ -95,7 +95,7 @@ class WidgetTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_check_disallowed_type_logged_out(self):
-        data = {u"dest": u"vids", u"name": u"video.mp4", u"type": u"video/mp4"}
+        data = {"dest": "vids", "name": "video.mp4", "type": "video/mp4"}
         response = self.client.post(reverse("s3upload"), data)
         self.assertEqual(response.status_code, 403)
 
@@ -121,17 +121,17 @@ class WidgetTests(TestCase):
 
     def test_check_signing_fields(self):
         self.client.login(username="admin", password="admin")
-        data = {u"dest": u"imgs", u"name": u"image.jpg", u"type": u"image/jpeg"}
+        data = {"dest": "imgs", "name": "image.jpg", "type": "image/jpeg"}
         response = self.client.post(reverse("s3upload"), data)
         response_dict = json.loads(response.content.decode())
         aws_payload = response_dict["aws_payload"]
-        self.assertTrue(u"x-amz-signature" in aws_payload)
-        self.assertTrue(u"x-amz-credential" in aws_payload)
-        self.assertTrue(u"policy" in aws_payload)
+        self.assertTrue("x-amz-signature" in aws_payload)
+        self.assertTrue("x-amz-credential" in aws_payload)
+        self.assertTrue("policy" in aws_payload)
         self.assertEqual(aws_payload["x-amz-algorithm"], "AWS4-HMAC-SHA256")
         self.assertEqual(
             aws_payload["form_action"],
-            "https://s3.amazonaws.com/{}".format(settings.AWS_STORAGE_BUCKET_NAME),
+            f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.S3UPLOAD_REGION}.amazonaws.com",
         )
         self.assertEqual(aws_payload["success_action_status"], 201)
         self.assertEqual(aws_payload["acl"], "public-read")
@@ -139,17 +139,17 @@ class WidgetTests(TestCase):
         self.assertEqual(aws_payload["content-type"], "image/jpeg")
 
     def test_check_signing_fields_unique_filename(self):
-        data = {u"dest": u"misc", u"name": u"image.jpg", u"type": u"image/jpeg"}
+        data = {"dest": "misc", "name": "image.jpg", "type": "image/jpeg"}
         response = self.client.post(reverse("s3upload"), data)
         response_dict = json.loads(response.content.decode())
         aws_payload = response_dict["aws_payload"]
-        self.assertTrue(u"x-amz-signature" in aws_payload)
-        self.assertTrue(u"x-amz-credential" in aws_payload)
-        self.assertTrue(u"policy" in aws_payload)
+        self.assertTrue("x-amz-signature" in aws_payload)
+        self.assertTrue("x-amz-credential" in aws_payload)
+        self.assertTrue("policy" in aws_payload)
         self.assertEqual(aws_payload["x-amz-algorithm"], "AWS4-HMAC-SHA256")
         self.assertEqual(
             aws_payload["form_action"],
-            "https://s3.amazonaws.com/{}".format(settings.AWS_STORAGE_BUCKET_NAME),
+            f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.S3UPLOAD_REGION}.amazonaws.com",
         )
         self.assertEqual(aws_payload["success_action_status"], 201)
         self.assertEqual(aws_payload["acl"], "public-read")
@@ -158,7 +158,7 @@ class WidgetTests(TestCase):
 
     def test_check_policy_conditions(self):
         self.client.login(username="admin", password="admin")
-        data = {u"dest": u"cached", u"name": u"video.mp4", u"type": u"video/mp4"}
+        data = {"dest": "cached", "name": "video.mp4", "type": "video/mp4"}
         response = self.client.post(reverse("s3upload"), data)
         self.assertEqual(response.status_code, 200)
         response_dict = json.loads(response.content.decode())
@@ -167,11 +167,11 @@ class WidgetTests(TestCase):
         policy_dict = json.loads(b64decode(aws_payload["policy"]).decode("utf-8"))
         self.assertTrue("conditions" in policy_dict)
         conditions_dict = policy_dict["conditions"]
-        self.assertEqual(conditions_dict[0]["bucket"], u"astoragebucketname")
-        self.assertEqual(conditions_dict[1]["acl"], u"authenticated-read")
-        self.assertEqual(conditions_dict[8]["Cache-Control"], u"max-age=2592000")
-        self.assertEqual(conditions_dict[9]["Content-Disposition"], u"attachment")
-        self.assertEqual(conditions_dict[10]["x-amz-server-side-encryption"], u"AES256")
+        self.assertEqual(conditions_dict[0]["bucket"], "astoragebucketname")
+        self.assertEqual(conditions_dict[1]["acl"], "authenticated-read")
+        self.assertEqual(conditions_dict[8]["Cache-Control"], "max-age=2592000")
+        self.assertEqual(conditions_dict[9]["Content-Disposition"], "attachment")
+        self.assertEqual(conditions_dict[10]["x-amz-server-side-encryption"], "AES256")
 
     @override_settings(
         S3UPLOAD_DESTINATIONS={
@@ -184,7 +184,7 @@ class WidgetTests(TestCase):
         }
     )
     def test_check_signed_url(self):
-        data = {u"dest": u"misc", u"name": u"image.jpg", u"type": u"image/jpeg"}
+        data = {"dest": "misc", "name": "image.jpg", "type": "image/jpeg"}
         response = self.client.post(reverse("s3upload"), data)
         response_dict = json.loads(response.content.decode())
         parsed_url = urlparse(response_dict["private_access_url"])

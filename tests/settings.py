@@ -46,6 +46,8 @@ TEMPLATES = [
 
 STATIC_URL = "/static/"
 
+STATIC_ROOT = path.join(PROJECT_DIR, "static")
+
 SECRET_KEY = "secret"
 
 LOGGING = {
@@ -80,11 +82,12 @@ def create_filename(filename):
     return path.join("custom", filename)
 
 
-AWS_ACCESS_KEY_ID = getenv("AWS_ACCESS_KEY_ID", "XXX")
-AWS_SECRET_ACCESS_KEY = getenv("AWS_SECRET_ACCESS_KEY", "XXX")
-AWS_STORAGE_BUCKET_NAME = getenv("AWS_STORAGE_BUCKET_NAME", "test-bucket")
+AWS_ACCESS_KEY_ID = getenv("AWS_ACCESS_KEY_ID", "")
+AWS_SECRET_ACCESS_KEY = getenv("AWS_SECRET_ACCESS_KEY", "")
+AWS_STORAGE_BUCKET_NAME = getenv("AWS_STORAGE_BUCKET_NAME", "")
 
-S3UPLOAD_REGION = "us-east-1"
+S3UPLOAD_REGION = getenv("S3UPLOAD_REGION", "")
+
 S3UPLOAD_DESTINATIONS = {
     "misc": {"key": lambda original_filename: "images/unique.jpg"},
     "files": {"key": "uploads/files", "auth": lambda u: u.is_staff},
