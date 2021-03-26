@@ -72,11 +72,9 @@ const disableSubmit = status => {
 const finishUpload = (element, endpoint, bucket, objectKey) => {
   const link = element.querySelector('.file-link');
   const url = element.querySelector('.file-url');
-  url.value = endpoint + '/' + bucket + '/' + objectKey;
-  link.setAttribute('href', url.value);
-  link.innerHTML = parseNameFromUrl(url.value)
-    .split('/')
-    .pop();
+  url.value = objectKey;
+  link.removeAttribute('href');
+  link.innerHTML = objectKey;
   element.className = 's3direct link-active';
   element.querySelector('.bar').style.width = '0%';
   disableSubmit(false);

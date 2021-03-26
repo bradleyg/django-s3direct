@@ -1,21 +1,18 @@
+
 import hashlib
 import hmac
 from collections import namedtuple
 
 from django.conf import settings
 
-# django-s3direct accesses AWS credentials from Django config and provides
-# an optional ability to retrieve credentials from EC2 instance profile if
-# AWS settings are set to None. This optional ability requires botocore,
-# however dependency on botocore is not enforced as this a secondary
-# method for retrieving credentials.
-try:
-    from botocore import session
-except ImportError:
-    session = None
+import boto3
+from botocore import session
+from botocore.client import Config
 
-AWSCredentials = namedtuple('AWSCredentials',
-                            ['token', 'secret_key', 'access_key'])
+AWSCredentials = namedtuple(
+    'AWSCredentials',
+    ['token', 'secret_key', 'access_key']
+)
 
 
 def get_s3direct_destinations():
@@ -80,3 +77,36 @@ def get_aws_credentials():
     else:
         # Creds are incorrect
         return AWSCredentials(None, None, None)
+
+def get_presigned_url(dest, key, expires_in=3600):
+    dest = get_s3direct_destinations().get(dest)
+
+    bucket = dest.get(
+        'bucket',
+        getattr(settings, 'AWS_STORAGE_BUCKET_NAME', None)
+    )
+    region = dest.get(
+        'region',
+        getattr(settings, 'AWS_S3_REGION_NAME', None)
+    )
+    endpoint = dest.get(
+        'endpoint',
+        getattr(settings, 'AWS_S3_ENDPOINT_URL', None)
+    )
+
+    s3_client = boto3.client(
+        's3',
+        endpoint_url=endpoint,
+        region_name=region,
+        config=Config(signature_version='s3v4')
+    )
+    response = s3_client.generate_presigned_url(
+        'get_object',
+        Params={
+            'Bucket': bucket,
+            'Key': key,
+        },
+        ExpiresIn=expires_in
+    )
+
+    return response

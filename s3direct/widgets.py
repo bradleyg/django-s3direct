@@ -8,6 +8,7 @@ from django.template.loader import render_to_string
 from django.utils.http import urlunquote_plus
 from django.conf import settings
 
+from s3direct.utils import get_presigned_url
 
 class S3DirectWidget(widgets.TextInput):
     class Media:
@@ -16,11 +17,17 @@ class S3DirectWidget(widgets.TextInput):
 
     def __init__(self, *args, **kwargs):
         self.dest = kwargs.pop('dest', None)
-        super(S3DirectWidget, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def render(self, name, value, **kwargs):
-        file_url = value or ''
         csrf_cookie_name = getattr(settings, 'CSRF_COOKIE_NAME', 'csrftoken')
+        value = value or ''
+        file_url = value
+        if file_url != '':
+            file_url = get_presigned_url(
+                self.dest,
+                file_url,
+            )
 
         ctx = {
             'policy_url': reverse('s3direct'),
@@ -29,9 +36,12 @@ class S3DirectWidget(widgets.TextInput):
             'name': name,
             'csrf_cookie_name': csrf_cookie_name,
             'file_url': file_url,
-            'file_name': os.path.basename(urlunquote_plus(file_url)),
+            'file_value': value,
         }
 
         return mark_safe(
-            render_to_string(os.path.join('s3direct', 's3direct-widget.tpl'),
-                             ctx))
+            render_to_string(
+                os.path.join('s3direct', 's3direct-widget.tpl'),
+                ctx
+            )
+        )

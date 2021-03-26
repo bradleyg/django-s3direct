@@ -1,17 +1,21 @@
 import json
 from datetime import datetime
 from django.conf import settings
-from django.http import (HttpResponse, HttpResponseBadRequest,
-                         HttpResponseForbidden, HttpResponseNotFound,
-                         HttpResponseServerError)
+from django.http import (
+    HttpResponse, HttpResponseBadRequest,
+    HttpResponseForbidden, HttpResponseNotFound,
+    HttpResponseServerError
+)
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 try:
     from urllib.parse import unquote
 except ImportError:
     from urlparse import unquote
-from .utils import (get_aws_credentials, get_aws_v4_signature,
-                    get_aws_v4_signing_key, get_s3direct_destinations, get_key)
+from .utils import (
+    get_aws_credentials, get_aws_v4_signature,
+    get_aws_v4_signing_key, get_s3direct_destinations, get_key
+)
 
 
 @csrf_protect
@@ -22,8 +26,10 @@ def get_upload_params(request):
     file_type = request.POST['type']
     file_size = int(request.POST['size'])
 
-    dest = get_s3direct_destinations().get(request.POST.get('dest', None),
-                                           None)
+    dest = get_s3direct_destinations().get(
+        request.POST.get('dest', None),
+        None
+    )
     if not dest:
         resp = json.dumps({'error': 'File destination does not exist.'})
         return HttpResponseNotFound(resp, content_type='application/json')
@@ -34,7 +40,7 @@ def get_upload_params(request):
         return HttpResponseForbidden(resp, content_type='application/json')
 
     allowed = dest.get('allowed')
-    if (allowed and file_type not in allowed) and allowed != '*':
+    if allowed and file_type not in allowed and allowed != '*':
         resp = json.dumps({'error': 'Invalid file type (%s).' % file_type})
         return HttpResponseBadRequest(resp, content_type='application/json')
 
@@ -49,8 +55,10 @@ def get_upload_params(request):
         resp = json.dumps({'error': 'Missing destination path.'})
         return HttpResponseServerError(resp, content_type='application/json')
 
-    bucket = dest.get('bucket',
-                      getattr(settings, 'AWS_STORAGE_BUCKET_NAME', None))
+    bucket = dest.get(
+        'bucket',
+        getattr(settings, 'AWS_STORAGE_BUCKET_NAME', None)
+    )
     if not bucket:
         resp = json.dumps({'error': 'S3 bucket config missing.'})
         return HttpResponseServerError(resp, content_type='application/json')
@@ -60,8 +68,10 @@ def get_upload_params(request):
         resp = json.dumps({'error': 'S3 region config missing.'})
         return HttpResponseServerError(resp, content_type='application/json')
 
-    endpoint = dest.get('endpoint',
-                        getattr(settings, 'AWS_S3_ENDPOINT_URL', None))
+    endpoint = dest.get(
+        'endpoint',
+        getattr(settings, 'AWS_S3_ENDPOINT_URL', None)
+    )
     if not endpoint:
         resp = json.dumps({'error': 'S3 endpoint config missing.'})
         return HttpResponseServerError(resp, content_type='application/json')
@@ -72,22 +82,14 @@ def get_upload_params(request):
         return HttpResponseServerError(resp, content_type='application/json')
 
     upload_data = {
-        'object_key':
-        get_key(key, file_name, dest),
-        'access_key_id':
-        aws_credentials.access_key,
-        'session_token':
-        aws_credentials.token,
-        'region':
-        region,
-        'bucket':
-        bucket,
-        'endpoint':
-        endpoint,
-        'acl':
-        dest.get('acl') or 'public-read',
-        'allow_existence_optimization':
-        dest.get('allow_existence_optimization', False)
+        'object_key':                   get_key(key, file_name, dest),
+        'access_key_id':                aws_credentials.access_key,
+        'session_token':                aws_credentials.token,
+        'region':                       region,
+        'bucket':                       bucket,
+        'endpoint':                     endpoint,
+        'acl':                          dest.get('acl') or 'public-read',
+        'allow_existence_optimization': dest.get('allow_existence_optimization', False)
     }
 
     optional_params = [
@@ -111,8 +113,10 @@ def get_upload_params(request):
 def generate_aws_v4_signature(request):
     message = unquote(request.POST['to_sign'])
     dest = get_s3direct_destinations().get(unquote(request.POST['dest']))
-    signing_date = datetime.strptime(request.POST['datetime'],
-                                     '%Y%m%dT%H%M%SZ')
+    signing_date = datetime.strptime(
+        request.POST['datetime'],
+        '%Y%m%dT%H%M%SZ'
+    )
 
     auth = dest.get('auth')
     if auth and not auth(request.user):
@@ -129,8 +133,10 @@ def generate_aws_v4_signature(request):
         resp = json.dumps({'error': 'AWS credentials config missing.'})
         return HttpResponseServerError(resp, content_type='application/json')
 
-    signing_key = get_aws_v4_signing_key(aws_credentials.secret_key,
-                                         signing_date, region, 's3')
+    signing_key = get_aws_v4_signing_key(
+        aws_credentials.secret_key,
+        signing_date, region, 's3'
+    )
 
     signature = get_aws_v4_signature(signing_key, message)
     resp = json.dumps({'s3ObjKey': signature})
