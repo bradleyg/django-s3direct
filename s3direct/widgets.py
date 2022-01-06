@@ -21,12 +21,12 @@ class S3DirectWidget(widgets.TextInput):
 
     def render(self, name, value, **kwargs):
         csrf_cookie_name = getattr(settings, 'CSRF_COOKIE_NAME', 'csrftoken')
-        value = value or ''
-        file_url = value
-        if file_url != '':
+        file_url = ""
+        if value is not None:
+            file_name = value['filename']
             file_url = get_presigned_url(
                 self.dest,
-                file_url,
+                value['url'],
             )
 
         ctx = {
@@ -35,8 +35,9 @@ class S3DirectWidget(widgets.TextInput):
             'dest': self.dest,
             'name': name,
             'csrf_cookie_name': csrf_cookie_name,
+            'value': value,
             'file_url': file_url,
-            'file_value': value,
+            'file_name': file_name,
         }
 
         return mark_safe(
