@@ -34,6 +34,7 @@ class CastOnAssignDescriptor(object):
         except:
             obj.__dict__[self.field.name] = self.field.to_python(value)
 
+
 class S3DirectField(JSONField):
     def __init__(
         self, *args, **kwargs,
@@ -75,7 +76,7 @@ class S3DirectField(JSONField):
 
     def get_prep_value(self, value):
         if value is None:
-            return value
+            return None
         return json.dumps(value, cls=self.encoder)
 
     def validate_url(self, value):
