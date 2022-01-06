@@ -1,6 +1,9 @@
 from __future__ import unicode_literals
 
+
 import os
+import json
+
 from django.forms import widgets
 from django.utils.safestring import mark_safe
 from django.urls import reverse
@@ -21,13 +24,17 @@ class S3DirectWidget(widgets.TextInput):
 
     def render(self, name, value, **kwargs):
         csrf_cookie_name = getattr(settings, 'CSRF_COOKIE_NAME', 'csrftoken')
-        file_url = ""
-        if value is not None:
+        try:
+            value = json.loads(value)
             file_name = value['filename']
             file_url = get_presigned_url(
                 self.dest,
                 value['url'],
             )
+        except:
+            file_name = ""
+            file_url = ""
+
 
         ctx = {
             'policy_url': reverse('s3direct'),
