@@ -11,7 +11,7 @@
            value="{{ csrf_cookie_name }}">
     <input class="file-url"
            type="hidden"
-           value="{{ file_url }}"
+           value="{{ file_key }}"
            id="{{ element_id }}"
            name="{{ name }}" />
     <input class="file-dest"

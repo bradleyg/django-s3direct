@@ -69,12 +69,12 @@ const disableSubmit = status => {
   });
 };
 
-const finishUpload = (element, endpoint, bucket, objectKey) => {
+const finishUpload = (element, fileName, endpoint, bucket, objectKey) => {
   const link = element.querySelector('.file-link');
   const url = element.querySelector('.file-url');
   url.value = objectKey;
   link.removeAttribute('href');
-  link.innerHTML = objectKey;
+  link.innerHTML = fileName;
   element.className = 's3direct link-active';
   element.querySelector('.bar').style.width = '0%';
   disableSubmit(false);
@@ -214,6 +214,7 @@ const initiateUpload = (element, signingUrl, uploadParameters, file, dest) => {
         cancelButton.removeEventListener('click', cancelUpload);
         finishUpload(
           element,
+          file.name,
           uploadParameters.endpoint,
           uploadParameters.bucket,
           s3Objkey
