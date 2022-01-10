@@ -18,8 +18,7 @@
            type="hidden"
            value="{{ dest }}">
     <input class="file-input"
-           type="file"
-           style="{{ style }}" />
+           type="file" />
     <div class="progress progress-striped active">
         <div class="bar"></div>
         <a href="#cancel"
