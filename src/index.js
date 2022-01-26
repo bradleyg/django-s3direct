@@ -279,15 +279,7 @@ const addHandlers = el => {
   input.addEventListener('change', checkFileAndInitiateUpload, false);
 };
 
-document.addEventListener('DOMContentLoaded', event => {
-  [].forEach.call(document.querySelectorAll('.s3direct'), addHandlers);
-});
+const observer = new MutationObserver(function (m) {[].forEach.call(document.querySelectorAll('.s3direct'), addHandlers);});
+const observer_config = {childList: true, subtree: true};
+observer.observe(document.body, observer_config);
 
-document.addEventListener('DOMNodeInserted', event => {
-  if (event.target.tagName) {
-    const el = event.target.querySelectorAll('.s3direct');
-    [].forEach.call(el, (element, index, array) => {
-      addHandlers(element);
-    });
-  }
-});
