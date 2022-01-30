@@ -447,7 +447,8 @@ class SignatureViewTestCase(TestCase):
     def test_signing_with_custom_region(self):
         dest = 'custom-region-bucket'
         custom_region = self.get_custom_region_from_s3_dests(dest)
-        string_to_sign, signing_date = self.create_dummy_signing_request(region=custom_region)
+        string_to_sign, signing_date = self.create_dummy_signing_request(
+            region=custom_region)
         response = self.client.post(
             reverse('s3direct-signing'),
             data={

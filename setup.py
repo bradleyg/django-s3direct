@@ -20,7 +20,7 @@ setup(
     url=package['homepage'],
     packages=['s3direct'],
     include_package_data=True,
-    install_requires=['django>=1.8'],
+    install_requires=['django>=3.0'],
     zip_safe=False,
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -29,7 +29,6 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
