@@ -1,5 +1,5 @@
 twine==3.1.1
 mock==4.0.2
-Django==3.1.13
+Django==3.1.14
 yapf==0.30.0
 tox==3.15.2
