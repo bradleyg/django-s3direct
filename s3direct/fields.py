@@ -1,6 +1,9 @@
+import cgi
 import boto3
 import botocore
 import json
+from urllib.parse import unquote
+
 from django import forms
 
 from django.db.models import JSONField
@@ -33,15 +36,20 @@ def validate_url(value, dest):
             Bucket=bucket,
             Key=value,
         )
-        filename = head_object["ContentDisposition"].split("filename=")[1]
+
+        content_disposition = head_object["ContentDisposition"]
+        header_value, header_params = cgi.parse_header(content_disposition)
+        filename = ""
+        for param_name in ["filename*", "filename"]:
+            if param_name in header_params:
+                filename = header_params[param_name].strip("UTF-8''")
+                filename = unquote(filename)
+                break
+
         mimetype = head_object["ContentType"]
         return {"key": value, "filename": filename, "mimetype": mimetype}
-    except botocore.exceptions.ClientError as e:
-        error_code = e.response["Error"]["Code"]
-        if error_code == "404":
-            raise ValidationError(_("Object not found."))
-
-    return None
+    except s3_client.exceptions.NoSuchKey:
+        raise ValidationError(_("Object not found."))
 
 
 class S3DirectDescriptor(object):
