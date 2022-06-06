@@ -497,7 +497,7 @@ class SignatureViewTestCase(TestCase):
 
 
 class AWSCredentialsTest(TestCase):
-    @mock.patch('s3direct.utils.session')
+    @mock.patch('s3direct.utils.SESSION')
     @override_settings(AWS_ACCESS_KEY_ID=None, AWS_SECRET_ACCESS_KEY=None)
     def test_retrieves_aws_credentials_from_botocore(self, botocore_mock):
         credentials_mock = mock.Mock(
@@ -505,10 +505,9 @@ class AWSCredentialsTest(TestCase):
             secret_key='secret_key',
             access_key='access_key',
         )
-        botocore_mock.get_session(
-        ).get_credentials.return_value = credentials_mock
+        botocore_mock.get_credentials.return_value = credentials_mock
         credentials = get_aws_credentials()
-        botocore_mock.get_session().get_credentials.assert_called_once_with()
+        botocore_mock.get_credentials.assert_called_once_with()
         self.assertEqual(credentials.token, 'token')
         self.assertEqual(credentials.secret_key, 'secret_key')
         self.assertEqual(credentials.access_key, 'access_key')
