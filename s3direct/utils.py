@@ -18,7 +18,8 @@ AWSCredentials = namedtuple('AWSCredentials',
                             ['token', 'secret_key', 'access_key'])
 SESSION = None
 if session is not None:
-    SESSION=session.get_session()
+    SESSION = session.get_session()
+
 
 def get_s3direct_destinations():
     """Returns s3direct destinations.

@@ -10,7 +10,7 @@ const request = (method, url, data, headers, el, cb) => {
   let req = new XMLHttpRequest();
   req.open(method, url, true);
 
-  Object.keys(headers).forEach(key => {
+  Object.keys(headers).forEach((key) => {
     req.setRequestHeader(key, headers[key]);
   });
 
@@ -26,11 +26,11 @@ const request = (method, url, data, headers, el, cb) => {
   req.send(data);
 };
 
-const parseNameFromUrl = url => {
+const parseNameFromUrl = (url) => {
   return decodeURIComponent((url + '').replace(/\+/g, '%20'));
 };
 
-const parseJson = json => {
+const parseJson = (json) => {
   let data;
   try {
     data = JSON.parse(json);
@@ -53,7 +53,7 @@ const error = (el, msg) => {
 
 let concurrentUploads = 0;
 
-const disableSubmit = status => {
+const disableSubmit = (status) => {
   const submitRow = document.querySelector('.submit-row');
   if (!submitRow) return;
 
@@ -64,7 +64,7 @@ const disableSubmit = status => {
   if (status === true) concurrentUploads++;
   else concurrentUploads--;
 
-  [].forEach.call(buttons, el => {
+  [].forEach.call(buttons, (el) => {
     el.disabled = concurrentUploads !== 0;
   });
 };
@@ -74,25 +74,21 @@ const finishUpload = (element, endpoint, bucket, objectKey) => {
   const url = element.querySelector('.file-url');
   url.value = endpoint + '/' + bucket + '/' + objectKey;
   link.setAttribute('href', url.value);
-  link.innerHTML = parseNameFromUrl(url.value)
-    .split('/')
-    .pop();
+  link.innerHTML = parseNameFromUrl(url.value).split('/').pop();
   element.className = 's3direct link-active';
   element.querySelector('.bar').style.width = '0%';
   disableSubmit(false);
 };
 
-const computeMd5 = data => {
+const computeMd5 = (data) => {
   return btoa(SparkMD5.ArrayBuffer.hash(data, true));
 };
 
-const computeSha256 = data => {
-  return createHash('sha256')
-    .update(data, 'utf-8')
-    .digest('hex');
+const computeSha256 = (data) => {
+  return createHash('sha256').update(data, 'utf-8').digest('hex');
 };
 
-const getCsrfToken = element => {
+const getCsrfToken = (element) => {
   const cookieInput = element.querySelector('.csrf-cookie-name');
   const input = document.querySelector('input[name=csrfmiddlewaretoken]');
   const token = input ? input.value : Cookies.get(cookieInput.value);
@@ -109,7 +105,7 @@ const generateAmzInitHeaders = (acl, serverSideEncryption, sessionToken) => {
   return headers;
 };
 
-const generateAmzCommonHeaders = sessionToken => {
+const generateAmzCommonHeaders = (sessionToken) => {
   const headers = {};
   if (sessionToken) headers['x-amz-security-token'] = sessionToken;
   return headers;
@@ -162,7 +158,7 @@ const initiateUpload = (element, signingUrl, uploadParameters, file, dest) => {
     partSize: 20 * 1024 * 1024,
     logging: true,
     allowS3ExistenceOptimization: uploadParameters.allow_existence_optimization,
-    s3FileCacheHoursAgo: uploadParameters.allow_existence_optimization ? 12 : 0
+    s3FileCacheHoursAgo: uploadParameters.allow_existence_optimization ? 12 : 0,
   };
 
   const addConfig = {
@@ -182,7 +178,7 @@ const initiateUpload = (element, signingUrl, uploadParameters, file, dest) => {
       if (msg.includes('InvalidAccessKeyId')) {
         error(element, msg);
       }
-    }
+    },
   };
 
   const optHeaders = {};
@@ -197,14 +193,14 @@ const initiateUpload = (element, signingUrl, uploadParameters, file, dest) => {
 
   addConfig['notSignedHeadersAtInitiate'] = optHeaders;
 
-  Evaporate.create(createConfig).then(evaporate => {
+  Evaporate.create(createConfig).then((evaporate) => {
     disableSubmit(true);
 
     element.className = 's3direct progress-active';
 
     const cancelButton = element.querySelector('.cancel-button');
 
-    const cancelUpload = e => {
+    const cancelUpload = (e) => {
       e.preventDefault();
       evaporate.cancel(`${uploadParameters.bucket}/${addConfig.name}`);
     };
@@ -212,7 +208,7 @@ const initiateUpload = (element, signingUrl, uploadParameters, file, dest) => {
     cancelButton.addEventListener('click', cancelUpload, false);
 
     evaporate.add(addConfig).then(
-      s3Objkey => {
+      (s3Objkey) => {
         cancelButton.removeEventListener('click', cancelUpload);
         finishUpload(
           element,
@@ -221,7 +217,7 @@ const initiateUpload = (element, signingUrl, uploadParameters, file, dest) => {
           s3Objkey
         );
       },
-      reason => {
+      (reason) => {
         cancelButton.removeEventListener('click', cancelUpload);
         return error(element, reason);
       }
@@ -229,7 +225,7 @@ const initiateUpload = (element, signingUrl, uploadParameters, file, dest) => {
   });
 };
 
-const checkFileAndInitiateUpload = event => {
+const checkFileAndInitiateUpload = (event) => {
   const element = event.target.parentElement;
   const file = element.querySelector('.file-input').files[0];
   const dest = element.querySelector('.file-dest').value;
@@ -260,7 +256,7 @@ const checkFileAndInitiateUpload = event => {
   });
 };
 
-const removeUpload = e => {
+const removeUpload = (e) => {
   e.preventDefault();
   const el = e.target.parentElement;
   el.querySelector('.file-url').value = '';
@@ -268,7 +264,7 @@ const removeUpload = e => {
   el.className = 's3direct form-active';
 };
 
-const addHandlers = el => {
+const addHandlers = (el) => {
   const url = el.querySelector('.file-url');
   const input = el.querySelector('.file-input');
   const remove = el.querySelector('.file-remove');
@@ -279,7 +275,8 @@ const addHandlers = el => {
   input.addEventListener('change', checkFileAndInitiateUpload, false);
 };
 
-const observer = new MutationObserver(function (m) {[].forEach.call(document.querySelectorAll('.s3direct'), addHandlers);});
-const observer_config = {childList: true, subtree: true};
+const observer = new MutationObserver(function (m) {
+  [].forEach.call(document.querySelectorAll('.s3direct'), addHandlers);
+});
+const observer_config = { childList: true, subtree: true };
 observer.observe(document.body, observer_config);
-
