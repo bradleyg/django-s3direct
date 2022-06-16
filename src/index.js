@@ -1,10 +1,10 @@
-import Cookies from 'js-cookie';
-import createHash from 'sha.js';
-import Evaporate from 'evaporate';
-import SparkMD5 from 'spark-md5';
+import Cookies from "js-cookie";
+import createHash from "sha.js";
+import Evaporate from "evaporate";
+import SparkMD5 from "spark-md5";
 
-import './css/bootstrap-progress.css';
-import './css/styles.css';
+import "./css/bootstrap-progress.css";
+import "./css/styles.css";
 
 const request = (method, url, data, headers, el, cb) => {
   let req = new XMLHttpRequest();
@@ -20,14 +20,14 @@ const request = (method, url, data, headers, el, cb) => {
 
   req.onerror = req.onabort = () => {
     disableSubmit(false);
-    error(el, 'Sorry, failed to upload file.');
+    error(el, "Sorry, failed to upload file.");
   };
 
   req.send(data);
 };
 
 const parseNameFromUrl = (url) => {
-  return decodeURIComponent((url + '').replace(/\+/g, '%20'));
+  return decodeURIComponent((url + "").replace(/\+/g, "%20"));
 };
 
 const parseJson = (json) => {
@@ -41,24 +41,24 @@ const parseJson = (json) => {
 };
 
 const updateProgressBar = (element, progressRatio) => {
-  const bar = element.querySelector('.bar');
-  bar.style.width = Math.round(progressRatio * 100) + '%';
+  const bar = element.querySelector(".bar");
+  bar.style.width = Math.round(progressRatio * 100) + "%";
 };
 
 const error = (el, msg) => {
-  el.className = 's3direct form-active';
-  el.querySelector('.file-input').value = '';
+  el.className = "s3direct form-active";
+  el.querySelector(".file-input").value = "";
   alert(msg);
 };
 
 let concurrentUploads = 0;
 
 const disableSubmit = (status) => {
-  const submitRow = document.querySelector('.submit-row');
+  const submitRow = document.querySelector(".submit-row");
   if (!submitRow) return;
 
   const buttons = submitRow.querySelectorAll(
-    'input[type=submit],button[type=submit]'
+    "input[type=submit],button[type=submit]"
   );
 
   if (status === true) concurrentUploads++;
@@ -70,13 +70,13 @@ const disableSubmit = (status) => {
 };
 
 const finishUpload = (element, endpoint, bucket, objectKey) => {
-  const link = element.querySelector('.file-link');
-  const url = element.querySelector('.file-url');
-  url.value = endpoint + '/' + bucket + '/' + objectKey;
-  link.setAttribute('href', url.value);
-  link.innerHTML = parseNameFromUrl(url.value).split('/').pop();
-  element.className = 's3direct link-active';
-  element.querySelector('.bar').style.width = '0%';
+  const link = element.querySelector(".file-link");
+  const url = element.querySelector(".file-url");
+  url.value = endpoint + "/" + bucket + "/" + objectKey;
+  link.setAttribute("href", url.value);
+  link.innerHTML = parseNameFromUrl(url.value).split("/").pop();
+  element.className = "s3direct link-active";
+  element.querySelector(".bar").style.width = "0%";
   disableSubmit(false);
 };
 
@@ -85,29 +85,29 @@ const computeMd5 = (data) => {
 };
 
 const computeSha256 = (data) => {
-  return createHash('sha256').update(data, 'utf-8').digest('hex');
+  return createHash("sha256").update(data, "utf-8").digest("hex");
 };
 
 const getCsrfToken = (element) => {
-  const cookieInput = element.querySelector('.csrf-cookie-name');
-  const input = document.querySelector('input[name=csrfmiddlewaretoken]');
+  const cookieInput = element.querySelector(".csrf-cookie-name");
+  const input = document.querySelector("input[name=csrfmiddlewaretoken]");
   const token = input ? input.value : Cookies.get(cookieInput.value);
   return token;
 };
 
 const generateAmzInitHeaders = (acl, serverSideEncryption, sessionToken) => {
   const headers = {};
-  if (acl) headers['x-amz-acl'] = acl;
-  if (sessionToken) headers['x-amz-security-token'] = sessionToken;
+  if (acl) headers["x-amz-acl"] = acl;
+  if (sessionToken) headers["x-amz-security-token"] = sessionToken;
   if (serverSideEncryption) {
-    headers['x-amz-server-side-encryption'] = serverSideEncryption;
+    headers["x-amz-server-side-encryption"] = serverSideEncryption;
   }
   return headers;
 };
 
 const generateAmzCommonHeaders = (sessionToken) => {
   const headers = {};
-  if (sessionToken) headers['x-amz-security-token'] = sessionToken;
+  if (sessionToken) headers["x-amz-security-token"] = sessionToken;
   return headers;
 };
 
@@ -121,13 +121,13 @@ const generateCustomAuthMethod = (element, signingUrl, dest) => {
   ) => {
     return new Promise((resolve, reject) => {
       const form = new FormData();
-      const headers = { 'X-CSRFToken': getCsrfToken(element) };
+      const headers = { "X-CSRFToken": getCsrfToken(element) };
 
-      form.append('to_sign', stringToSign);
-      form.append('datetime', signatureDateTime);
-      form.append('dest', dest);
+      form.append("to_sign", stringToSign);
+      form.append("datetime", signatureDateTime);
+      form.append("dest", dest);
 
-      request('POST', signingUrl, form, headers, element, (status, resp) => {
+      request("POST", signingUrl, form, headers, element, (status, resp) => {
         const response = parseJson(resp);
         switch (status) {
           case 200:
@@ -175,7 +175,7 @@ const initiateUpload = (element, signingUrl, uploadParameters, file, dest) => {
       updateProgressBar(element, progressRatio);
     },
     warn: (warnType, area, msg) => {
-      if (msg.includes('InvalidAccessKeyId')) {
+      if (msg.includes("InvalidAccessKeyId")) {
         error(element, msg);
       }
     },
@@ -184,32 +184,32 @@ const initiateUpload = (element, signingUrl, uploadParameters, file, dest) => {
   const optHeaders = {};
 
   if (uploadParameters.cache_control) {
-    optHeaders['Cache-Control'] = uploadParameters.cache_control;
+    optHeaders["Cache-Control"] = uploadParameters.cache_control;
   }
 
   if (uploadParameters.content_disposition) {
-    optHeaders['Content-Disposition'] = uploadParameters.content_disposition;
+    optHeaders["Content-Disposition"] = uploadParameters.content_disposition;
   }
 
-  addConfig['notSignedHeadersAtInitiate'] = optHeaders;
+  addConfig["notSignedHeadersAtInitiate"] = optHeaders;
 
   Evaporate.create(createConfig).then((evaporate) => {
     disableSubmit(true);
 
-    element.className = 's3direct progress-active';
+    element.className = "s3direct progress-active";
 
-    const cancelButton = element.querySelector('.cancel-button');
+    const cancelButton = element.querySelector(".cancel-button");
 
     const cancelUpload = (e) => {
       e.preventDefault();
       evaporate.cancel(`${uploadParameters.bucket}/${addConfig.name}`);
     };
 
-    cancelButton.addEventListener('click', cancelUpload, false);
+    cancelButton.addEventListener("click", cancelUpload, false);
 
     evaporate.add(addConfig).then(
       (s3Objkey) => {
-        cancelButton.removeEventListener('click', cancelUpload);
+        cancelButton.removeEventListener("click", cancelUpload);
         finishUpload(
           element,
           uploadParameters.endpoint,
@@ -218,7 +218,7 @@ const initiateUpload = (element, signingUrl, uploadParameters, file, dest) => {
         );
       },
       (reason) => {
-        cancelButton.removeEventListener('click', cancelUpload);
+        cancelButton.removeEventListener("click", cancelUpload);
         return error(element, reason);
       }
     );
@@ -227,19 +227,19 @@ const initiateUpload = (element, signingUrl, uploadParameters, file, dest) => {
 
 const checkFileAndInitiateUpload = (event) => {
   const element = event.target.parentElement;
-  const file = element.querySelector('.file-input').files[0];
-  const dest = element.querySelector('.file-dest').value;
-  const destCheckUrl = element.getAttribute('data-policy-url');
-  const signerUrl = element.getAttribute('data-signing-url');
+  const file = element.querySelector(".file-input").files[0];
+  const dest = element.querySelector(".file-dest").value;
+  const destCheckUrl = element.getAttribute("data-policy-url");
+  const signerUrl = element.getAttribute("data-signing-url");
   const form = new FormData();
-  const headers = { 'X-CSRFToken': getCsrfToken(element) };
+  const headers = { "X-CSRFToken": getCsrfToken(element) };
 
-  form.append('dest', dest);
-  form.append('name', file.name);
-  form.append('type', file.type);
-  form.append('size', file.size);
+  form.append("dest", dest);
+  form.append("name", file.name);
+  form.append("type", file.type);
+  form.append("size", file.size);
 
-  request('POST', destCheckUrl, form, headers, element, (status, response) => {
+  request("POST", destCheckUrl, form, headers, element, (status, response) => {
     const uploadParameters = parseJson(response);
     switch (status) {
       case 200:
@@ -251,7 +251,7 @@ const checkFileAndInitiateUpload = (event) => {
         error(element, uploadParameters.error);
         break;
       default:
-        error(element, 'Sorry, could not get upload URL.');
+        error(element, "Sorry, could not get upload URL.");
     }
   });
 };
@@ -259,24 +259,26 @@ const checkFileAndInitiateUpload = (event) => {
 const removeUpload = (e) => {
   e.preventDefault();
   const el = e.target.parentElement;
-  el.querySelector('.file-url').value = '';
-  el.querySelector('.file-input').value = '';
-  el.className = 's3direct form-active';
+  el.querySelector(".file-url").value = "";
+  el.querySelector(".file-input").value = "";
+  el.className = "s3direct form-active";
 };
 
 const addHandlers = (el) => {
-  const url = el.querySelector('.file-url');
-  const input = el.querySelector('.file-input');
-  const remove = el.querySelector('.file-remove');
-  const status = url.value === '' ? 'form' : 'link';
+  const url = el.querySelector(".file-url");
+  const input = el.querySelector(".file-input");
+  const remove = el.querySelector(".file-remove");
+  const status = url.value === "" ? "form" : "link";
 
-  el.className = 's3direct ' + status + '-active';
-  remove.addEventListener('click', removeUpload, false);
-  input.addEventListener('change', checkFileAndInitiateUpload, false);
+  el.className = "s3direct " + status + "-active";
+  remove.addEventListener("click", removeUpload, false);
+  input.addEventListener("change", checkFileAndInitiateUpload, false);
 };
 
-const observer = new MutationObserver(function (m) {
-  [].forEach.call(document.querySelectorAll('.s3direct'), addHandlers);
+document.addEventListener("DOMContentLoaded", (event) => {
+  const observer = new MutationObserver(function (m) {
+    [].forEach.call(document.querySelectorAll(".s3direct"), addHandlers);
+  });
+  const observer_config = { childList: true, subtree: true };
+  observer.observe(document.body, observer_config);
 });
-const observer_config = { childList: true, subtree: true };
-observer.observe(document.body, observer_config);
