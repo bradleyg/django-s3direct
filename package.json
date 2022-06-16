@@ -1,6 +1,6 @@
 {
   "name": "django-s3direct",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Add direct uploads to S3 functionality with a progress bar to file input fields.",
   "directories": {
     "example": "example"
@@ -21,7 +21,7 @@
     "watch": "parcel watch src/index.js --hmr-port 8001 --dist-dir s3direct/static/s3direct/dist/",
     "serve": "python example/manage.py runserver 0.0.0.0:8000",
     "yapf": "yapf s3direct/ --recursive --in-place",
-    "prettier": "prettier src/**/*.js --write --single-quote",
+    "prettier": "prettier src/**/*.js --write",
     "dev": "npm run serve & npm run watch",
     "prod": "npm run yapf && npm run prettier && npm run build",
     "pypi": "python setup.py sdist && twine upload dist/*"
