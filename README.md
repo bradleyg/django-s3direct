@@ -32,10 +32,7 @@ permission to upload to your bucket for your newly created credentials.
         "s3:PutObjectAcl"
       ],
       "Effect": "Allow",
-      "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME/*",
-      "Principal": {
-        "AWS": ["YOUR_ACCOUNT_ID"]
-      }
+      "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME/*"
     }
   ]
 }
@@ -265,8 +262,8 @@ $ python manage.py createsuperuser
 $ python manage.py runserver
 ```
 
-Visit `http://localhost:8000/admin` to view the admin widget and
-`http://localhost:8000/form` to view the custom form widget.
+Visit `http://localhost:8080/admin` to view the admin widget and
+`http://localhost:8080/form` to view the custom form widget.
 
 ## Development
 
@@ -277,9 +274,7 @@ $ cd django-s3direct
 # Add your AWS keys/details to .env file and export
 $ cp .env-dist .env
 
-# Build docker image
-$ docker build . --build-arg SKIP_TOX=true -t s3direct
-$ docker run -itv $(pwd):/code -p 8000-8001:8000-8001 --env-file .env s3direct bash
+# Frontend deps
 $ npm i
 
 # Install locally
@@ -288,7 +283,7 @@ $ python setup.py develop
 # Run examples
 $ python example/manage.py migrate
 $ python example/manage.py createsuperuser
-$ python example/manage.py runserver 0.0.0.0:8000
+$ python example/manage.py runserver 0.0.0.0:8080
 
 # Run tox tests
 $ tox
