@@ -266,6 +266,8 @@ const removeUpload = (e) => {
 
 const addHandlers = (el) => {
   const url = el.querySelector(".file-url");
+  if (url.name.includes("__prefix__")) return false;
+
   const input = el.querySelector(".file-input");
   const remove = el.querySelector(".file-remove");
   const status = url.value === "" ? "form" : "link";
@@ -275,10 +277,16 @@ const addHandlers = (el) => {
   input.addEventListener("change", checkFileAndInitiateUpload, false);
 };
 
+const findAndAddHandlers = () => {
+  document
+    .querySelectorAll(".s3direct:not(.form-active, .link-active)")
+    .forEach(addHandlers);
+};
+
 document.addEventListener("DOMContentLoaded", (event) => {
-  const observer = new MutationObserver(function (m) {
-    [].forEach.call(document.querySelectorAll(".s3direct"), addHandlers);
-  });
-  const observer_config = { childList: true, subtree: true };
-  observer.observe(document.body, observer_config);
+  findAndAddHandlers();
+
+  const observer = new MutationObserver(() => findAndAddHandlers());
+
+  observer.observe(document.body, { childList: true, subtree: true });
 });
