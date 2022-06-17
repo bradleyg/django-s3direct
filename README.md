@@ -66,11 +66,6 @@ Add a CORS policy to your bucket. Note the ETag header is
 important as it is used for multipart uploads. For more information see
 [here](https://github.com/TTLabs/EvaporateJS/wiki/Configuring-The-AWS-S3-Bucket).
 
-If using Digital Ocean Spaces you must upload the CORS config via the API/s3cmd
-CLI (as you can't add the `ExposeHeader` rule). See
-[here](https://www.digitalocean.com/community/questions/why-can-i-use-http-localhost-port-with-cors-in-spaces)
-for more details.
-
 ```json
 [
   {
@@ -284,9 +279,6 @@ $ python setup.py develop
 $ python example/manage.py migrate
 $ python example/manage.py createsuperuser
 $ python example/manage.py runserver 0.0.0.0:8080
-
-# Run tox tests
-$ tox
 
 # Run tests
 $ npm run test
