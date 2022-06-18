@@ -6,6 +6,7 @@ from django.conf import settings
 from django.test.utils import get_runner
 
 settings.configure(
+    SECRET_KEY='test-key',
     DEBUG=True,
     DATABASES={'default': {
         'ENGINE': 'django.db.backends.sqlite3',
