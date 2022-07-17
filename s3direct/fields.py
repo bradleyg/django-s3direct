@@ -57,18 +57,14 @@ class S3DirectDescriptor(object):
         self.field = field
 
     def __get__(self, obj, type=None):
-        if obj is None:
+        try:
+            value = obj.__dict__.get(self.field.name, None)
+            file_url = get_presigned_url(
+                self.field.dest,
+                value["key"],
+            )
+        except:
             return None
-
-        value = obj.__dict__.get(self.field.name, None)
-
-        if value is None:
-            return None
-
-        file_url = get_presigned_url(
-            self.field.dest,
-            value["key"],
-        )
 
         return {
             **value,
