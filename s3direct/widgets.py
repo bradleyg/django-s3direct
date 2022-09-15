@@ -28,6 +28,9 @@ class S3DirectWidget(widgets.TextInput):
         if value is None:
             value = {}
 
+        if type(value) is not dict:
+            value = {'url': value}
+
         ctx = {
             'policy_url': reverse('s3direct'),
             'signing_url': reverse('s3direct-signing'),
