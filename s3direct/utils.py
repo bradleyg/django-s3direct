@@ -9,6 +9,9 @@ from botocore import session
 from botocore.client import Config
 
 AWSCredentials = namedtuple("AWSCredentials", ["token", "secret_key", "access_key"])
+SESSION = None
+if session is not None:
+    SESSION = session.get_session()
 
 
 def get_s3direct_destinations():
@@ -63,11 +66,11 @@ def get_aws_credentials():
         # AWS tokens are not created for pregenerated access keys
         return AWSCredentials(None, secret_key, access_key)
 
-    if not session:
+    if not SESSION:
         # AWS credentials are not required for publicly-writable buckets
         return AWSCredentials(None, None, None)
 
-    creds = session.get_session().get_credentials()
+    creds = SESSION.get_credentials()
     if creds:
         return AWSCredentials(creds.token, creds.secret_key, creds.access_key)
     else:

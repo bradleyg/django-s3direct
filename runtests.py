@@ -6,6 +6,7 @@ from django.conf import settings
 from django.test.utils import get_runner
 
 settings.configure(
+    SECRET_KEY='test-key',
     DEBUG=True,
     DATABASES={'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -30,6 +31,7 @@ settings.configure(
             'APP_DIRS': True,
             'OPTIONS': {
                 'context_processors': [
+                    'django.template.context_processors.request',
                     "django.contrib.auth.context_processors.auth",
                     'django.contrib.messages.context_processors.messages',
                 ]

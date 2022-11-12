@@ -447,7 +447,8 @@ class SignatureViewTestCase(TestCase):
     def test_signing_with_custom_region(self):
         dest = 'custom-region-bucket'
         custom_region = self.get_custom_region_from_s3_dests(dest)
-        string_to_sign, signing_date = self.create_dummy_signing_request(region=custom_region)
+        string_to_sign, signing_date = self.create_dummy_signing_request(
+            region=custom_region)
         response = self.client.post(
             reverse('s3direct-signing'),
             data={
@@ -496,7 +497,7 @@ class SignatureViewTestCase(TestCase):
 
 
 class AWSCredentialsTest(TestCase):
-    @mock.patch('s3direct.utils.session')
+    @mock.patch('s3direct.utils.SESSION')
     @override_settings(AWS_ACCESS_KEY_ID=None, AWS_SECRET_ACCESS_KEY=None)
     def test_retrieves_aws_credentials_from_botocore(self, botocore_mock):
         credentials_mock = mock.Mock(
@@ -504,10 +505,9 @@ class AWSCredentialsTest(TestCase):
             secret_key='secret_key',
             access_key='access_key',
         )
-        botocore_mock.get_session(
-        ).get_credentials.return_value = credentials_mock
+        botocore_mock.get_credentials.return_value = credentials_mock
         credentials = get_aws_credentials()
-        botocore_mock.get_session().get_credentials.assert_called_once_with()
+        botocore_mock.get_credentials.assert_called_once_with()
         self.assertEqual(credentials.token, 'token')
         self.assertEqual(credentials.secret_key, 'secret_key')
         self.assertEqual(credentials.access_key, 'access_key')

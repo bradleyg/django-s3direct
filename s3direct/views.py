@@ -123,7 +123,8 @@ def generate_aws_v4_signature(request):
         resp = json.dumps({'error': 'Permission denied.'})
         return HttpResponseForbidden(resp, content_type='application/json')
 
-    region = dest.get('region') or getattr(settings, 'AWS_S3_REGION_NAME', None)
+    region = dest.get('region') or getattr(settings, 'AWS_S3_REGION_NAME',
+                                           None)
     if not region:
         resp = json.dumps({'error': 'S3 region config missing.'})
         return HttpResponseServerError(resp, content_type='application/json')

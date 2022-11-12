@@ -1,22 +1,21 @@
-django-s3direct
-===============
+# django-s3direct
 
-Directly upload files to S3 compatible services with Django.
--------------------------------------
+## Directly upload files to S3 compatible services with Django.
 
 <img src="https://raw.githubusercontent.com/bradleyg/django-s3direct/master/screenshot.png" width="100%"/>
 
 ## Installation
 
 Install with Pip:  
-```pip install django-s3direct```
+`pip install django-s3direct`
 
 ## Access setup
 
 ### When setting up access credentials you have two options:
 
 ### Option 1:
-__Generate access credentials and add them directly to your Django settings__.
+
+**Generate access credentials and add them directly to your Django settings**.
 If using Amazon S3 you'll also need to create an IAM policy which grants
 permission to upload to your bucket for your newly created credentials.
 
@@ -25,14 +24,14 @@ permission to upload to your bucket for your newly created credentials.
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Effect": "Allow",
       "Action": [
+        "s3:AbortMultipartUpload",
         "s3:GetObject",
-        "s3:PutObject",
-        "s3:PutObjectAcl",
         "s3:ListMultipartUploadParts",
-        "s3:AbortMultipartUpload"
+        "s3:PutObject",
+        "s3:PutObjectAcl"
       ],
+      "Effect": "Allow",
       "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME/*"
     }
   ]
@@ -40,8 +39,9 @@ permission to upload to your bucket for your newly created credentials.
 ```
 
 ### Option 2:
-__Use the EC2 instance profile and its attached IAM role (AWS only)__  
-Ensure the following trust policy is in place in addition to the policy 
+
+**Use the EC2 instance profile and its attached IAM role (AWS only)**  
+Ensure the following trust policy is in place in addition to the policy
 above. You'll also need the
 [boto3](https://github.com/boto/boto3) package installed.
 
@@ -66,25 +66,16 @@ Add a CORS policy to your bucket. Note the ETag header is
 important as it is used for multipart uploads. For more information see
 [here](https://github.com/TTLabs/EvaporateJS/wiki/Configuring-The-AWS-S3-Bucket).
 
-If using Digital Ocean Spaces you must upload the CORS config via the API/s3cmd
-CLI (as you can't add the ```ExposeHeader``` rule). See
-[here](https://www.digitalocean.com/community/questions/why-can-i-use-http-localhost-port-with-cors-in-spaces)
-for more details.
-
-```xml
-<CORSConfiguration>
-    <CORSRule>
-        <AllowedOrigin>http://YOURDOMAIN.COM:8080</AllowedOrigin>
-        <AllowedMethod>GET</AllowedMethod>
-        <AllowedMethod>HEAD</AllowedMethod>
-        <AllowedMethod>PUT</AllowedMethod>
-        <AllowedMethod>POST</AllowedMethod>
-        <AllowedMethod>DELETE</AllowedMethod>
-        <MaxAgeSeconds>3000</MaxAgeSeconds>
-        <ExposeHeader>ETag</ExposeHeader>
-        <AllowedHeader>*</AllowedHeader>
-    </CORSRule>
-</CORSConfiguration>
+```json
+[
+  {
+    "AllowedHeaders": ["*"],
+    "AllowedMethods": ["GET", "HEAD", "PUT", "POST", "DELETE"],
+    "AllowedOrigins": ["http://localhost:8080"],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3000
+  }
+]
 ```
 
 ## Django Setup
@@ -125,7 +116,7 @@ S3DIRECT_DESTINATIONS = {
     'example_destination': {
         # "key" [required] The location to upload file
         #       1. String: folder path to upload to
-        #       2. Function: generate folder path + filename using a function  
+        #       2. Function: generate folder path + filename using a function
         'key': 'uploads/images',
 
         # "auth" [optional] Limit to specfic Django users
@@ -190,7 +181,7 @@ urlpatterns = [
 ]
 ```
 
-Run ```python manage.py collectstatic``` if required.
+Run `python manage.py collectstatic` if required.
 
 ## Use in Django admin
 
@@ -216,7 +207,7 @@ class S3DirectUploadForm(forms.Form):
     images = forms.URLField(widget=S3DirectWidget(dest='example_destination'))
 ```
 
-__*Optional.__ You can modify the HTML of the widget by overiding template __s3direct/templates/s3direct-widget.tpl__
+**\*Optional.** You can modify the HTML of the widget by overiding template **s3direct/templates/s3direct-widget.tpl**
 
 ### views.py
 
@@ -233,19 +224,16 @@ class MyView(FormView):
 
 ```html
 <html>
-<head>
-    <meta charset="utf-8">
+  <head>
+    <meta charset="utf-8" />
     <title>s3direct</title>
     {{ form.media }}
-</head>
-<body>
-    <form action="" method="post">{% csrf_token %}
-        {{ form.as_p }}
-    </form>
-</body>
+  </head>
+  <body>
+    <form action="" method="post">{% csrf_token %} {{ form.as_p }}</form>
+  </body>
 </html>
 ```
-
 
 ## Examples
 
@@ -269,10 +257,11 @@ $ python manage.py createsuperuser
 $ python manage.py runserver
 ```
 
-Visit ```http://localhost:8000/admin``` to view the admin widget and
-```http://localhost:8000/form``` to view the custom form widget.
+Visit `http://localhost:8080/admin` to view the admin widget and
+`http://localhost:8080/form` to view the custom form widget.
 
 ## Development
+
 ```shell
 $ git clone git@github.com:bradleyg/django-s3direct.git
 $ cd django-s3direct
@@ -280,9 +269,7 @@ $ cd django-s3direct
 # Add your AWS keys/details to .env file and export
 $ cp .env-dist .env
 
-# Build docker image
-$ docker build . --build-arg SKIP_TOX=true -t s3direct
-$ docker run -itv $(pwd):/code -p 8000-8001:8000-8001 --env-file .env s3direct bash
+# Frontend deps
 $ npm i
 
 # Install locally
@@ -291,10 +278,7 @@ $ python setup.py develop
 # Run examples
 $ python example/manage.py migrate
 $ python example/manage.py createsuperuser
-$ python example/manage.py runserver 0.0.0.0:8000
-
-# Run tox tests
-$ tox
+$ python example/manage.py runserver 0.0.0.0:8080
 
 # Run tests
 $ npm run test

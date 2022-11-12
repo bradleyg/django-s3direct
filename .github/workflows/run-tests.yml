@@ -2,9 +2,9 @@ name: Test s3direct
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   build:
@@ -13,8 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build image
-        run: docker build . -t s3direct
+      - name: Install node deps
+        run: npm install
 
-      - name: Test with Tox
-        run: docker run -t s3direct tox
+      - name: Install Python deps
+        run: pip3 install -r requirements-dev.txt
+
+      - name: Run tests
+        run: npm run test

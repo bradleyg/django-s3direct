@@ -11,7 +11,7 @@ s3direct/static/s3direct/dist/index.map
 .idea
 node_modules
 npm-debug.log
-.tox/
 .env
 .cache
 settings.json
+.parcel-cache
