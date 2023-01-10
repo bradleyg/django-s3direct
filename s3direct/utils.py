@@ -86,13 +86,19 @@ def get_presigned_url(dest, key, expires_in=3600, method_name="get_object"):
     region = dest.get("region", getattr(settings, "AWS_S3_REGION_NAME", None))
     endpoint = dest.get("endpoint", getattr(settings, "AWS_S3_ENDPOINT_URL", None))
 
+    authentication = {}
+    if aws_credentials.access_key:
+        authentication = {
+            "aws_access_key_id": aws_credentials.access_key,
+            "aws_secret_access_key": aws_credentials.secret_key,
+        }
+
     s3_client = boto3.client(
         "s3",
-        aws_access_key_id=aws_credentials.access_key,
-        aws_secret_access_key=aws_credentials.secret_key,
         endpoint_url=endpoint,
         region_name=region,
         config=Config(signature_version="s3v4"),
+        **authentication,
     )
     response = s3_client.generate_presigned_url(
         method_name,
