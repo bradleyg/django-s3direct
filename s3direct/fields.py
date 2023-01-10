@@ -26,16 +26,18 @@ def validate_url(value, dest):
 
     dest = get_s3direct_destinations().get(dest)
 
-    aws_credentials = get_aws_credentials()
+    aws_access_key_id = getattr(settings, "AWS_ACCESS_KEY_ID", None)
+    aws_secret_access_key = getattr(settings, "AWS_SECRET_ACCESS_KEY", None)
+    bucket = dest.get("bucket", getattr(settings, "AWS_STORAGE_BUCKET_NAME", None))
     bucket = dest.get("bucket", getattr(settings, "AWS_STORAGE_BUCKET_NAME", None))
     region = dest.get("region", getattr(settings, "AWS_S3_REGION_NAME", None))
     endpoint = dest.get("endpoint", getattr(settings, "AWS_S3_ENDPOINT_URL", None))
 
     authentication = {}
-    if aws_credentials.access_key:
+    if aws_access_key_id and aws_secret_access_key:
         authentication = {
-            "aws_access_key_id": aws_credentials.access_key,
-            "aws_secret_access_key": aws_credentials.secret_key,
+            "aws_access_key_id": aws_access_key_id,
+            "aws_secret_access_key": aws_secret_access_key,
         }
 
     s3_client = boto3.client(
