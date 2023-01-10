@@ -13,7 +13,11 @@ from django.db.models.fields import Field
 from django.utils.translation import gettext as _
 
 from s3direct.widgets import S3DirectWidget
-from s3direct.utils import get_s3direct_destinations, get_presigned_url
+from s3direct.utils import (
+    get_aws_credentials,
+    get_s3direct_destinations,
+    get_presigned_url,
+)
 
 
 def validate_url(value, dest):
@@ -21,11 +25,15 @@ def validate_url(value, dest):
         raise Exception(_("Not a string."))
 
     dest = get_s3direct_destinations().get(dest)
+
+    aws_credentials = get_aws_credentials()
     bucket = dest.get("bucket", getattr(settings, "AWS_STORAGE_BUCKET_NAME", None))
     region = dest.get("region", getattr(settings, "AWS_S3_REGION_NAME", None))
     endpoint = dest.get("endpoint", getattr(settings, "AWS_S3_ENDPOINT_URL", None))
     s3_client = boto3.client(
         "s3",
+        aws_access_key_id=aws_credentials.access_key,
+        aws_secret_access_key=aws_credentials.secret_key,
         endpoint_url=endpoint,
         region_name=region,
         config=botocore.client.Config(signature_version="s3v4"),
