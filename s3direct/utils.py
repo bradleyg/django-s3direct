@@ -78,21 +78,35 @@ def get_aws_credentials():
         return AWSCredentials(None, None, None)
 
 
-def get_presigned_url(dest, key, expires_in=3600, method_name="get_object"):
+def get_presigned_url(
+    dest, key, expires_in=3600, method_name="get_object", is_oracle=True
+):
     dest = get_s3direct_destinations().get(dest)
 
     aws_access_key_id = getattr(settings, "AWS_ACCESS_KEY_ID", None)
     aws_secret_access_key = getattr(settings, "AWS_SECRET_ACCESS_KEY", None)
     bucket = dest.get("bucket", getattr(settings, "AWS_STORAGE_BUCKET_NAME", None))
+
     region = dest.get("region", getattr(settings, "AWS_S3_REGION_NAME", None))
     endpoint = dest.get("endpoint", getattr(settings, "AWS_S3_ENDPOINT_URL", None))
 
     authentication = {}
-    if aws_access_key_id and aws_secret_access_key:
-        authentication = {
-            "aws_access_key_id": aws_access_key_id,
-            "aws_secret_access_key": aws_secret_access_key,
-        }
+    if is_oracle:
+        # If we are not in OCI, these variables are not set
+        if aws_access_key_id and aws_secret_access_key:
+            # We use OCI key & access
+            authentication = {
+                "aws_access_key_id": aws_access_key_id,
+                "aws_secret_access_key": aws_secret_access_key,
+            }
+    else:
+        # Forced as non-OCI
+        region = dest.get(
+            "region", getattr(settings, "ORIGINAL_AWS_S3_REGION_NAME", None)
+        )
+        endpoint = dest.get(
+            "endpoint", getattr(settings, "ORIGINAL_AWS_S3_ENDPOINT_URL", None)
+        )
 
     s3_client = boto3.client(
         "s3",
