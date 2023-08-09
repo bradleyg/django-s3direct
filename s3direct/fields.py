@@ -80,7 +80,8 @@ def validate_url(value, dest):
                 "mimetype": mimetype,
                 "source": source,
             }
-        except s3_client.exceptions.NoSuchKey:
+        except Exception as e:
+            print(e)
             no_such_key = True
 
     if no_such_key:
