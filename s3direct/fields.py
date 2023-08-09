@@ -33,39 +33,57 @@ def validate_url(value, dest):
     region = dest.get("region", getattr(settings, "AWS_S3_REGION_NAME", None))
     endpoint = dest.get("endpoint", getattr(settings, "AWS_S3_ENDPOINT_URL", None))
 
-    authentication = {}
+    authentications = [{"source": "AWS"}]
     if aws_access_key_id and aws_secret_access_key:
-        authentication = {
-            "aws_access_key_id": aws_access_key_id,
-            "aws_secret_access_key": aws_secret_access_key,
-        }
-
-    s3_client = boto3.client(
-        "s3",
-        endpoint_url=endpoint,
-        region_name=region,
-        config=botocore.client.Config(signature_version="s3v4"),
-        **authentication,
-    )
-
-    try:
-        head_object = s3_client.head_object(
-            Bucket=bucket,
-            Key=value,
+        authentications.append(
+            {
+                "source": "OCI",
+                "aws_access_key_id": aws_access_key_id,
+                "aws_secret_access_key": aws_secret_access_key,
+            }
         )
 
-        content_disposition = head_object["ContentDisposition"]
-        header_value, header_params = cgi.parse_header(content_disposition)
-        filename = ""
-        for param_name in ["filename*", "filename"]:
-            if param_name in header_params:
-                filename = header_params[param_name].strip("UTF-8''")
-                filename = unquote(filename)
-                break
+    # HACK: We need to check all the authentications possible to validate the file
+    # in AWS and Oracle
 
-        mimetype = head_object["ContentType"]
-        return {"key": value, "filename": filename, "mimetype": mimetype}
-    except s3_client.exceptions.NoSuchKey:
+    no_such_key = False
+    for authentication in authentications:
+        source = authentication.pop("source")
+
+        s3_client = boto3.client(
+            "s3",
+            endpoint_url=endpoint,
+            region_name=region,
+            config=botocore.client.Config(signature_version="s3v4"),
+            **authentication,
+        )
+
+        try:
+            head_object = s3_client.head_object(
+                Bucket=bucket,
+                Key=value,
+            )
+
+            content_disposition = head_object["ContentDisposition"]
+            header_value, header_params = cgi.parse_header(content_disposition)
+            filename = ""
+            for param_name in ["filename*", "filename"]:
+                if param_name in header_params:
+                    filename = header_params[param_name].strip("UTF-8''")
+                    filename = unquote(filename)
+                    break
+
+            mimetype = head_object["ContentType"]
+            return {
+                "key": value,
+                "filename": filename,
+                "mimetype": mimetype,
+                "source": source,
+            }
+        except s3_client.exceptions.NoSuchKey:
+            no_such_key = True
+
+    if no_such_key:
         raise ValidationError(_("Object not found."))
 
 
