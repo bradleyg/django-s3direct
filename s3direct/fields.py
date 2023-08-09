@@ -29,33 +29,42 @@ def validate_url(value, dest):
     aws_access_key_id = getattr(settings, "AWS_ACCESS_KEY_ID", None)
     aws_secret_access_key = getattr(settings, "AWS_SECRET_ACCESS_KEY", None)
     bucket = dest.get("bucket", getattr(settings, "AWS_STORAGE_BUCKET_NAME", None))
-    bucket = dest.get("bucket", getattr(settings, "AWS_STORAGE_BUCKET_NAME", None))
+
     region = dest.get("region", getattr(settings, "AWS_S3_REGION_NAME", None))
     endpoint = dest.get("endpoint", getattr(settings, "AWS_S3_ENDPOINT_URL", None))
 
-    authentications = [{"source": "AWS"}]
+    services = [{"source": "AWS"}]
     if aws_access_key_id and aws_secret_access_key:
-        authentications.append(
+        # This is an OCI deployment
+        services = [
+            {
+                "source": "AWS",
+                "region": getattr(settings, "ORIGINAL_AWS_S3_REGION_NAME", None),
+                "endpoint": getattr(settings, "ORIGINAL_AWS_S3_ENDPOINT_URL", None),
+            },
             {
                 "source": "OCI",
                 "aws_access_key_id": aws_access_key_id,
                 "aws_secret_access_key": aws_secret_access_key,
-            }
-        )
+            },
+        ]
 
     # HACK: We need to check all the authentications possible to validate the file
     # in AWS and Oracle
 
     no_such_key = False
-    for authentication in authentications:
-        source = authentication.pop("source")
+    for service in services:
+        source = service.pop("source")
+
+        endpoint_url = service.pop("endpoint", endpoint)
+        region_name = service.pop("region", region)
 
         s3_client = boto3.client(
             "s3",
-            endpoint_url=endpoint,
-            region_name=region,
+            endpoint_url=endpoint_url,
+            region_name=region_name,
             config=botocore.client.Config(signature_version="s3v4"),
-            **authentication,
+            **service,
         )
 
         try:
