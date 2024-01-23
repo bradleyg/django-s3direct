@@ -35,7 +35,7 @@ def validate_url(value, dest):
 
     services = [{"source": "AWS"}]
     if aws_access_key_id and aws_secret_access_key:
-        # This is an OCI deployment
+        # This is an hybrid OCI deployment
         services = [
             {
                 "source": "AWS",
@@ -48,6 +48,17 @@ def validate_url(value, dest):
                 "aws_secret_access_key": aws_secret_access_key,
             },
         ]
+
+        # This is OCI native deployment
+        aws_access_key_id = getattr(settings, "ORIGINAL_AWS_ACCESS_KEY_ID", None)
+        aws_secret_access_key = getattr(settings, "ORIGINAL_SECRET_ACCESS_KEY", None)
+
+        if aws_access_key_id and aws_secret_access_key:
+            services[0].update({
+                "aws_access_key_id": aws_access_key_id,
+                "aws_secret_access_key": aws_secret_access_key,
+            })
+
 
     # HACK: We need to check all the authentications possible to validate the file
     # in AWS and Oracle

@@ -108,6 +108,16 @@ def get_presigned_url(
             "endpoint", getattr(settings, "ORIGINAL_AWS_S3_ENDPOINT_URL", None)
         )
 
+        # This is OCI native deployment
+        aws_access_key_id = getattr(settings, "ORIGINAL_AWS_ACCESS_KEY_ID", None)
+        aws_secret_access_key = getattr(settings, "ORIGINAL_SECRET_ACCESS_KEY", None)
+
+        if aws_access_key_id and aws_secret_access_key:
+            authentication = {
+                "aws_access_key_id": aws_access_key_id,
+                "aws_secret_access_key": aws_secret_access_key,
+            }
+
     s3_client = boto3.client(
         "s3",
         endpoint_url=endpoint,
