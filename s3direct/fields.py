@@ -3,6 +3,7 @@ import boto3
 import botocore
 import json
 from urllib.parse import unquote
+from email.message import EmailMessage
 
 from django import forms
 
@@ -86,12 +87,10 @@ def validate_url(value, dest):
 
             content_disposition = head_object["ContentDisposition"]
             header_value, header_params = cgi.parse_header(content_disposition)
-            filename = ""
-            for param_name in ["filename*", "filename"]:
-                if param_name in header_params:
-                    filename = header_params[param_name].strip("UTF-8''")
-                    filename = unquote(filename)
-                    break
+
+            msg = EmailMessage()
+            msg["Content-Disposition"] = content_disposition
+            filename = msg.get_filename()
 
             mimetype = head_object["ContentType"]
             return {
